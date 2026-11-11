@@ -13,14 +13,14 @@ speaker-aware perception.
 - StrongOmni/Gemini targeted-slice review remains downstream and unchanged.
 - The backend is evidence, not ground truth.
 
-The normalized response shape is:
+Example response structure (transcript shown in English for illustration):
 
 ```json
 {
   "segments": [
-    {"speaker_id": "1", "start_sec": 0.48, "end_sec": 1.66, "text": "欢迎大家"}
+    {"speaker_id": "1", "start_sec": 0.48, "end_sec": 1.66, "text": "Welcome, everyone."}
   ],
-  "text": "[0.48][S01]欢迎大家[1.66]"
+  "text": "[0.48][S01]Welcome, everyone.[1.66]"
 }
 ```
 

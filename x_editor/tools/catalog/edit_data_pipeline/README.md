@@ -55,9 +55,9 @@ python examples/run_tool_call.py \
     "operation": "text_edit",
     "input_audio_path": "/path/to/input.wav",
     "output_path": "/data/xedit/runs/text_edit.wav",
-    "source_text": "开发边界将作为城市发展的刚性约定",
-    "instruction_st": "<sub targ=\"城市边界\">开发边界</sub>将作为城市发展的刚性约定",
-    "language": "zh",
+    "source_text": "The train leaves tomorrow.",
+    "instruction_st": "The <sub targ=\"bus\">train</sub> leaves tomorrow.",
+    "language": "en",
     "evaluate": false
   }'
 ```
@@ -71,9 +71,9 @@ python examples/run_tool_call.py \
     "operation": "pitch_rate_edit",
     "input_audio_path": "/path/to/input.wav",
     "output_path": "/data/xedit/runs/rate_edit.wav",
-    "source_text": "开发边界将作为城市发展的刚性约定",
-    "instruction_st": "<rate, factor=1.2>开发边界</rate>将作为城市发展的刚性约定",
-    "language": "zh",
+    "source_text": "The train leaves tomorrow.",
+    "instruction_st": "The <rate, factor=1.2>train</rate> leaves tomorrow.",
+    "language": "en",
     "evaluate": false
   }'
 ```
@@ -99,9 +99,9 @@ python examples/run_tool_call.py \
     "operation": "emotion_style_edit",
     "input_audio_path": "/path/to/input.wav",
     "output_path": "/data/xedit/runs/emotion_edit.wav",
-    "source_text": "开发边界将作为城市发展的刚性约定",
-    "instruction_st": "<emo type=\"happy\" level=\"2\">开发边界将作为城市发展的刚性约定</emo>",
-    "language": "zh",
+    "source_text": "The train leaves tomorrow.",
+    "instruction_st": "<emo type=\"happy\" level=\"2\">The train leaves tomorrow.</emo>",
+    "language": "en",
     "evaluate": false
   }'
 ```

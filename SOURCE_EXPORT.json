@@ -33,7 +33,7 @@
     },
     {
       "file": "README.md",
-      "release_sha256": "84dcf2a45d0027c5c4efd8dae7bc83c2661248659de4b1cc1677527fdb25eef1",
+      "release_sha256": "160163bebe750d3e3d1f01d72cc4d79491e0ecbb348938551f40c2d7e805651a",
       "identical": false
     },
     {
@@ -2003,7 +2003,7 @@
     },
     {
       "file": "x_editor/tools/catalog/edit_data_pipeline/README.md",
-      "release_sha256": "d68f8f8cd884c4ee824fa6b0fc6a725638db4d6e1a62f387a221a4914fb61787",
+      "release_sha256": "4eecac085dc95f29662af836929b4ac51c08053980e434e60353ff50eb32f738",
       "identical": false
     },
     {
@@ -2118,7 +2118,7 @@
     },
     {
       "file": "x_editor/tools/catalog/moss_transcribe_diarize/README.md",
-      "release_sha256": "4bbd0ade7bace97aa672b6ea641f26b3f28d1d173921ff2f10dd8cd2e75c33df",
+      "release_sha256": "aaa4ce7ace65896881d32dc67dcf74d62c3b6d69739163b81e92a6e4817f57a7",
       "identical": false
     },
     {
