@@ -1,0 +1,144 @@
+schema_version: x-editor.operation-capability-card/v1
+operation: edit_data_pipeline.speech_rate
+semantic_effects:
+  - change_global_speech_rate
+supported_scopes:
+  - global
+requirements:
+  inputs:
+    - inputs.input_audio
+  evidence: []
+preservation:
+  - dimension: source_wording
+    level: unknown
+    evidence_kind: unknown
+    rationale: WSOLA is waveform-based while resynthesis methods use transcript and speaker reference; one card-level guarantee would be misleading.
+  - dimension: pitch
+    level: moderate
+    evidence_kind: declared_design_fact
+    rationale: The dedicated speech-rate tool is documented as changing duration while preserving pitch.
+  - dimension: speaker_identity
+    level: unknown
+    evidence_kind: unknown
+    rationale: Identity preservation has not been reviewed across waveform and resynthesis methods.
+quality_characteristics:
+  - dimension: rate_target_accuracy
+    level: unknown
+    evidence_kind: unknown
+    rationale: The legal rate interval does not establish achieved perceptual rate.
+  - dimension: speech_naturalness
+    level: unknown
+    evidence_kind: unknown
+    rationale: Naturalness must be compared across legal methods and magnitudes.
+artifact_risks:
+  - risk: time_stretch_artifact
+    level: unknown
+    evidence_kind: unknown
+    rationale: No reviewed development prior quantifies method-specific artifacts.
+  - risk: resynthesis_wording_or_identity_drift
+    level: unknown
+    evidence_kind: unknown
+    rationale: Resynthesis-specific drift must be established empirically.
+composition:
+  supports_batch_targets: false
+  cumulative_degradation_risk: unknown
+parameter_contract:
+  additional_parameters: reject
+  planner_selectable:
+    - path: inputs.input_audio
+      value_type: string
+      required: true
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: source_audio_ref
+      runtime_value_source: source_audio_refs
+    - path: params.rate
+      value_type: number
+      required: true
+      enum_values: []
+      minimum: 0.5
+      maximum: 2.0
+      default: null
+      semantic_role: speech_rate_factor
+    - path: params.method
+      value_type: enum
+      required: true
+      enum_values:
+        - wsola
+        - indextts2
+        - wsola+indextts2
+        - auto
+      minimum: null
+      maximum: null
+      default: wsola+indextts2
+      semantic_role: speech_rate_backend
+      value_guidance:
+        - Use wsola when only the waveform input is available and no separate speaker reference or matching reviewed transcript can be supplied.
+        - Use indextts2 or wsola+indextts2 only when both conditional resynthesis inputs are legally available for the same speech artifact.
+        - Do not choose auto to bypass missing conditional inputs or to request hidden fallback.
+      value_examples:
+        - wsola
+    - path: params.text
+      value_type: string
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: reviewed_source_transcript_for_resynthesis
+    - path: params.speaker_audio_path
+      value_type: string
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: speaker_reference_audio_ref_for_resynthesis
+      runtime_value_source: reference_audio_refs
+      value_guidance:
+        - Select only an audio ref present in workflow_reference_audio_refs; source audio and from_step outputs are not legal reference values for this field.
+        - Omit this parameter when params.method is wsola.
+      value_examples: []
+    - path: params.language
+      value_type: string
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: source_language
+  framework_owned:
+    - params.output_path
+    - params.service_url
+    - params.trace_id
+    - params.allow_method_fallback
+  conditional_rules:
+    - when:
+        path: params.method
+        operator: in
+        values:
+          - indextts2
+          - wsola+indextts2
+          - auto
+      require:
+        - params.text
+        - params.speaker_audio_path
+      forbid: []
+limitations:
+  - This parameter-only operation processes its entire bound input, including a previously extracted region. It does not accept local selection parameters or tagged text; tagged speed editing is a separate capability of edit_data_pipeline.pitch_rate_edit. A region-based plan needs explicit extraction and reconstruction that preserve unselected audio and account for the changed region duration.
+  - A failed resynthesis method does not silently become WSOLA; production recovery must explicitly enable the framework-owned allow_method_fallback policy and records RecoveredFlow evidence.
+  - The repository does not establish a measured quality ordering among the legal methods.
+  - The v1 capability schema cannot express that params.text must be a reviewed transcript matching inputs.input_audio or that params.speaker_audio_path must resolve to a valid speaker reference; runtime validation remains authoritative.
+provenance:
+  - source_path: x_editor/tools/skills/speech_rate_conversion.yaml
+    source_kind: manual
+  - source_path: x_editor/tools/catalog/edit_data_pipeline/client.py
+    source_kind: runtime_handler
+  - source_path: x_editor/tools/catalog/edit_data_pipeline/manual.yaml
+    source_kind: service_schema
+  - source_path: x_editor/runtime/operation_normalizers.py
+    source_kind: runtime_handler
+  - source_path: tests/test_edit_data_pipeline_client.py
+    source_kind: test

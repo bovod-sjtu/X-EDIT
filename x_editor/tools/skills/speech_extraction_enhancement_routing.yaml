@@ -1,0 +1,127 @@
+skill_id: speech_extraction_enhancement_routing
+display_name: Speech 分离/抽取/增强/编辑全局路由边界
+source_mcp: planner-routing
+tool_names:
+  - tse
+  - speech_separation
+  - foreground_background_remix
+  - speech_enhancement
+  - edit_data_pipeline
+  - artifact_ops
+  - qwen3_tts
+  - seed_vc
+  - intra_audio_voice_transfer
+  - spatial_reverb
+
+description: |
+  面向 speech modality 样例的全局工具边界 skill。目标是让 Planner 先判断
+  “任务类型/所需证据/能否安全执行”，再选择具体工具，避免把 speaker extraction、
+  foreground/background、清晰化、改字、音色转换和空间效果误路由到同一个工具。
+
+detailed_capability: |
+  路由总原则：
+  1. 先区分任务对象：content/text、prosody/pitch/rate/emotion/pause/volume、
+     speaker/timbre、target speaker extraction、foreground/background、timeline assembly、
+     quality enhancement、spatial scene。
+  2. 再检查必需证据：source_text、word_timestamps、speaker_segments、reference_audio_paths、
+     foreground/background stems、target text、目标说话人描述。
+  3. 证据不足但可以通过感知兜底补足时，先规划 perception.audio_fallback；
+     该模块先尝试专用 ASR/alignment/diarization，再用 Gemini 2.5 Pro 听音频补足；
+     只有感知后仍缺必要证据或 operation 不存在时，才标记 missing_inputs/unsupported。
+  4. 只有实际模型/operation 存在且输入满足边界时才 READY。
+
+  路由矩阵：
+  - 改字/text replacement/deletion of words: edit_data_pipeline.text_edit；长音频先 edit_pipeline_segmentation。
+  - 情绪/风格: edit_data_pipeline.emotion_style_edit；speaker-scoped 时先 artifact_ops_timeline。
+  - 音高/语速: edit_data_pipeline.pitch_rate_edit；pitch-only 必须 preserve duration，rate 才允许变时长。
+  - 停顿插入: edit_data_pipeline.pause_edit；停顿删除走 artifact_ops_timeline/remove/mute，不走 pause_edit。
+  - 音量/响度: edit_data_pipeline.volume_normalize 或 volume_normalizer。
+  - 有 reference 的目标说话人抽取: tse_quarkaudio_unise。
+  - 无 reference 的重叠说话/混合音源分离: speech_separation_roformer。
+  - 前景人声编辑但背景保持: foreground_background_remix。
+  - 单人或全局清晰化/降噪/去混响: speech_enhancement。
+  - 有 reference 的 voice conversion: seed_vc。
+  - 无 reference 的 voice/persona design: qwen3_tts_voice_design。
+  - 同一音频内部说话人音色迁移: speaker_diarization_internal_vc。
+  - 片段抽取/删除/静音/拼接/重建: perception.audio_fallback -> artifact_ops_timeline，如果现有 perception 已充分则可直接 artifact_ops_timeline。
+  - 静态房间/大厅/空旷空间混响: spatial_reverb。
+
+  关键禁止项：
+  - 不要用 speech_enhancement 做 speaker separation、target speaker extraction、改字、情感或 VC。
+  - 不要用 edit_data_pipeline 处理 foreground/background 混合音频中的“只改前景”。
+  - 不要用 speech_separation 声称能稳定选择 first/second/female/male speaker。
+  - 不要在没有 reference_audio_path 时调用 TSE。
+  - 不要在有 reference voice conversion 时用 qwen3_tts 捏声线。
+  - 不要把 room/reverb/large hall 类空间效果路由到 speech_enhancement；去混响才是 enhancement。
+
+dimensions: [routing, extraction, enhancement, speaker, timeline, text, pitch, tempo, emotion, spatial]
+
+parameters:
+  - name: user_request
+    type: string
+    required: true
+    description: 原始 speech editing 指令。
+  - name: input_audio_paths
+    type: string
+    required: true
+    description: 样例中的所有音频输入。
+  - name: source_text
+    type: string
+    required: false
+    description: ASR/Gemini perception 得到的主音频 transcript。
+  - name: word_timestamps
+    type: string
+    required: false
+    description: forced alignment 结果。
+  - name: speaker_segments
+    type: string
+    required: false
+    description: diarization 结果。
+  - name: reference_audio_paths
+    type: string
+    required: false
+    description: 除主音频外可作为 reference/enrollment 的音频。
+
+output:
+  type: data
+  description: routing decision，包含 selected_tools、missing_inputs、unsupported_reason 和建议 workflow。
+
+execution_constraints:
+  should_run_before: [GeminiPlanner, ToolAwarePlanner, AudioEditExecutor]
+  should_run_after: []
+  mutually_exclusive_with: []
+  can_repeat: true
+
+examples:
+  - scenario: "Make the speaker talk faster while keeping background music unchanged"
+    parameters:
+      selected_skill: foreground_background_remix
+    expected_outcome: "separate -> edit foreground rate -> remix background"
+  - scenario: "Extract the target speaker using a reference audio"
+    parameters:
+      selected_skill: tse_quarkaudio_unise
+    expected_outcome: "TSE with concrete reference_audio_path"
+  - scenario: "Extract all speech from the first speaker"
+    parameters:
+      selected_skill: artifact_ops_timeline
+    expected_outcome: "requires diarization; no TSE unless reference exists"
+  - scenario: "Make this sound like a large empty room"
+    parameters:
+      selected_skill: spatial_reverb
+    expected_outcome: "apply static room RIR after content edits"
+
+instruction_mapping:
+  "replace/change/remove spoken word or phrase": "edit_data_pipeline.text_edit + edit_pipeline_segmentation if long"
+  "make voice emotional/angry/sad/surprised/calm": "edit_data_pipeline.emotion_style_edit; speaker-scoped uses artifact_ops_timeline"
+  "raise/lower pitch or speed up/slow down speech": "edit_data_pipeline.pitch_rate_edit; foreground/background uses foreground_background_remix"
+  "remove/delete pause/silence": "artifact_ops_timeline, not pause_edit"
+  "insert/add pause": "edit_data_pipeline.pause_edit"
+  "reference audio + extract target speaker": "tse_quarkaudio_unise"
+  "reference audio + sound like/voice conversion": "seed_vc"
+  "no reference + desired voice persona": "qwen3_tts_voice_design"
+  "same audio + swap/adopt another speaker timbre": "speaker_diarization_internal_vc"
+  "overlapping speech / mixed speech / separate speakers without reference": "speech_separation_roformer"
+  "foreground voice edit + background music/sound unchanged": "foreground_background_remix"
+  "clear/clean/denoise/dereverb/enhance intelligibility": "speech_enhancement"
+  "extract/remove/mute/concat/reconstruct timeline spans": "缺少 speaker/phrase/role grounding 时先 perception.audio_fallback，再 artifact_ops_timeline"
+  "room/hall/cathedral/bathroom/reverb/echo/static acoustic space": "spatial_reverb"

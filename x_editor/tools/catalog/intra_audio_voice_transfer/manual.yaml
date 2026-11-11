@@ -1,0 +1,54 @@
+tool_id: intra_audio_voice_transfer
+mcp_tool_name: intra_audio_voice_transfer.execute
+input_schema:
+  type: object
+  required:
+    - input_audio_path
+    - output_path
+    - instruction
+  properties:
+    input_audio_path:
+      type: string
+    output_path:
+      type: string
+    instruction:
+      type: string
+    source_text:
+      type: string
+    perception_report:
+      type: object
+output_schema:
+  type: object
+  required:
+    - output_audio_path
+  properties:
+    output_audio_path:
+      type: string
+    manifest_path:
+      type: string
+    speaker_segments_path:
+      type: string
+    source_audio_copy:
+      type: string
+    reference_audio_paths:
+      type: object
+    converted_segment_count:
+      type: integer
+    mappings:
+      type: array
+    warnings:
+      type: array
+defaults:
+  diarization_model: BUT-FIT/diarizen-wavlm-large-s80-md-v2
+  seed_vc_url: http://127.0.0.1:8003
+validation:
+  required_checks:
+    - output audio exists
+    - speaker mapping is resolved from instruction
+    - global duration is preserved
+examples:
+  - scenario: Make second speaker match first speaker in the same dialogue.
+    arguments:
+      input_audio_path: /tmp/dialogue.wav
+      output_path: /tmp/dialogue_second_to_first.wav
+      instruction: Change the second speaker's voice timbre to match the first speaker's voice, while keeping the spoken content unchanged.

@@ -1,0 +1,136 @@
+{
+  "schema_version": "x-edit.final-validation/v1",
+  "date": "2026-10-08",
+  "controller_install": {
+    "fresh_environment": true,
+    "locked_dependencies": true,
+    "doctor_configuration_passed": true,
+    "capability_cards": 17
+  },
+  "cpu_services": {
+    "fresh_environment": true,
+    "started": [
+      "vad",
+      "volume",
+      "rate",
+      "pitch"
+    ],
+    "operations": {
+      "passed": true,
+      "mode": "dsp",
+      "checks": [
+        {
+          "request": "rate",
+          "service": "rate",
+          "seconds": 0.062255135737359524,
+          "response_sha256": "e912ad380fe964a47bfeb7cbff619b1584d38e8f2362f19a8c77361fa81e9f24"
+        },
+        {
+          "request": "volume",
+          "service": "volume",
+          "seconds": 0.03408959973603487,
+          "response_sha256": "d774c58d6e503fa51766b9d5c0e14b9386b60441f622b73236065d2a6f580f72"
+        },
+        {
+          "duration_ratio": 0.8,
+          "peak_dbfs": -11.999946665424783
+        }
+      ],
+      "human_quality_verified": false,
+      "all_capabilities_verified": false
+    }
+  },
+  "current_forward": {
+    "completed": 3,
+    "delivered": 3,
+    "gpu_services": "Existing endpoints reused; not a new GPU cold start",
+    "input_audio": "Previously generated diagnostic speech; not distributed",
+    "cases": [
+      {
+        "case": "text",
+        "mode": "forward",
+        "delivered": true,
+        "artifact": {
+          "sha256": "2d8c02909c7b7de6c8f85a8472db22c1cd66973e0c8839dd97658c0d100ed685",
+          "frames": 58566,
+          "samplerate": 24000
+        },
+        "duration": 2.44025,
+        "finite": true,
+        "frames": 58566,
+        "seconds": 116.55710740294307
+      },
+      {
+        "case": "gain_rate",
+        "mode": "forward",
+        "delivered": true,
+        "artifact": {
+          "sha256": "f3d2236d05986616171628ff5dff37eb40e8aaaafc2c6cffb6ec3a915d49f9d6",
+          "frames": 47172,
+          "samplerate": 24000
+        },
+        "duration": 1.9655,
+        "finite": true,
+        "frames": 47172,
+        "seconds": 130.81712177023292
+      },
+      {
+        "case": "reference_voice",
+        "mode": "forward",
+        "delivered": true,
+        "artifact": {
+          "sha256": "c9b574284b2127d8a306e0c8c8663e6500a4cd38b729d54dee62859a5d1e176c",
+          "frames": 54016,
+          "samplerate": 22050
+        },
+        "duration": 2.449705215419501,
+        "finite": true,
+        "frames": 54016,
+        "seconds": 71.57586146891117
+      }
+    ],
+    "measurements": {
+      "text_output_asr": "The next bus will leave at 6:15.",
+      "gain_db": -5.999999999999998,
+      "gain_residual_rms": 8.884074407100167e-18,
+      "duration_ratio": 0.7999999999999999,
+      "source_sha256": "b24f9386d2a02f22a04033f24ca47d10ae694541e8171122ce039b4162c7d243",
+      "subjective_quality_verified": false
+    }
+  },
+  "controller_wheel": {
+    "installed_outside_source_tree": true,
+    "dependency_constraints": "uv.lock exported without the project",
+    "dependency_check_passed": true,
+    "doctor_passed": true,
+    "forward_construction_passed": true,
+    "sequential_revision_construction_passed": true,
+    "live_revision_rerun": false
+  },
+  "deployment_repairs": {
+    "external_install_does_not_invoke_subprocesses": true,
+    "external_plan_no_dependency_expansion": true,
+    "ancillary_assets_downloaded_and_sha256_verified": 5,
+    "ancillary_assets_reject_changed_files": true,
+    "unknown_asset_group_rejected": true
+  },
+  "original_runtime_config_and_adapter_files_unchanged": true,
+  "historical_agent_panel": {
+    "completed": 24,
+    "delivered": 23,
+    "source": "sample_validation.json"
+  },
+  "historical_gpu_backend_followup": {
+    "operations": 5,
+    "passed": 5,
+    "source": "backend_cold_validation.json"
+  },
+  "not_certified": [
+    "Universal editing correctness",
+    "Emotion and voice quality",
+    "All 28 GPU services cold-started again for this final integration",
+    "Long audio and concurrency",
+    "Historical benchmark scores",
+    "Unrestricted Apache licensing for external backends"
+  ]
+}

@@ -1,0 +1,39 @@
+skill_id: accent_dialect_translation
+description: Convert speech between regional/dialectal varieties and a standard variety by normalizing wording, then converting accent or dialect.
+priority: 130
+selected_tools: [edit_data_pipeline, accent_conversion]
+runtime_operations: [edit_data_pipeline.text_edit, accent_conversion]
+positive_signals:
+  - translate the Taiwanese language
+  - Taiwanese language
+  - Taiwanese Mandarin
+  - Taiwanese slang
+  - Taiwanese into Mandarin
+  - Shanghai dialect
+  - dialect to Mandarin
+  - dialect into standard
+  - dialect to standard
+  - regional expressions
+  - localized expressions
+  - de-regionalize
+  - standardize dialect
+  - 台语
+  - 臺語
+  - 台湾话
+  - 臺灣話
+  - 台湾腔
+  - 台灣腔
+  - 方言转普通话
+  - 方言翻译
+  - 去地域化表达
+required_evidence: [source_text]
+workflow:
+  - edit_data_pipeline.text_edit_for_regional_expression_normalization
+  - accent_conversion_for_target_accent_or_dialect
+rationale: Dialect or accent translation is usually not a pure language translation. It may require replacing regional particles, slang, or localized phrasing while separately converting pronunciation/accent to the requested standard or regional variety.
+guardrails:
+  - For Taiwanese/台语/台湾腔/Taiwanese Mandarin to Mandarin/普通话, do not use seamless_expressive_s2st as a direct S2ST step.
+  - Treat the task as two objectives: de-regionalized or regionalized expression conversion, then accent/dialect conversion.
+  - The text_edit step must use source_text and either target_text or instruction_st when available; it owns wording such as removing localized particles, slang, or regional phrasing.
+  - The accent_conversion step must run after the wording edit and should target Standard Mandarin, Standard English, or the explicitly requested regional variety.
+  - Do not select accent_conversion alone when the request asks to translate/standardize regional expressions; it does not own lexical expression normalization by itself.

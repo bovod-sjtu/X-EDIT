@@ -1,0 +1,77 @@
+{
+  "scope": "Historical provenance and documentation-only extension candidates; not installer inputs or supported built-in tools.",
+  "models": [
+    {
+      "repo_id": "mrfakename/sam-audio-large",
+      "revision": "497809f191dd4f673a2c93557176387cf2a06cf2",
+      "revision_evidence": "local Hub cache ref; not necessarily active serving revision",
+      "model_card": "https://huggingface.co/mrfakename/sam-audio-large",
+      "deployment_provenance": "The existing X-Edit service uses this public mirror at this revision. Identity with the official facebook checkpoint is not asserted."
+    },
+    {
+      "repo_id": "google-t5/t5-base",
+      "revision": "a9723ea7f1b39c1eae772870f3b547bf6ef7e6c1",
+      "revision_evidence": "official Hub metadata, 2026-09-29; newly pinned installation asset",
+      "model_card": "https://huggingface.co/google-t5/t5-base"
+    },
+    {
+      "repo_id": "ASLP-lab/VoiceSculptor-VD",
+      "revision": "6d7a5573960727b00a5b8f3de032a22dfee7f16e",
+      "revision_evidence": "official Hub metadata, 2026-09-29; newly pinned installation asset",
+      "model_card": "https://huggingface.co/ASLP-lab/VoiceSculptor-VD"
+    },
+    {
+      "repo_id": "HKUSTAudio/xcodec2",
+      "revision": "e412427ed30f0cf9d5e3c95562113deb10a32d03",
+      "model_card": "https://huggingface.co/HKUSTAudio/xcodec2",
+      "allow_patterns": [
+        "*.json",
+        "*.py",
+        "vq/**/*.py",
+        "vq/*.py",
+        "model.safetensors",
+        "README*",
+        "LICENSE*"
+      ],
+      "revision_evidence": "public Hub metadata 2026-09-29; optional installation asset"
+    }
+  ],
+  "repositories": [
+    {
+      "name": "dacvae",
+      "url": "https://github.com/facebookresearch/dacvae.git",
+      "commit": "414c20785fc3a28373073ea8ef7a1316eeeaca6e",
+      "status": "pinned_installed_source"
+    },
+    {
+      "name": "imagebind",
+      "url": "https://github.com/facebookresearch/ImageBind.git",
+      "commit": "53680b02d7e37b19b124fa37bae4b6c98c38f5be",
+      "status": "pinned_installed_source"
+    },
+    {
+      "name": "laion-clap",
+      "url": "https://github.com/lematt1991/CLAP.git",
+      "commit": "b85cb7ecac0af7d064cbf03ebd990e709e959fe7",
+      "status": "pinned_installed_source"
+    },
+    {
+      "name": "perception-models",
+      "url": "https://github.com/facebookresearch/perception_models",
+      "commit": "e72b6810b1133e1c879f2cc965d276eb73803f1f",
+      "status": "pinned_installed_source"
+    },
+    {
+      "name": "pytorchvideo",
+      "url": "https://github.com/facebookresearch/pytorchvideo.git",
+      "commit": "6cdc929315aab1b5674b6dcf73b16ec99147735f",
+      "status": "pinned_installed_source"
+    },
+    {
+      "name": "SAM-Audio",
+      "url": "https://github.com/facebookresearch/sam-audio.git",
+      "commit": "bb4c6999d2677c7402360e426afc01ddfad6dce0",
+      "status": "pinned_installed_source"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+tool_id: audio_effects
+display_name: Deterministic Audio Effects
+backend: scipy_dsp_presets
+category: acoustic_effect
+purpose: >
+  Apply speech-preserving acoustic/channel effects such as telephone,
+  old radio, underwater, strong wind/outdoor ambience, crowd or audience
+  background noise, generic background music, muffled-through-wall, approximate
+  whisper/shouting/non-human animal-like vocal-effort style, or approximate reference channel
+  matching. This is a deterministic DSP tool, not a speech generator or
+  enhancement model.
+when_to_use:
+  - User asks for telephone, phone call, over-the-phone, or narrowband vocal effects.
+  - User asks for old-fashioned radio, radio playback, static, or lo-fi channel effects.
+  - User asks for underwater, strong wind, muffled, heavy wall, or similar acoustic environment rendering.
+  - User asks to add crowd, audience, people-talking, cafe-like, or generic social background noise.
+  - User asks to add generic background music or a simple music bed behind speech.
+  - User asks for whispering or shouting style and no dedicated generative vocal-effort tool is available.
+  - User asks for a best-effort animal-like/non-human vocal coloration and no true non-human voice conversion model is available.
+  - User asks to make one audio sound like it was recorded in the same acoustic channel condition as a reference audio.
+do_not_use_when:
+  - User asks to clean, denoise, dereverb, or make speech more natural; prefer speech_enhancement.
+  - User asks to transfer speaker identity or timbre; prefer seed_vc or intra_audio_voice_transfer.
+  - User asks for room/hall/cathedral reverb only; prefer spatial_reverb.
+  - User asks to change words, language, pitch, rate, pause, or emotion tags; use edit_data_pipeline or qwen3_tts.
+inputs:
+  - input_audio
+  - preset
+  - optional_reference_audio_path
+outputs:
+  - effected_audio
+cost:
+  gpu_required: false
+  expected_latency: low
+constraints:
+  - Presets are deterministic approximations and prioritize preserving speech timing and content over photorealistic scene or vocal-effort synthesis.
+  - match_channel_reference approximates loudness and spectral/channel coloration; it is not full room or microphone transfer.
+  - Strong effects can reduce intelligibility; use moderate strength unless the user explicitly asks for extreme degradation.

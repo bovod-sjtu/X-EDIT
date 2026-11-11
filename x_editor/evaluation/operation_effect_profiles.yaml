@@ -1,0 +1,163 @@
+schema_version: x-editor.operation-evaluation-effects/v6
+profiles:
+  # Multiplicative gain preserves samples outside the declared intervals and
+  # never resamples, normalizes, clips, or synthesizes. Scope requires runtime
+  # evidence; this profile alone cannot prove a requested gain was achieved.
+  - operation: artifact_ops.apply_gain
+    temporal_scope: local_or_global
+    local_interval_contract: source_target_spans
+    identity_outside_local_intervals: true
+    changed: [acoustic_properties]
+    preserved: [wording, language, speaker_identity, vocal_timbre, duration, local_timing]
+    unknown: []
+  - operation: artifact_ops.beep_spans
+    temporal_scope: local
+    changed: [wording]
+    preserved: [language, speaker_identity, vocal_timbre, duration, local_timing]
+    unknown: [acoustic_properties]
+  - operation: artifact_ops.concat
+    temporal_scope: structural
+    changed: [wording, language, speaker_identity, vocal_timbre, acoustic_properties, duration, local_timing]
+    preserved: []
+    unknown: []
+  - operation: artifact_ops.extract_spans
+    temporal_scope: structural
+    local_interval_contract: selected_spans_extraction
+    changed: [wording, speaker_identity, vocal_timbre, acoustic_properties, duration, local_timing]
+    preserved: [language]
+    unknown: []
+  - operation: artifact_ops.mute_spans
+    temporal_scope: local
+    changed: [wording, acoustic_properties]
+    preserved: [language, speaker_identity, vocal_timbre, duration, local_timing]
+    unknown: []
+  - operation: artifact_ops.reconstruct
+    temporal_scope: structural
+    changed: []
+    preserved: []
+    unknown: [wording, language, speaker_identity, vocal_timbre, acoustic_properties, duration, local_timing]
+  - operation: artifact_ops.remove_spans
+    temporal_scope: local
+    local_interval_contract: selected_spans_removal
+    changed: [wording, speaker_identity, vocal_timbre, acoustic_properties, duration, local_timing]
+    preserved: [language]
+    unknown: []
+  - operation: artifact_ops.reorder_spans
+    temporal_scope: structural
+    changed: [wording, speaker_identity, vocal_timbre, acoustic_properties, duration, local_timing]
+    preserved: [language]
+    unknown: []
+  - operation: artifact_ops.silence
+    temporal_scope: structural
+    changed: [wording, language, speaker_identity, vocal_timbre, acoustic_properties, duration, local_timing]
+    preserved: []
+    unknown: []
+  - operation: artifact_ops.speaker_scoped_edit
+    temporal_scope: local_or_global
+    changed: []
+    preserved: []
+    unknown: [wording, language, speaker_identity, vocal_timbre, acoustic_properties, duration, local_timing]
+  - operation: audio_effects
+    temporal_scope: global
+    changed: [acoustic_properties]
+    preserved: [wording, language, speaker_identity, vocal_timbre, duration, local_timing]
+    unknown: []
+  - operation: edit_data_pipeline.audio_assembly
+    temporal_scope: structural
+    changed: [wording, duration, local_timing]
+    preserved: [speaker_identity, vocal_timbre, acoustic_properties]
+    unknown: [language]
+  - operation: edit_data_pipeline.boundary_smooth
+    temporal_scope: local
+    changed: [local_timing]
+    preserved: [wording, language, speaker_identity, vocal_timbre, acoustic_properties, duration]
+    unknown: []
+  - operation: edit_data_pipeline.emotion_style_edit
+    temporal_scope: local_or_global
+    local_interval_contract: whole_source_text_coverage
+    changed: [vocal_timbre, duration, local_timing]
+    preserved: [wording, language, speaker_identity, acoustic_properties]
+    unknown: []
+  - operation: edit_data_pipeline.pause_edit
+    temporal_scope: local
+    local_interval_contract: pause_insertion_plan
+    identity_outside_local_intervals: true
+    changed: [duration, local_timing]
+    preserved: [wording, language, speaker_identity, vocal_timbre, acoustic_properties]
+    unknown: []
+  - operation: edit_data_pipeline.pitch_rate_edit
+    temporal_scope: local
+    local_interval_contract: aligned_edit_span_pairs
+    identity_outside_local_intervals: true
+    changed: [vocal_timbre, duration, local_timing]
+    preserved: [wording, language, speaker_identity, acoustic_properties]
+    unknown: []
+  - operation: edit_data_pipeline.pitch_shift
+    temporal_scope: global
+    changed: [vocal_timbre]
+    preserved: [wording, language, speaker_identity, acoustic_properties, duration, local_timing]
+    unknown: []
+  - operation: edit_data_pipeline.speech_rate
+    temporal_scope: global
+    changed: [duration, local_timing]
+    preserved: [wording, language, speaker_identity, vocal_timbre, acoustic_properties]
+    unknown: []
+  - operation: edit_data_pipeline.text_edit
+    temporal_scope: local_or_global
+    local_interval_contract: source_target_spans
+    identity_outside_local_intervals: true
+    changed: [wording, duration, local_timing]
+    preserved: [speaker_identity, vocal_timbre, acoustic_properties]
+    unknown: [language]
+  - operation: edit_data_pipeline.volume_normalize
+    temporal_scope: global
+    changed: [acoustic_properties]
+    preserved: [wording, language, speaker_identity, vocal_timbre, duration, local_timing]
+    unknown: []
+  - operation: emphasis_stress_edit
+    temporal_scope: local
+    local_interval_contract: source_target_spans
+    identity_outside_local_intervals: true
+    changed: [vocal_timbre, local_timing]
+    preserved: [wording, language, speaker_identity, acoustic_properties, duration]
+    unknown: []
+  - operation: foreground_background_remix
+    temporal_scope: global
+    changed: [acoustic_properties]
+    preserved: []
+    unknown: [wording, language, speaker_identity, vocal_timbre, duration, local_timing]
+  - operation: intra_audio_voice_transfer
+    temporal_scope: global
+    changed: [speaker_identity, vocal_timbre]
+    preserved: [wording, language, acoustic_properties, duration, local_timing]
+    unknown: []
+  - operation: no_reference_voice_conversion
+    temporal_scope: global
+    changed: [speaker_identity, vocal_timbre]
+    preserved: [wording, language, acoustic_properties, duration, local_timing]
+    unknown: []
+  - operation: qwen3_tts
+    temporal_scope: structural
+    changed: [wording, language, speaker_identity, vocal_timbre, acoustic_properties, duration, local_timing]
+    preserved: []
+    unknown: []
+  - operation: seed_vc
+    temporal_scope: global
+    changed: [speaker_identity, vocal_timbre]
+    preserved: [wording, language, acoustic_properties, duration, local_timing]
+    unknown: []
+  - operation: spatial_reverb
+    temporal_scope: global
+    changed: [acoustic_properties]
+    preserved: [wording, language, speaker_identity, vocal_timbre, duration, local_timing]
+    unknown: []
+  - operation: speech_enhancement
+    temporal_scope: global
+    changed: [acoustic_properties]
+    preserved: [wording, language, speaker_identity, vocal_timbre, duration, local_timing]
+    unknown: []
+  - operation: speech_separation
+    temporal_scope: structural
+    changed: [acoustic_properties]
+    preserved: [duration, local_timing]
+    unknown: [wording, language, speaker_identity, vocal_timbre]

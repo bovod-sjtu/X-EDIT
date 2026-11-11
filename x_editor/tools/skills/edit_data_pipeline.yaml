@@ -1,0 +1,248 @@
+skill_id: edit_data_pipeline
+display_name: Edit Data Pipeline 语音编辑服务
+source_mcp: edit-data-pipeline
+tool_names: [edit_data_pipeline, edit_data_pipeline.apply]
+
+description: |
+  将显式配置的 edit-data-pipeline 作为整体工具调用，用于对已有源音频做文本、
+  音高、语速、情感、停顿插入和响度编辑；不是 standalone TTS，也不是参考说话人 VC。
+detailed_capability: |
+  edit_data_pipeline 是源音频编辑工具。Planner 必须先确认用户是在编辑已有 audio，而不是
+  从零生成语音、做说话人分离、做通用降噪，或按参考音频转换说话人。
+
+  支持的主要 operation：
+  1. text_edit
+     - 用 tagged text-edit pipeline 修改源音频中的 spoken text，同时尽量保留源说话人和上下文。
+     - 必须提供 input_audio_path、source_text、instruction_st、output_path。
+     - instruction_st 使用 <sub targ="new">old</sub> 形式；stripped instruction_st 应和 source_text 对齐。
+     - input_audio_path 必须是前端已经切好的段落，时长严格小于 30s；wrapper 会在调用服务前拒绝 >=30s 或无法验证时长的音频。
+     - 长音频必须先分段，避免服务上下文和 F5-TTS prepend context 超限。
+
+  2. pitch_rate_edit
+     - 用 pitch/rate pipeline 做局部或整句音高、语速编辑。
+     - pitch 使用 <pitch, semitones=...>...</pitch>；rate 使用 <rate, factor=...>...</rate>。
+     - 默认 pitch_method 使用 psola+indextts2_cco。
+     - pitch-only 必须设置 smooth_policy=never，因为只改变 pitch 不应该改变整体音频时长。
+     - 通用“提升音高/降低音高”默认用 +/-8 semitones；“半个八度”可用 +/-6 semitones。
+     - rate/speed 编辑才允许改变时长；语速默认质量路径为 WSOLA + TTS/IndexTTS2 re-synthesis。
+
+  3. emotion_style_edit
+     - 用 tagged emotion/style pipeline 修改情感或说话风格。
+     - instruction_st 使用 <happy|sad|angry|surprised|calm, level=...>...</emotion>。
+     - angry 和 surprised 默认用最高强度 level=3；其它情感默认 level=2，除非用户指定。
+     - 建议 persist=true，便于保存 synthetic target、candidate 和 service debug artifacts。
+
+  4. pause_edit
+     - 只用于“插入停顿/暂停/停一下”等正向插入。
+     - instruction_st 使用 <pause act="ins" level="1|2|3"/> 点标签。
+     - “删除/移除/去掉停顿或静音”不是简单 pause_edit，应走停顿移除、重新拼接或其它专用流程。
+
+  5. volume_normalize
+     - 用于调整音量、响度或归一化，推荐 method=rms。
+     - 只处理明确的音量/响度参数编辑；无参考音色/声线/persona 设计应走 qwen3_tts custom_voice。
+
+  6. speech_rate / boundary_smooth / audio_assembly
+     - speech_rate 是 legacy 语速入口；高质量默认 method=wsola+indextts2。
+     - boundary_smooth 和 audio_assembly 是低层拼接/平滑能力，需要明确 boundary、target_audio
+       或 edit_tagged_text，不应由含糊自然语言直接触发。
+
+  多维同句自然语言指令的执行模型：
+  - 同一句用户指令可以包含多个编辑维度，但前端 planner 必须把它拆成有序 operation。
+  - 推荐顺序：text_edit -> emotion_style_edit -> pause_edit -> pitch_rate_edit -> volume_normalize。
+  - 每一步以上一步 output_audio_path 作为下一步 input_audio_path，并同步使用当前 transcript。
+  - 例如“把公园改成学校，并说得更生气”应拆为 text_edit 后接 emotion_style_edit；
+    不要把两个维度硬塞进一个 unsupported operation。
+
+  说话人/音色控制边界：
+  - 有 reference_audio_paths 且目标是“变成某人/参考音频里的声音/voice conversion”时，使用 seed_vc，
+    不要用 edit_data_pipeline 近似。
+  - 无 reference_audio_paths 且用户要求 speaker/timbre/persona 级别变化，例如“变成男声/女声/童声/更低沉/沙哑/磁性”，
+    优先使用 qwen3_tts custom_voice 捏目标音色，并写清楚 voice-design instruct。
+  - 只有明确要求“提升音高/降低音高/调大音量/降低音量”等声学参数时，
+    才继续使用 edit_data_pipeline 的 pitch_rate_edit / volume_normalize。
+
+  长音频分段规则：
+  - input audio 时长 >= 30s 时，必须先分段再调用 edit_data_pipeline。
+  - text_edit 比其它 operation 更严格：传给 text_edit service 的每个 input_audio_path 必须 <30s，不能依赖 service 内部再裁剪。
+  - max_segment_sec 必须严格小于 30s；框架默认 29.5s，且 X_EDITOR_EDIT_SEGMENT_MAX_SEC 也会被 clamp 到 29.5。
+  - 每个 chunk 必须只包含单说话人；默认要求 speaker_segments。
+  - 切分点必须在词边界；默认要求 word_timestamps。
+  - 分段后每段单独调用 edit_data_pipeline，最后拼接输出，并保留 segment_manifest.json。
+  - 缺少 word_timestamps 或 speaker_segments 时，不要静默整段调用，应先要求 perception/forced alignment/diarization；diarization 默认通过隔离服务 X_EDITOR_DIARIZATION_URL 完成。
+
+dimensions: [text, pitch, tempo, timbre, dynamics, emotion, analysis]
+
+parameters:
+  - name: operation
+    type: enum
+    required: true
+    description: 要调用的 edit-data-pipeline operation。
+    enum_values:
+      - text_edit
+      - pitch_rate_edit
+      - emotion_style_edit
+      - pause_edit
+      - speech_rate
+      - volume_normalize
+      - pitch_shift
+      - boundary_smooth
+      - audio_assembly
+  - name: input_audio_path
+    type: string
+    required: true
+    description: 待编辑源音频路径。除 audio_assembly 的特殊输入外，服务层编辑都需要该字段。
+  - name: output_path
+    type: string
+    required: true
+    description: 编辑后 WAV 输出路径。
+  - name: source_text
+    type: string
+    required: false
+    description: 与 input_audio_path 对齐的转写文本；text_edit、pitch_rate_edit、emotion_style_edit、pause_edit 必需。
+  - name: instruction_st
+    type: string
+    required: false
+    description: 结构化 tagged instruction。不同 operation 使用 sub、pitch、rate、emotion 或 pause 标签。
+  - name: reference_audio_paths
+    type: string
+    required: false
+    description: 仅用于路由判断；非空且目标是参考说话人转换时应改用 seed_vc，不应传给 edit_data_pipeline 近似。
+  - name: word_timestamps
+    type: string
+    required: false
+    description: 长音频分段所需词级时间戳。audio >= 30s 时必须可用。
+  - name: speaker_segments
+    type: string
+    required: false
+    description: 长音频分段所需说话人区间。默认必须可用，确保每个 chunk 是单说话人。
+  - name: max_segment_sec
+    type: number
+    required: false
+    default: 29.5
+    description: 长音频分段最大秒数，必须严格小于 30s。
+    constraints: "< 30.0；框架默认并上限 clamp 为 29.5"
+  - name: text_edit_max_input_sec
+    type: number
+    required: false
+    default: 30.0
+    description: text_edit 的硬性输入上限；实际传入 service 的 audio segment 必须严格小于该值。
+    constraints: "< 30.0；wrapper 会拒绝 >=30s 或无法验证时长的 input_audio_path"
+  - name: pitch_method
+    type: string
+    required: false
+    default: psola+indextts2_cco
+    description: pitch_rate_edit 的 pitch conversion method；默认优先 psola+indextts2_cco。
+  - name: smooth_policy
+    type: enum
+    required: false
+    default: never
+    description: pitch_rate_edit 的平滑策略。pitch-only 必须为 never；rate 可用 auto。
+    enum_values: [never, auto, always]
+  - name: method
+    type: string
+    required: false
+    default: wsola+indextts2
+    description: operation-specific method。speech_rate 默认 wsola+indextts2；volume 推荐 rms。
+  - name: target_db
+    type: number
+    required: false
+    default: -20.0
+    description: volume_normalize 的目标响度。
+    constraints: "-60.0 ~ 0.0 dB"
+  - name: persist
+    type: boolean
+    required: false
+    default: false
+    description: 是否让服务保存中间输出；emotion_style_edit 和 pause_edit 调试时建议 true。
+  - name: output_dir
+    type: string
+    required: false
+    description: 服务 artifact 输出目录，用于保存中间音频、candidate、manifest 等 debug 信息。
+
+output:
+  type: audio_file
+  description: 编辑后的 WAV；长音频分段执行时还应产出 segment_manifest.json 和每段 input/output artifact。
+
+execution_constraints:
+  should_run_before: [volume_normalizer, acompressor, equalizer]
+  should_run_after: [ctc_forced_aligner]
+  mutually_exclusive_with: []
+  can_repeat: true
+
+examples:
+  - scenario: "把源音频中“公园”替换为“学校”"
+    parameters:
+      operation: text_edit
+      input_audio_path: /path/to/source.wav
+      output_path: /data/xedit/runs/text_edit.wav
+      source_text: 今天天气很好，我们去公园散步。
+      instruction_st: '今天天气很好，我们去<sub targ="学校">公园</sub>散步。'
+      language: zh
+      evaluate: false
+    expected_outcome: "只替换目标词，保留源说话人和大部分上下文韵律"
+  - scenario: "提升整句音高，效果明显但不改变时长"
+    parameters:
+      operation: pitch_rate_edit
+      input_audio_path: /path/to/source.wav
+      output_path: /data/xedit/runs/pitch_up.wav
+      source_text: 今天的会议马上开始。
+      instruction_st: '<pitch, semitones=8>今天的会议马上开始。</pitch>'
+      pitch_method: psola+indextts2_cco
+      smooth_policy: never
+    expected_outcome: "音高升高约 8 个半音，整体时长应与源音频基本一致"
+  - scenario: "语速加快 20%"
+    parameters:
+      operation: pitch_rate_edit
+      input_audio_path: /path/to/source.wav
+      output_path: /data/xedit/runs/rate_fast.wav
+      source_text: 请大家尽快提交今天的反馈。
+      instruction_st: '<rate, factor=1.2>请大家尽快提交今天的反馈。</rate>'
+      pitch_method: psola+indextts2_cco
+      smooth_policy: auto
+    expected_outcome: "语速变快、时长缩短，音高不应被显著改变"
+  - scenario: "把整句改成最高强度生气情绪"
+    parameters:
+      operation: emotion_style_edit
+      input_audio_path: /path/to/source.wav
+      output_path: /data/xedit/runs/angry.wav
+      source_text: 这件事情需要马上处理。
+      instruction_st: '<angry, level=3>这件事情需要马上处理。</angry>'
+      persist: true
+      max_candidates: 3
+    expected_outcome: "文本不变，情绪显著转为生气，并保留中间候选音频"
+  - scenario: "明确参数编辑：把音高降低 6 个半音并稍微压低响度"
+    parameters:
+      operation: pitch_rate_edit
+      input_audio_path: /path/to/source.wav
+      output_path: /data/xedit/runs/deep_male_pitch.wav
+      source_text: 欢迎收听今天的节目。
+      instruction_st: '<pitch, semitones=-6>欢迎收听今天的节目。</pitch>'
+      pitch_method: psola+indextts2_cco
+      smooth_policy: never
+      next_operation: volume_normalize
+      next_target_db: -20.5
+    expected_outcome: "这是显式 pitch/volume 参数编辑；若用户目标是无参考音频的低沉男声音色，应改用 qwen3_tts custom_voice"
+  - scenario: "70 秒长音频做文本编辑"
+    parameters:
+      operation: text_edit
+      max_segment_sec: 29.5
+      word_timestamps: required
+      speaker_segments: required
+    expected_outcome: "按词边界切成多个 <30s 且单说话人的 chunk，逐段编辑后拼接，并输出 segment_manifest.json"
+
+instruction_mapping:
+  "source audio exists && wants spoken text replacement": "使用 text_edit；必须构造 <sub targ=\"new\">old</sub> instruction_st"
+  "source audio exists && wants pitch change": "使用 pitch_rate_edit；构造 <pitch, semitones=...> 标签；默认 pitch_method=psola+indextts2_cco，smooth_policy=never"
+  "source audio exists && wants speech rate change": "使用 pitch_rate_edit；构造 <rate, factor=...> 标签；rate 编辑允许改变时长，smooth_policy 可为 auto"
+  "source audio exists && wants emotion/style": "使用 emotion_style_edit；angry/surprised 默认 level=3，其它默认 level=2"
+  "source audio exists && wants pause insertion": "使用 pause_edit；构造 <pause act=\"ins\" level=\"1|2|3\"/>；只处理插入停顿"
+  "wants remove/delete pause or silence": "不要用 pause_edit；需要停顿移除、重拼接或其它专用流程"
+  "reference_audio_paths 非空 && wants speaker/timbre/voice conversion": "不要用 edit_data_pipeline 近似；使用 seed_vc"
+  "reference_audio_paths 为空 && wants speaker/timbre/persona/voice design": "不要用 edit_data_pipeline 近似；使用 qwen3_tts custom_voice，并写清楚 voice-design instruct"
+  "single natural-language instruction has text + emotion/pitch/rate/volume": "拆成多步 operation；text_edit 先执行，再执行其它维度"
+  "audio_duration >= 30s": "必须使用 word_timestamps 和 speaker_segments 按词边界、单说话人、max_segment_sec=29.5 分段"
+  "text_edit input segment duration >= 30s or unknown": "禁止直接调用 text_edit；先在前端按词边界切到 <30s"
+  "pitch-only": "必须验证输出时长不应明显变化；不要启用 always smooth"
+  "standalone TTS/no source audio": "不要用 edit_data_pipeline；使用 qwen3_tts 或其它 TTS"
+  "denoise/enhance/extract/isolate/separate foreground/background": "不要用 edit_data_pipeline；单人增强用 ClearerVoice speech_enhancement；有参考说话人抽取用 QuarkAudio-UniSE TSE；无参考多人/重叠语音分离用 speech_separation"
+  "add room reverb / echo / hall / large empty room / 空间感 / 混响": "不要用 edit_data_pipeline；使用 spatial_reverb，并把自然语言空间描述映射成 room_preset、t60、dry_wet"

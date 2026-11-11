@@ -1,0 +1,28 @@
+name: speech_enhancement
+server:
+  command: ["uv", "run", "--frozen", "--project", ".", "python", "mcp_server.py"]
+  working_dir: "."
+  env:
+    UV_PROJECT_ENVIRONMENT: ".venv"
+    UV_LINK_MODE: "copy"
+    RUST_LOG: "warn"
+    PYTHONNOUSERSITE: "1"
+    XEDITOR_CLEARERVOICE_HOME: "../clearer_voice_studio"
+    CLEARERVOICE_SERVICE_URL: "http://127.0.0.1:8027"
+  resources:
+    gpu: true
+    memory_gb: 12
+  lifecycle: session
+  startup_timeout_sec: 180
+managed_services:
+  - name: clearer_voice_studio
+    url_env: CLEARERVOICE_SERVICE_URL
+    default_url: "http://127.0.0.1:8027"
+    working_dir: "../clearer_voice_studio"
+    command: [".venv/bin/python", "service.py", "--host", "127.0.0.1", "--port", "8027"]
+    health_path: "/health"
+    smoke:
+      - {method: "OPTIONS", path: "/enhance"}
+      - {method: "GET", path: "/health?deep=true", timeout_sec: 180}
+    startup_timeout_sec: 180
+    setup_hint: "cd x_editor/tools/catalog/clearer_voice_studio && ./setup.sh"

@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "x-edit-audio"
+version = "0.1.0.dev1"
+description = "Auditable agentic speech editing with expert tools and sequential policy revision"
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+license = "Apache-2.0"
+dependencies = [
+  "httpx==0.28.1",
+  "numpy==2.4.6",
+  "pandas==3.0.5",
+  "pydantic==2.13.4",
+  "pydantic-settings==2.15.0",
+  "pydub==0.25.1",
+  "python-dotenv==1.2.3",
+  "PyYAML==6.0.3",
+  "requests==2.34.2",
+  "scipy==1.17.1",
+  "soundfile==0.14.0",
+  "jsonschema==4.26.0",
+]
+
+[project.scripts]
+x-edit = "x_editor.cli:main"
+x-edit-tools = "x_editor.tools.loader:main"
+
+[tool.setuptools.packages.find]
+include = ["x_editor*"]
+exclude = ["x_editor.accent_library.data", "x_editor.accent_library.data.*", "*.tests", "*.tests.*", "*.__pycache__", "*.__pycache__.*", "*.venv", "*.venv.*", "*..venv", "*..venv.*", "*.vendor", "*.vendor.*", "*.checkpoints", "*.checkpoints.*"]
+
+[tool.setuptools.package-data]
+x_editor = ["**/*.yaml", "**/*.json", "**/*.md", "**/*.toml", "**/*.lock", "**/*.sh", "**/*.txt"]
+
+[tool.setuptools.exclude-package-data]
+"*" = ["accent_library/data/*", "accent_library/data/**/*", "**/.venv/**", "**/vendor/**", "**/checkpoints/**", "**/.cache/**", "**/__pycache__/**", "**/.env", "**/.env.*", "**/*.pyc", "**/*.wav", "**/*.mp3", "**/*.flac", "**/*.ogg", "**/*.opus", "**/*.m4a", "**/*.aac", "**/*.mp4", "**/*.webm", "**/*.safetensors", "**/*.pt", "**/*.pth", "**/*.ckpt", "**/*.bin", "**/*.onnx", "**/*.so", "**/*.so.*", "**/*.dll", "**/*.dylib", "**/*.exe", "**/*.pem", "**/*.key"]

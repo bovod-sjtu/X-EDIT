@@ -1,0 +1,56 @@
+skill_id: afftdn_denoise
+display_name: FFT 降噪
+source_mcp: ffmpeg
+tool_names: [afftdn_denoise]
+
+description: 基于 FFT 的频谱降噪，有效去除稳定的背景噪声（如空调声、电流声）。
+detailed_capability: |
+  通过分析噪声频谱并从信号中减去来实现降噪。
+  nr 参数控制降噪强度：
+  - nr=1~6: 轻微降噪，保留更多原始音质
+  - nr=8~12: 中等降噪，适合一般背景噪声
+  - nr=15~20: 强力降噪，可能引入 artifacts
+  适合在效果链最前面使用，先清理再处理。
+
+dimensions: [noise]
+
+parameters:
+  - name: audio_path
+    type: string
+    required: true
+    description: 输入音频文件路径
+  - name: nr
+    type: integer
+    required: false
+    default: 12
+    description: 降噪强度
+    constraints: "1 ~ 30"
+  - name: output_path
+    type: string
+    required: false
+    default: auto
+    description: 输出文件路径
+
+output:
+  type: audio_file
+  description: 降噪后的音频文件
+
+execution_constraints:
+  should_run_before: [pitch_shift_rubberband, equalizer, bass_boost, acompressor]
+  should_run_after: []
+  mutually_exclusive_with: [afwtdn_denoise]
+  can_repeat: false
+
+examples:
+  - scenario: "去除轻微背景空调声"
+    parameters:
+      nr: 8
+    expected_outcome: "背景噪声明显降低，人声基本无损失"
+  - scenario: "去除明显电流底噪"
+    parameters:
+      nr: 15
+    expected_outcome: "底噪显著减少，但可能轻微影响高频细节"
+
+instruction_mapping:
+  "effects.removed contains 'noise'": "nr=8~15"
+  "notable_issues contains 'background noise'": "nr=10~15"

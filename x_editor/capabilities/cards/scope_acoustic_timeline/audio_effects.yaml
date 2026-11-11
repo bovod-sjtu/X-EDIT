@@ -1,0 +1,84 @@
+schema_version: x-editor.operation-capability-card/v1
+operation: audio_effects
+semantic_effects: [channel_effect, acoustic_effect, reference_channel_approximation]
+supported_scopes: [global]
+requirements:
+  inputs: [inputs.input_audio]
+  evidence: []
+preservation:
+  - dimension: timeline_duration
+    level: strong
+    evidence_kind: declared_design_fact
+    rationale: The default mode writes processed samples back into the original-length timeline.
+  - dimension: speech_content
+    level: moderate
+    evidence_kind: declared_design_fact
+    rationale: The DSP presets do not resynthesize words, although strong effects may reduce intelligibility.
+quality_characteristics:
+  - dimension: effect_fidelity
+    level: unknown
+    evidence_kind: unknown
+    rationale: Presets are deterministic approximations with no reviewed development prior.
+artifact_risks:
+  - risk: intelligibility_loss_at_high_strength
+    level: unknown
+    evidence_kind: unknown
+    rationale: The manual identifies this risk, but no task-conditioned severity prior is available.
+composition:
+  supports_batch_targets: false
+  cumulative_degradation_risk: medium
+parameter_contract:
+  additional_parameters: reject
+  planner_selectable:
+    - path: inputs.input_audio
+      value_type: string
+      required: true
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: source_audio
+    - path: inputs.reference_audio_path
+      value_type: string
+      required: false
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: reference_channel_audio
+    - path: params.preset
+      value_type: enum
+      required: true
+      enum_values: [telephone, old_radio, underwater, strong_wind, crowd_noise, background_music, muffled_wall, whisper_style, shouting_style, animal_vocal_style, match_channel_reference]
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: acoustic_effect_preset
+    - path: params.strength
+      value_type: number
+      required: false
+      minimum: 0.0
+      maximum: 1.0
+      default: 0.75
+      semantic_role: effect_strength
+    - path: params.preserve_duration
+      value_type: boolean
+      required: false
+      minimum: null
+      maximum: null
+      default: true
+      semantic_role: preserve_timeline_duration
+  framework_owned: [params.output_path, params.output_dir, params.instruction]
+  conditional_rules:
+    - when: {path: params.preset, operator: equals, value: match_channel_reference}
+      require: [inputs.reference_audio_path]
+      forbid: []
+limitations:
+  - It does not clean, denoise, dereverberate, edit text, or transfer speaker identity.
+  - Reference matching approximates spectral and channel coloration rather than full room transfer.
+  - Local segment editing is not Planner-admissible until the operation exposes a typed target-span parameter and publishes its exact temporal mapping; free-form instruction parsing is not an execution contract.
+provenance:
+  - source_path: x_editor/tools/catalog/audio_effects/manual.yaml
+    source_kind: manual
+  - source_path: x_editor/tools/catalog/audio_effects/mcp_server.py
+    source_kind: service_schema
+  - source_path: x_editor/runtime/audio_effects.py
+    source_kind: runtime_handler

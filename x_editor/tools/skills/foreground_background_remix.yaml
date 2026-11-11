@@ -1,0 +1,124 @@
+skill_id: foreground_background_remix
+display_name: 前景/背景分离编辑与重混
+source_mcp: runtime-composite
+tool_names:
+  - foreground_background_remix
+  - speech_separation
+  - edit_data_pipeline
+  - speech_enhancement
+
+description: |
+  用于 speech editing 中“只编辑前景说话/人声，同时保持背景音乐或背景声不变”的复合链路。
+  该 skill 不新增底层模型，而是约束 Planner 使用 speech_separation 分 stems，
+  对 foreground stem 做 edit/enhance，再与 background stem 按原始时长 remix。
+
+detailed_capability: |
+  适用场景：
+  - Make the speaker talk faster while keeping the background music at its original speed.
+  - Delete all the voice and only keep the background sound/music.
+  - Enhance the foreground voice while preserving background ambience.
+  - Extract foreground vocals/speech from background music when exact speaker identity is not required.
+
+  标准执行链路：
+  1. speech_separation.separate(input_audio_path, output_dir, model_family=bs_roformer)
+  2. 选择 foreground stem，通常 policy=speech/vocal/voice。
+  3. 按唯一标签选择 background stem，policy=background/music/instrumental。
+  4. 如果是删除人声：foreground_action=remove_foreground，直接输出 background。
+  5. 如果是前景编辑：foreground stem 调 edit_data_pipeline.* 或 speech_enhancement。
+  6. 将 edited foreground fit/pad/trim 到原始 timeline，再 overlay 到 background。
+  7. 默认 preserve_duration=true，最终输出长度应与原始音频一致。
+
+  能力边界：
+  - speech_separation 仅区分人声和伴奏，不提供单个重叠说话人的轨。
+  - 说话人时间段提取需要已有定位证据；若说话重叠，不能用人声轨替代目标说话人分离。
+  - 不应直接把混合音频送入 edit_data_pipeline；否则背景音乐会被一起变速/变调/改情感。
+  - 如果 foreground 编辑是 text/pitch/emotion/pause，必须有 foreground 对应 source_text。
+  - 只保留背景或只提取前景时，可不需要 source_text。
+
+dimensions: [source_separation, speech, background, tempo, pitch, emotion, text, dynamics]
+
+parameters:
+  - name: input_audio_path
+    type: string
+    required: true
+    description: 原始混合音频。
+  - name: output_path
+    type: string
+    required: true
+    description: 最终重混后的 WAV 输出。
+  - name: foreground_action
+    type: enum
+    required: false
+    default: edit_foreground
+    enum_values: [edit_foreground, remove_foreground, isolate_foreground]
+    description: 编辑前景、删除前景只留背景，或只输出前景。
+  - name: foreground_stem_policy
+    type: string
+    required: false
+    default: speech
+    description: 按唯一人声标签选择，例如 speech、voice、vocal；顺序不代表语义。
+  - name: background_stem_policy
+    type: string
+    required: false
+    default: background
+    description: 按唯一伴奏标签选择，例如 background、music、instrumental；歧义或缺失则失败。
+  - name: edit_operation
+    type: enum
+    required: false
+    enum_values:
+      - edit_data_pipeline.text_edit
+      - edit_data_pipeline.pitch_rate_edit
+      - edit_data_pipeline.emotion_style_edit
+      - edit_data_pipeline.pause_edit
+      - edit_data_pipeline.volume_normalize
+      - speech_enhancement
+      - copy
+    description: 对 foreground stem 执行的编辑操作。
+  - name: source_text
+    type: string
+    required: false
+    description: foreground stem 对应转写。text/pitch/emotion/pause 编辑时必需。
+  - name: preserve_duration
+    type: boolean
+    required: false
+    default: true
+    description: 最终输出是否保持原始音频时长；benchmark 默认应保持。
+  - name: post_enhance
+    type: boolean
+    required: false
+    default: false
+    description: remix 后是否再用 ClearerVoice 做最终 cleanup。
+
+output:
+  type: audio_file
+  description: 重混后的 WAV；metadata 应包含 stem_paths、foreground_stem_path、background_stem_path、tool_chain。
+
+execution_constraints:
+  should_run_before: [spatial_reverb, volume_normalizer]
+  should_run_after: []
+  mutually_exclusive_with: []
+  can_repeat: false
+
+examples:
+  - scenario: "说话人加快语速，但背景音乐保持原速"
+    parameters:
+      foreground_action: edit_foreground
+      edit_operation: edit_data_pipeline.pitch_rate_edit
+      foreground_stem_policy: speech
+      background_stem_policy: background
+      preserve_duration: true
+    expected_outcome: "只有前景人声语速变化，背景音乐 tempo 不变，最终时长与原音频对齐"
+  - scenario: "删除所有人声，只保留背景音乐"
+    parameters:
+      foreground_action: remove_foreground
+      foreground_stem_policy: speech
+      background_stem_policy: music
+      preserve_duration: true
+    expected_outcome: "输出为 background/residual stem，时长与原音频一致"
+
+instruction_mapping:
+  "background music unchanged && speaker/speech changes speed": "使用 foreground_background_remix；不要直接 edit_data_pipeline.pitch_rate_edit 混合音频"
+  "only keep background sound/music": "foreground_action=remove_foreground"
+  "delete/remove voice/vocals && keep background": "foreground_action=remove_foreground"
+  "enhance foreground voice && preserve background": "edit_operation=speech_enhancement"
+  "isolate foreground voice/vocals": "foreground_action=isolate_foreground"

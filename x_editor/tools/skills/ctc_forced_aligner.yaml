@@ -1,0 +1,57 @@
+skill_id: ctc_forced_aligner
+display_name: CTC 强制对齐（音素级时间戳）
+source_mcp: ctc-forced-aligner
+tool_names: [ctc_align]
+
+description: 给定音频和对应文本，返回每个字符/音素的时间戳，精确知道每个字在音频中的起止时间。
+detailed_capability: |
+  基于 CTC 模型的字符级强制对齐。支持中英文自动检测。
+
+  在音频编辑中的核心用途：
+  1. **精确剪辑**：知道"第3个字到第5个字"对应音频的哪一段
+  2. **局部替换**：只替换音频中某个词，不影响前后内容
+  3. **时间验证**：确认编辑后的音频时长是否与文本匹配
+  4. **与 TTS 结合**：对齐原音频后，精确定位需要 TTS 替换的片段
+
+  输出格式：
+  ```
+  [{"char": "你", "start": 0.12, "end": 0.35}, ...]
+  ```
+
+dimensions: [analysis]
+
+parameters:
+  - name: audio_path
+    type: string
+    required: true
+    description: 音频文件路径
+  - name: text
+    type: string
+    required: true
+    description: 与音频对应的文本
+  - name: language
+    type: string
+    required: false
+    description: 语言代码，不填则自动检测
+    enum_values: [eng, zho]
+
+output:
+  type: data
+  description: 字符级对齐结果（JSON 数组）
+
+execution_constraints:
+  should_run_before: []
+  should_run_after: []
+  mutually_exclusive_with: []
+  can_repeat: true
+
+examples:
+  - scenario: "定位音频中'非常重要'这个词的位置"
+    parameters:
+      text: "这是一个非常重要的通知"
+    expected_outcome: "返回每个字的时间戳，可提取'非常重要'对应的 start/end"
+
+instruction_mapping:
+  "user_prompt 包含 '替换某个词' / '只改这一段' / '局部编辑'": "先调用对齐获取时间戳，再局部替换"
+  "user_prompt 包含 '剪辑' / '裁剪' / '截取' 且涉及文本内容": "先对齐，获取精确时间范围"
+  "需要与 index_tts 配合进行局部替换": "先对齐 → 定位片段 → TTS 生成替换音频 → 拼接"

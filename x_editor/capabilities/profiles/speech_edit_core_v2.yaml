@@ -1,0 +1,69 @@
+schema_version: x-editor.runtime-capability-profile-contract/v1
+profile_name: speech_edit_core_v2
+extends: speech_edit_core_v1
+operations:
+  - operation: speech_enhancement
+    parameter_contract: exact
+    admitted_semantic_effects: [speech_cleanup, speech_denoise, speech_dereverb, speech_clarity]
+    verifier_kind: operation_principle
+    verifier_check_ids:
+      - speech_enhancement.contract
+      - speech_enhancement.duration
+      - speech_enhancement.signal
+    required_service_ids: [speech_enhancement]
+  - operation: speech_separation
+    parameter_contract: exact
+    admitted_semantic_effects: [generic_source_separation, vocal_accompaniment_separation]
+    verifier_kind: operation_principle
+    verifier_check_ids:
+      - speech_separation.contract
+      - speech_separation.stems
+      - speech_separation.duration
+    required_service_ids: [speech_separation]
+  - operation: foreground_background_remix
+    parameter_contract: exact
+    admitted_semantic_effects: [foreground_remove, foreground_extract]
+    verifier_kind: delivery_contract
+    verifier_check_ids:
+      - framework.delivery_contract.execution
+      - framework.delivery_contract.inputs
+      - framework.delivery_contract.artifact
+    required_service_ids: [speech_separation]
+  - operation: artifact_ops.apply_gain
+    parameter_contract: exact
+    admitted_semantic_effects: [relative_level_change]
+    verifier_kind: operation_principle
+    verifier_check_ids:
+      - artifact_ops.apply_gain.contract
+      - artifact_ops.apply_gain.timeline
+      - artifact_ops.apply_gain.signal
+      - artifact_ops.apply_gain.preservation
+    required_service_ids: []
+services:
+  - service_id: speech_enhancement
+    capability_id: x-editor/tool/speech-enhancement/enhance/v1
+    endpoint_env: CLEARERVOICE_SERVICE_URL
+    canary:
+      method: POST
+      relative_path: /enhance
+      request_json:
+        input_audio_path: $CANARY_AUDIO_PATH
+        output_path: $PROFILE_CANARY_OUTPUT_ROOT/speech_enhancement.wav
+        mode: general
+        preserve_background: false
+        enhancement_goal: Improve clarity without changing spoken content.
+      required_response_json_paths: [output_audio_path]
+  - service_id: speech_separation
+    capability_id: x-editor/tool/speech-separation/separate/v1
+    endpoint_env: AUDIO_SEPARATOR_ROFORMER_SERVICE_URL
+    canary:
+      method: POST
+      relative_path: /separate
+      request_json:
+        input_audio_path: $CANARY_AUDIO_PATH
+        output_dir: $PROFILE_CANARY_OUTPUT_ROOT/speech_separation_stems
+        output_path: $PROFILE_CANARY_OUTPUT_ROOT/speech_separation_selected.wav
+        model_family: bs_roformer
+        output_format: WAV
+        stem_policy: vocals
+      required_response_json_paths: [output_audio_path, stem_paths]

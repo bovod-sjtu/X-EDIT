@@ -1,0 +1,11 @@
+{
+  "schema_version": "x-editor.diarizen-source-support-contract/v1",
+  "coordinate_system": "input_audio_seconds",
+  "padding": "right_zero_padding_only",
+  "reviewed_git_revision": "a60b18151dbbe246e4199d8ef5cd2ece3872ea94",
+  "source_files": {
+    "diarizen.pipelines.inference": "1c0ce47830818fe135d78f57947e1f8b7919c93380df802e7392e866ddf02397",
+    "pyannote.audio.core.inference": "8b425c07093e4877c998b3fb2ea2dc58d1335de35e9458c5547a806725322e1f",
+    "pyannote.audio.pipelines.speaker_diarization": "7e1d7d5fc0d0848d6f4aa5b01436c1d75015af7a9eee4e9e920a8508e215ab72"
+  }
+}

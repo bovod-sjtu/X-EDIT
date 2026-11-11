@@ -1,0 +1,79 @@
+{
+  "date": "2026-10-01",
+  "scope": "Local GPU regression of source externalization; existing environments and model assets reused. Not a fresh GPU installation or a quality study.",
+  "structural_tests": {
+    "passed": 6,
+    "total": 6
+  },
+  "backends": [
+    {
+      "name": "index_tts",
+      "official_url": "https://github.com/index-tts/index-tts.git",
+      "official_commit": "1eafa935e8887f9ba877f82cf7319fceddfc86cb",
+      "compatibility_modules": 8,
+      "upstream_clean_after_inference": true,
+      "checks": [
+        {
+          "case": "emotion_and_tokens",
+          "valid_audio_before_and_after": true,
+          "decoded_samples_identical": true,
+          "sample_rate": 22050,
+          "frames": 44288,
+          "samples_sha256": "fa9fcee3a83d1cebe8bc58cc19c7226b109163eadc4fc3665fca2c544d8e0e90"
+        },
+        {
+          "case": "cached_continuation",
+          "valid_audio_before_and_after": true,
+          "decoded_samples_identical": true,
+          "sample_rate": 22050,
+          "frames": 65024,
+          "samples_sha256": "44a3a51575b07c404715267972fda94e807ea2862fc81637bc15b23d8ff196d5"
+        },
+        {
+          "case": "segmented_emotion",
+          "valid_audio_before_and_after": true,
+          "decoded_samples_identical": true,
+          "sample_rate": 22050,
+          "frames": 49978,
+          "samples_sha256": "f606182f293842a138db1f5adfdd945f4e473952ad6448ef038827569fe93dd3"
+        }
+      ],
+      "old_bundled_directory_bytes": 6281303,
+      "new_adapter_directory_bytes": 215551
+    },
+    {
+      "name": "seed_vc",
+      "official_url": "https://github.com/Plachtaa/seed-vc.git",
+      "official_commit": "51383efd921027683c89e5348211d93ff12ac2a8",
+      "compatibility_modules": 1,
+      "upstream_clean_after_inference": true,
+      "checks": [
+        {
+          "case": "explicit_seed",
+          "valid_audio_before_and_after": true,
+          "decoded_samples_identical": true,
+          "sample_rate": 22050,
+          "frames": 45056,
+          "samples_sha256": "e13b1df7de2fbc5aa9fef722a59b45182e9e2601bf7e17497d054edf555616bd"
+        },
+        {
+          "case": "default_seed",
+          "valid_audio_before_and_after": true,
+          "decoded_samples_identical": true,
+          "sample_rate": 22050,
+          "frames": 45056,
+          "samples_sha256": "e13b1df7de2fbc5aa9fef722a59b45182e9e2601bf7e17497d054edf555616bd"
+        }
+      ],
+      "old_bundled_directory_bytes": 513227,
+      "new_adapter_directory_bytes": 67545
+    }
+  ],
+  "limitations": [
+    "Optional CUDA kernel and acceleration paths not executed.",
+    "Pitch-conditioned Seed-VC not executed.",
+    "Aligner-mediated multi-tag continuation not executed.",
+    "No broad editing benchmark or human listening certification.",
+    "License obligations remain in force; external placement is not a license exemption."
+  ]
+}

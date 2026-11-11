@@ -1,0 +1,68 @@
+skill_id: audio_caption_span_grounding
+description: Use timestamped Omni caption perception for non-speech audio-event captioning and span grounding, with an optional FlexSED candidate prior.
+priority: 96
+selected_tools: [perception.timestamped_caption, artifact_ops]
+runtime_operations:
+  - perception.timestamped_caption
+  - perception.flexsed_events
+  - artifact_ops.extract_spans
+  - artifact_ops.remove_spans
+  - artifact_ops.mute_spans
+  - artifact_ops.beep_spans
+  - artifact_ops.reconstruct
+positive_signals:
+  - caption
+  - describe audio
+  - describe the audio
+  - sound event
+  - audio event
+  - locate sound
+  - locate the sound
+  - timestamp sound
+  - timestamped caption
+  - non-speech event
+  - background event
+  - where does the sound
+  - when does the sound
+  - remove the sound of
+  - extract the sound of
+  - mute the sound of
+  - reverb
+  - echo
+  - wind
+  - underwater
+  - music
+  - background music
+  - animal sound
+  - general sound
+  - acoustic scene
+  - crying
+  - shouting
+  - scream
+  - whisper
+negative_signals:
+  - keeping the background music unchanged
+  - keep the background music unchanged
+  - background music unchanged
+  - while keeping the background music
+  - preserving the background music
+  - preserve the background music
+required_evidence: [model_caption_segments, optional_flexsed_prior, optional_slice_audio_calls]
+workflow:
+  - build_candidate_event_labels_from_event_bank_instruction_and_planner_labels
+  - choose_model_only_or_optional_flexsed_prior_from_the_evidence_need
+  - run_perception_timestamped_caption_with_the_selected_backend_route
+  - use_slice_audio_diagnostics_or_per_segment_yes_no_review_for_ambiguous_model_only_event_boundaries
+  - pass_confirmed_caption_segments_to_artifact_ops_when_an_edit_needs_spans
+rationale: Open-ended audio caption and non-speech event localization can use the configured Omni model directly, with FlexSED as an optional concrete-event candidate prior.
+guardrails:
+  - event_label is required only when the request truly asks for a concrete audible event prior or direct FlexSED event detection; open-ended caption, quoted speech, speaker, accent, emotion, timbre, and other perceptual targets must keep their own typed target kind instead of inventing an event label.
+  - Slice-count shortfalls and needs_review are reviewable uncertainty by default, not automatic evidence invalidation. Block only explicit required evidence gaps, unknown provenance, contradictory values, or a local destructive edit that still lacks usable temporal boundaries.
+  - Use this for coarse timestamped description of general sound, environmental audio, music, acoustic effects, and open-ended non-speech event localization.
+  - Do not use timestamped captions as the sole boundary source for exact transcript content, quoted words, sentence/question/answer spans, speaker identity, speaker order, role/gender/age speaker selection, or speaker-scoped utterances; call speaker_attributed_review first.
+  - Caption segments may include speech, male/female speaker, question, or overlap labels, but those labels are descriptive context rather than precise speech/speaker evidence.
+  - If the target requires both speech/speaker constraints and acoustic/event/caption constraints, run both speaker_attributed_speech_span_grounding and this module, then reconcile/intersect spans before artifact_ops.
+  - FlexSED is an optional candidate prior for concrete audible events, not a prerequisite for timestamped captioning and not a degraded-mode marker when absent.
+  - Model-only events may drive destructive edits only after direct span evidence or a candidate rubric confirms usable local boundaries.
+  - If no candidate segments survive, build generic candidate windows from FlexSED/coarse segmentation/speaker or caption segments and ask the perception model a yes/no rubric per candidate segment; do not select whole audio by default.
+  - For exact speech words, speaker turns, or speaker identity, use speech perception or speaker_attributed_review instead.

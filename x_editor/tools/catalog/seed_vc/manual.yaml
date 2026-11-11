@@ -1,0 +1,56 @@
+tool_id: seed_vc
+mcp_tool_name: seed_vc.convert
+input_schema:
+  type: object
+  required:
+    - source_audio_path
+    - reference_audio_path
+    - output_path
+  properties:
+    source_audio_path:
+      type: string
+    reference_audio_path:
+      type: string
+    output_path:
+      type: string
+    diffusion_steps:
+      type: integer
+      default: 30
+      minimum: 1
+      maximum: 100
+    length_adjust:
+      type: number
+      default: 1.0
+      minimum: 0.5
+      maximum: 2.0
+    inference_cfg_rate:
+      type: number
+      default: 0.7
+      minimum: 0.0
+      maximum: 1.0
+output_schema:
+  type: object
+  required:
+    - output_audio_path
+  properties:
+    output_audio_path:
+      type: string
+    sample_rate:
+      type: integer
+    duration_seconds:
+      type: number
+defaults:
+  diffusion_steps: 30
+  length_adjust: 1.0
+  inference_cfg_rate: 0.7
+validation:
+  frontend_check:
+    - Converted speech should resemble the reference speaker.
+    - Spoken content should remain unchanged.
+    - No severe conversion artifacts should be introduced.
+examples:
+  - scenario: Convert source speaker to match provided reference voice.
+    arguments:
+      diffusion_steps: 30
+      length_adjust: 1.0
+      inference_cfg_rate: 0.7

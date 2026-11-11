@@ -1,0 +1,40 @@
+tool_id: flexsed
+display_name: FlexSED
+backend: JHU-LCAP/FlexSED
+category: perception
+purpose: >
+  Open-vocabulary sound event detection over an audio file. Use it to ground
+  non-speech or paralinguistic events into timestamp spans and heatmap evidence
+  before extraction, removal, muting, effects, or reconstruction.
+when_to_use:
+  - User asks to locate, extract, remove, mute, beep, preserve, or edit a named sound event such as door, dog, laughter, siren, music, applause, coughing, phone ring, radio noise, or underwater/background effects.
+  - Planner needs timestamp evidence for audio-caption/event grounding that cannot be obtained from ASR or speaker diarization.
+  - A downstream edit should only affect event-bearing spans while preserving the rest of the source audio.
+do_not_use_when:
+  - The target is exact word, phrase, speaker turn, or speaker identity; prefer Qwen3ASR, speaker_attributed_review, DiariZen, or artifact_ops transcript selectors.
+  - The instruction requires generating or editing audio; FlexSED only returns perception evidence.
+  - The event label is too abstract to hear directly, such as "make it better" or "important moment".
+inputs:
+  - audio_path
+  - events
+  - start_sec
+  - end_sec
+  - p
+  - threshold
+  - output_dir
+outputs:
+  - timestamps
+  - window_event_line
+  - window_event_summary
+  - heatmap_png
+  - heatmap_npy_scores
+  - frame_rate_hz
+cost:
+  gpu_required: true
+  expected_latency: medium
+constraints:
+  - Real inference requires an official FlexSED checkout and model/dependency environment; this wrapper does not vendor weights.
+  - Scores are probabilistic frame-level event evidence, not final edit decisions.
+  - Timestamp resolution follows the official plotting frame rate of 25 Hz, about 0.04 seconds per frame.
+  - Top-p window summaries rank only the supplied candidate event labels; they are not closed-set automatic audio captioning.
+  - Use verifier or human review for low-confidence, overlapping, or semantically broad event labels before destructive edits.

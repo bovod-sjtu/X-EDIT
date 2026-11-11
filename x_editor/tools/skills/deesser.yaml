@@ -1,0 +1,51 @@
+skill_id: deesser
+display_name: 齿音消除器
+source_mcp: ffmpeg
+tool_names: [deesser]
+
+description: 自动检测并削减过强的齿音（sibilance），处理 S、T、Sh 等高频摩擦音。
+detailed_capability: |
+  通过压缩 4kHz-10kHz 范围内的过强能量来消除刺耳齿音。
+  常用于：
+  - 人声后期处理中去除刺耳感
+  - 提升语音清晰度而不损失整体亮度
+
+dimensions: [timbre, noise]
+
+parameters:
+  - name: audio_path
+    type: string
+    required: true
+    description: 输入音频文件路径
+  - name: threshold
+    type: number
+    required: false
+    default: 0.01
+    description: 检测阈值，越小越敏感
+    constraints: "0.001 ~ 0.1"
+  - name: output_path
+    type: string
+    required: false
+    default: auto
+    description: 输出文件路径
+
+output:
+  type: audio_file
+  description: 去齿音后的音频文件
+
+execution_constraints:
+  should_run_before: [loudnorm]
+  should_run_after: [equalizer, bass_boost, pitch_shift_rubberband]
+  mutually_exclusive_with: []
+  can_repeat: false
+
+examples:
+  - scenario: "去除人声刺耳齿音"
+    parameters:
+      threshold: 0.008
+    expected_outcome: "S/T 音变得柔和，整体听感更平滑"
+
+instruction_mapping:
+  "timbre_qualities.removed contains 'harsh'": "推荐使用"
+  "effects.removed contains 'sibilance'": "threshold=0.005~0.01"
+  "notable_issues contains 'sibilance'": "threshold=0.005~0.01"

@@ -1,0 +1,43 @@
+tool_id: tse
+mcp_tool_name: tse.extract_target_speaker
+input_schema:
+  type: object
+  required:
+    - mixture_audio_path
+    - reference_audio_path
+    - output_path
+  properties:
+    mixture_audio_path:
+      type: string
+      description: Path to the mixed input audio.
+    reference_audio_path:
+      type: string
+      description: Reference enrollment audio for the target speaker.
+    output_path:
+      type: string
+      description: Output wav path for extracted target speech.
+    enroll_duration:
+      type: number
+      default: 5.0
+      description: Reference enrollment duration in seconds.
+output_schema:
+  type: object
+  required:
+    - target_audio_path
+  properties:
+    target_audio_path:
+      type: string
+    output_audio_path:
+      type: string
+defaults:
+  enroll_duration: 5.0
+validation:
+  frontend_check:
+    - Target output should contain the requested speaker and minimal leakage from other speakers.
+    - Target linguistic content should match the selected speaker segments.
+    - Output should be suitable for downstream VC/TTS/enhancement.
+examples:
+  - scenario: Extract target speaker using a reference enrollment clip.
+    arguments:
+      reference_audio_path: /path/to/ref.wav
+      enroll_duration: 5.0

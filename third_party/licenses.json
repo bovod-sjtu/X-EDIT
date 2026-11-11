@@ -1,0 +1,1117 @@
+{
+  "schema_version": 1,
+  "checked_date": "2026-10-11",
+  "scope": "Direct pinned dependencies and included components, not an exhaustive transitive-package legal review. Upstream declarations are not a compatibility certification.",
+  "entries": [
+    {
+      "kind": "model",
+      "name": "ASLP-lab/VoiceSculptor-VD",
+      "revision": "6d7a5573960727b00a5b8f3de032a22dfee7f16e",
+      "url": "https://huggingface.co/ASLP-lab/VoiceSculptor-VD",
+      "distributed": false,
+      "declared_license": "apache-2.0",
+      "license_name": null,
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "6bd3e836e8d03a2a94df0413adf655857db737e69398fc45d03d80f4359e7066",
+      "documents": [
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/ASLP-lab/VoiceSculptor-VD/resolve/6d7a5573960727b00a5b8f3de032a22dfee7f16e/README.md",
+          "sha256": "bb3a0c643f67d7ac9bec58064071344142183dd67062bc392819d9f29e9edd04",
+          "bytes": 6711
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "apache-2.0",
+      "scope": "historical_documentation_only_extension_reference_not_an_active_dependency"
+    },
+    {
+      "kind": "model",
+      "name": "BUT-FIT/SE-DiCoW",
+      "revision": "470fce9ffff844dd53a27751cdf6c6df9efecb39",
+      "url": "https://huggingface.co/BUT-FIT/SE-DiCoW",
+      "distributed": false,
+      "declared_license": "apache-2.0",
+      "license_name": null,
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "0d25e62ba93883448cddb59f5043c01cf987f33ab0ba48e47b17cf454532fe07",
+      "documents": [
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/BUT-FIT/SE-DiCoW/resolve/470fce9ffff844dd53a27751cdf6c6df9efecb39/README.md",
+          "sha256": "becd3765b672e9298b60aecff8389750ee35648c502688268051d4e0babfb737",
+          "bytes": 5038
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "apache-2.0",
+      "scope": "Separately downloaded weights and upstream code; not included in release"
+    },
+    {
+      "kind": "model",
+      "name": "BUT-FIT/diarizen-wavlm-large-s80-md",
+      "revision": "6285693ddd5b38e8229acb93f864f3d04a82bee1",
+      "url": "https://huggingface.co/BUT-FIT/diarizen-wavlm-large-s80-md",
+      "distributed": false,
+      "declared_license": "cc-by-nc-4.0",
+      "license_name": null,
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "3ef06dde0b09a3c42b3de4eb7ca8c9532164dd0965b95af70cdf58705ec39c42",
+      "documents": [
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/BUT-FIT/diarizen-wavlm-large-s80-md/resolve/6285693ddd5b38e8229acb93f864f3d04a82bee1/README.md",
+          "sha256": "1aec340051798bfa0362ef46a796a4590f734b142848c82a75431fbb6408ed46",
+          "bytes": 3794
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "cc-by-nc-4.0",
+      "scope": "historical_documentation_only_extension_reference_not_an_active_dependency"
+    },
+    {
+      "kind": "model",
+      "name": "BUT-FIT/diarizen-wavlm-large-s80-md-v2",
+      "revision": "f27b9ffbedcf422856d104ecee9b94be37ea578e",
+      "url": "https://huggingface.co/BUT-FIT/diarizen-wavlm-large-s80-md-v2",
+      "distributed": false,
+      "declared_license": "cc-by-nc-4.0",
+      "license_name": null,
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "d254b310ae12869f114a648af8a1abbe89edb2622624edb97279e5105d90966b",
+      "documents": [
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/BUT-FIT/diarizen-wavlm-large-s80-md-v2/resolve/f27b9ffbedcf422856d104ecee9b94be37ea578e/README.md",
+          "sha256": "5942849bf7805b054da7894939091d678e0d11651455e5b736cd31405f574d44",
+          "bytes": 3823
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "cc-by-nc-4.0",
+      "scope": "Separately downloaded weights and upstream code; not included in release"
+    },
+    {
+      "kind": "model",
+      "name": "HKUSTAudio/xcodec2",
+      "revision": "e412427ed30f0cf9d5e3c95562113deb10a32d03",
+      "url": "https://huggingface.co/HKUSTAudio/xcodec2",
+      "distributed": false,
+      "declared_license": "cc-by-nc-4.0",
+      "license_name": null,
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "4a3e090284b7b39013aae5ff9a49d8b679e486e5dfe8d977e7d38f6989ec8b13",
+      "documents": [
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/HKUSTAudio/xcodec2/resolve/e412427ed30f0cf9d5e3c95562113deb10a32d03/README.md",
+          "sha256": "6c06f0e7dc76d6558c62d7dac2a63252ca9e58c84887153fd17fd2597da96dd7",
+          "bytes": 2411
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "cc-by-nc-4.0",
+      "scope": "Separately downloaded weights and upstream code; not included in release"
+    },
+    {
+      "kind": "model",
+      "name": "Higobeatz/FlexSED",
+      "revision": "eefe52b7ad686a9bc9f1f5dd0803e2c52171e128",
+      "url": "https://huggingface.co/Higobeatz/FlexSED",
+      "distributed": false,
+      "declared_license": "mit",
+      "license_name": null,
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "6ceff2e0ce4e247cf4148a84e1cdc00c190fdfb1915ed986a8a44ac9b7205a0a",
+      "documents": [
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/Higobeatz/FlexSED/resolve/eefe52b7ad686a9bc9f1f5dd0803e2c52171e128/README.md",
+          "sha256": "d8d7a46d41a1a37fe4f0a5f637bf55c649310185329127d8a2204632e480be17",
+          "bytes": 24
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "mit",
+      "scope": "Separately downloaded weights and upstream code; not included in release"
+    },
+    {
+      "kind": "model",
+      "name": "IndexTeam/IndexTTS-2",
+      "revision": "740dcaff396282ffb241903d150ac011cd4b1ede",
+      "url": "https://huggingface.co/IndexTeam/IndexTTS-2",
+      "distributed": false,
+      "declared_license": null,
+      "license_name": null,
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "b9d9e60eee3eb225f6f838a6d52411ff7398e85d5e8a51aa8c1717fc3c1af481",
+      "documents": [
+        {
+          "file": "LICENSE.txt",
+          "url": "https://huggingface.co/IndexTeam/IndexTTS-2/resolve/740dcaff396282ffb241903d150ac011cd4b1ede/LICENSE.txt",
+          "sha256": "53875532237e0a97b17a41721556ff57e93193fc566e48c3a0febe6e35bb5343",
+          "bytes": 10554,
+          "license_label": "LicenseRef-bilibili-Model-Use"
+        },
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/IndexTeam/IndexTTS-2/resolve/740dcaff396282ffb241903d150ac011cd4b1ede/README.md",
+          "sha256": "3e3225d4ec5fd95737613ec0e3f8ed64a5cde48a435ac21bce29b5ad4abc27a2",
+          "bytes": 2511
+        }
+      ],
+      "status": "license_document_fetched; card_license_field_missing",
+      "checked_date": "2026-09-30",
+      "license_summary": "LicenseRef-bilibili-Model-Use",
+      "scope": "Separately downloaded weights and upstream code; not included in release"
+    },
+    {
+      "kind": "model",
+      "name": "OpenMOSS-Team/MOSS-Transcribe-Diarize",
+      "revision": "4a1af868018e7974197f4f018730758012b28c27",
+      "url": "https://huggingface.co/OpenMOSS-Team/MOSS-Transcribe-Diarize",
+      "distributed": false,
+      "declared_license": "apache-2.0",
+      "license_name": null,
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "6547e6390efb871679e3726535275084958092bb546d0ce73d998ee55fe84edb",
+      "documents": [
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/OpenMOSS-Team/MOSS-Transcribe-Diarize/resolve/4a1af868018e7974197f4f018730758012b28c27/README.md",
+          "sha256": "95180d57058e1893580c765539bd07691ed5e3629b0841bce9f3e5fe4d936b15",
+          "bytes": 13798
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "apache-2.0",
+      "scope": "historical_documentation_only_extension_reference_not_an_active_dependency"
+    },
+    {
+      "kind": "model",
+      "name": "Plachta/Seed-VC",
+      "revision": "257283f9f41585055e8f858fba4fd044e5caed6e",
+      "url": "https://huggingface.co/Plachta/Seed-VC",
+      "distributed": false,
+      "declared_license": "gpl-3.0",
+      "license_name": null,
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "59d8784e00b930d5e2e7d844820590c39430bc4110cbee381992035a5c016609",
+      "documents": [
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/Plachta/Seed-VC/resolve/257283f9f41585055e8f858fba4fd044e5caed6e/README.md",
+          "sha256": "a79f0b84971e7383032ef525691ecda81aa76f6ec1070ce1e072ac2956d4593e",
+          "bytes": 53
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "gpl-3.0",
+      "scope": "Separately downloaded weights and upstream code; not included in release"
+    },
+    {
+      "kind": "model",
+      "name": "Politrees/UVR_resources",
+      "revision": "929e057b81aa49bc2e6490bef8671f47b2c120f6",
+      "url": "https://huggingface.co/Politrees/UVR_resources",
+      "distributed": false,
+      "declared_license": "mit",
+      "license_name": null,
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "1a91a025ce6335b13efea1ea6f8c5c8aa6ff6df5865cb66ed4e7039c66184a55",
+      "documents": [
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/Politrees/UVR_resources/resolve/929e057b81aa49bc2e6490bef8671f47b2c120f6/README.md",
+          "sha256": "eb16f453a1004e65db159622119be8896e9ce8cbada9df704652ebb58929af16",
+          "bytes": 292
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "mit",
+      "scope": "Separately downloaded weights and upstream code; not included in release",
+      "note": "Collection card declares MIT. This is not verification of checkpoint-specific rights for every RoFormer model in the collection."
+    },
+    {
+      "kind": "model",
+      "name": "Qwen/Qwen2.5-Omni-3B",
+      "revision": "f75b40e3da2003cdd6e1829b1f420ca70797c34e",
+      "url": "https://huggingface.co/Qwen/Qwen2.5-Omni-3B",
+      "distributed": false,
+      "declared_license": "other",
+      "license_name": "qwen-research",
+      "license_link": "LICENSE",
+      "gated": false,
+      "metadata_sha256": "5dcdd88587799c9c3c869b17a01e1a57c9168a1c1bfe3561dc5c36bda06b4742",
+      "documents": [
+        {
+          "file": "LICENSE",
+          "url": "https://huggingface.co/Qwen/Qwen2.5-Omni-3B/resolve/f75b40e3da2003cdd6e1829b1f420ca70797c34e/LICENSE",
+          "sha256": "ae8ef9d3fb476f735d9b9abeaab73b7f778b121c77427cd918ec3da01eefbc44",
+          "bytes": 7387,
+          "license_label": "LicenseRef-Qwen-Research"
+        },
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/Qwen/Qwen2.5-Omni-3B/resolve/f75b40e3da2003cdd6e1829b1f420ca70797c34e/README.md",
+          "sha256": "9b436a82898fa8f1e8559d1aea114052e7d471c4a5319676e033cbacc08ebcc1",
+          "bytes": 36788
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "LicenseRef-Qwen-Research",
+      "scope": "Separately downloaded weights and upstream code; not included in release"
+    },
+    {
+      "kind": "model",
+      "name": "Qwen/Qwen3-ASR-1.7B",
+      "revision": "7278e1e70fe206f11671096ffdd38061171dd6e5",
+      "url": "https://huggingface.co/Qwen/Qwen3-ASR-1.7B",
+      "distributed": false,
+      "declared_license": "apache-2.0",
+      "license_name": null,
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "2c928d279503d08c35899097a3cc8201b7641e641edbf0219bc357d5b4720dc3",
+      "documents": [
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/Qwen/Qwen3-ASR-1.7B/resolve/7278e1e70fe206f11671096ffdd38061171dd6e5/README.md",
+          "sha256": "5058416891bc47a2051557765997e8c42f8eb78a0e33c3e775bd17d4b0ba4d50",
+          "bytes": 57456
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "apache-2.0",
+      "scope": "Separately downloaded weights and upstream code; not included in release"
+    },
+    {
+      "kind": "model",
+      "name": "Qwen/Qwen3-ForcedAligner-0.6B",
+      "revision": "c7cbfc2048c462b0d63a45797104fc9db3ad62b7",
+      "url": "https://huggingface.co/Qwen/Qwen3-ForcedAligner-0.6B",
+      "distributed": false,
+      "declared_license": "apache-2.0",
+      "license_name": null,
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "180f8ed65e79db061af3e9d8dcaafbdb757241d9021132ed963537f1adc87087",
+      "documents": [
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/Qwen/Qwen3-ForcedAligner-0.6B/resolve/c7cbfc2048c462b0d63a45797104fc9db3ad62b7/README.md",
+          "sha256": "5058416891bc47a2051557765997e8c42f8eb78a0e33c3e775bd17d4b0ba4d50",
+          "bytes": 57456
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "apache-2.0",
+      "scope": "Separately downloaded weights and upstream code; not included in release"
+    },
+    {
+      "kind": "model",
+      "name": "Qwen/Qwen3-Omni-30B-A3B-Instruct",
+      "revision": "26291f793822fb6be9555850f06dfe95f2d7e695",
+      "url": "https://huggingface.co/Qwen/Qwen3-Omni-30B-A3B-Instruct",
+      "distributed": false,
+      "declared_license": "other",
+      "license_name": "apache-2.0",
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "d4d1b0f17dab0b1604a185457412895904eb7c639ae7109e8d5d2a854cf8605b",
+      "documents": [
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/Qwen/Qwen3-Omni-30B-A3B-Instruct/resolve/26291f793822fb6be9555850f06dfe95f2d7e695/README.md",
+          "sha256": "0e44065c4c4a27071f7239afd5b5a33af5bc2e437dd7ea9950e51aafabfde3df",
+          "bytes": 90295
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "apache-2.0",
+      "scope": "Separately downloaded weights and upstream code; not included in release",
+      "note": "Pinned card declares license=other and license_name=apache-2.0; no standalone license file returned in the pinned file listing."
+    },
+    {
+      "kind": "model",
+      "name": "Qwen/Qwen3-TTS-12Hz-1.7B-Base",
+      "revision": "fd4b254389122332181a7c3db7f27e918eec64e3",
+      "url": "https://huggingface.co/Qwen/Qwen3-TTS-12Hz-1.7B-Base",
+      "distributed": false,
+      "declared_license": "apache-2.0",
+      "license_name": null,
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "64d54fe37e363d8f90338a556922849f9793c86d768d1fffc38d6eb82e368960",
+      "documents": [
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/Qwen/Qwen3-TTS-12Hz-1.7B-Base/resolve/fd4b254389122332181a7c3db7f27e918eec64e3/README.md",
+          "sha256": "621b7e88f1867bc03d817176fc1f7f55f4b5a70654b2a07fdcda1e169efb024b",
+          "bytes": 57817
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "apache-2.0",
+      "scope": "Separately downloaded weights and upstream code; not included in release"
+    },
+    {
+      "kind": "model",
+      "name": "Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice",
+      "revision": "0c0e3051f131929182e2c023b9537f8b1c68adfe",
+      "url": "https://huggingface.co/Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice",
+      "distributed": false,
+      "declared_license": "apache-2.0",
+      "license_name": null,
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "617ec0ecbaa4f97276e369134f65ff1546543c41382ee950eb34a34cb01535e2",
+      "documents": [
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice/resolve/0c0e3051f131929182e2c023b9537f8b1c68adfe/README.md",
+          "sha256": "64f65e809b51cc0c35f393fbbfcc2d735c0cb3fdbbc6f3fdc4a5e6ce55e9d088",
+          "bytes": 57846
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "apache-2.0",
+      "scope": "Separately downloaded weights and upstream code; not included in release"
+    },
+    {
+      "kind": "model",
+      "name": "Qwen/Qwen3-TTS-Tokenizer-12Hz",
+      "revision": "7dd38ad4e9bad454aae9cd937d0cd577604fe229",
+      "url": "https://huggingface.co/Qwen/Qwen3-TTS-Tokenizer-12Hz",
+      "distributed": false,
+      "declared_license": "apache-2.0",
+      "license_name": null,
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "8f9f9c2200cf49b45cd8940e24c24d6b46bb64ef39a7a6c1c4d73fb96ac19bc4",
+      "documents": [
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/Qwen/Qwen3-TTS-Tokenizer-12Hz/resolve/7dd38ad4e9bad454aae9cd937d0cd577604fe229/README.md",
+          "sha256": "1d9016fbb07873cd720d008423c3da275eac7a20c3997a525594025608d3e1cf",
+          "bytes": 3482
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "apache-2.0",
+      "scope": "Separately downloaded weights and upstream code; not included in release"
+    },
+    {
+      "kind": "model",
+      "name": "Qwen/Qwen3.8-27B",
+      "revision": "1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0",
+      "url": "https://huggingface.co/Qwen/Qwen3.8-27B",
+      "distributed": false,
+      "declared_license": "apache-2.0",
+      "license_name": null,
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "20a7828aadb04ca2efc11efe9b70006703979a7df7afcd2fe28386e564a0c4ef",
+      "documents": [
+        {
+          "file": "LICENSE",
+          "url": "https://huggingface.co/Qwen/Qwen3.8-27B/resolve/1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0/LICENSE",
+          "sha256": "bbedc3fda3305820b977265f01b8619d87570a6739de3a5582c3464840f1e57a",
+          "bytes": 11544,
+          "license_label": "Apache-2.0"
+        },
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/Qwen/Qwen3.8-27B/resolve/1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0/README.md",
+          "sha256": "57e4bdb258ee1a7d2635c5174ebd4e56abe392505cdb5f8bbb356b0dc4293641",
+          "bytes": 65012
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "Apache-2.0",
+      "scope": "Separately downloaded weights and upstream code; not included in release"
+    },
+    {
+      "kind": "model",
+      "name": "SWivid/F5-TTS",
+      "revision": "84e5a410d9cead4de2f847e7c9369a6440bdfaca",
+      "url": "https://huggingface.co/SWivid/F5-TTS",
+      "distributed": false,
+      "declared_license": "cc-by-nc-4.0",
+      "license_name": null,
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "c4dab76b89d1840740c60307f0bb1a75a7cdfb74bf097a184a03cb0b2c3e47fd",
+      "documents": [
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/SWivid/F5-TTS/resolve/84e5a410d9cead4de2f847e7c9369a6440bdfaca/README.md",
+          "sha256": "cf3354feaf4020527b3642b12a5a382de13d0af6bc99e8d37bee84425c1ca224",
+          "bytes": 630
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "cc-by-nc-4.0",
+      "scope": "Separately downloaded weights and upstream code; not included in release"
+    },
+    {
+      "kind": "model",
+      "name": "alibabasglab/MossFormer2_SE_48K",
+      "revision": "eff8c97925c8bec812af707814b3e5d777fd4503",
+      "url": "https://huggingface.co/alibabasglab/MossFormer2_SE_48K",
+      "distributed": false,
+      "declared_license": "apache-2.0",
+      "license_name": null,
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "3e3cd7dccfabb5be4cd48ad9982119037f900128002697ef4043b159a9a8a23d",
+      "documents": [
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/alibabasglab/MossFormer2_SE_48K/resolve/eff8c97925c8bec812af707814b3e5d777fd4503/README.md",
+          "sha256": "62c405e115b2f3f948730fc2574c9a0019da3c12a0efef32c7d3873b16ac460e",
+          "bytes": 2176
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "apache-2.0",
+      "scope": "Separately downloaded weights and upstream code; not included in release"
+    },
+    {
+      "kind": "model",
+      "name": "amphion/MaskGCT",
+      "revision": "265c6cef07625665d0c28d2faafb1415562379dc",
+      "url": "https://huggingface.co/amphion/MaskGCT",
+      "distributed": false,
+      "declared_license": "cc-by-nc-4.0",
+      "license_name": null,
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "07e12921a3254f466aed5c7f0f6bf1437ff44b8459f06c1d9c0ccf2e10c6b9e3",
+      "documents": [
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/amphion/MaskGCT/resolve/265c6cef07625665d0c28d2faafb1415562379dc/README.md",
+          "sha256": "8dfdbd32898b8b260f6cf63647ac1ae98aa6779f3b49cc4ff32059920e712cdf",
+          "bytes": 6490
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "cc-by-nc-4.0",
+      "scope": "Separately downloaded weights and upstream code; not included in release"
+    },
+    {
+      "kind": "model",
+      "name": "charactr/vocos-mel-24khz",
+      "revision": "0feb3fdd929bcd6649e0e7c5a688cf7dd012ef21",
+      "url": "https://huggingface.co/charactr/vocos-mel-24khz",
+      "distributed": false,
+      "declared_license": "mit",
+      "license_name": null,
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "44c168e10961e6545cc2fb81f4e82d919b0d1edd5128d713fa64675feaca9472",
+      "documents": [
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/charactr/vocos-mel-24khz/resolve/0feb3fdd929bcd6649e0e7c5a688cf7dd012ef21/README.md",
+          "sha256": "5858497d76d58914b29958a0f448e7b4fd3bb54940100baaa7520d4a56d8b3df",
+          "bytes": 1830
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "mit",
+      "scope": "Separately downloaded weights and upstream code; not included in release"
+    },
+    {
+      "kind": "model",
+      "name": "facebook/w2v-bert-2.0",
+      "revision": "da985ba0987f70aaeb84a80f2851cfac8c697a7b",
+      "url": "https://huggingface.co/facebook/w2v-bert-2.0",
+      "distributed": false,
+      "declared_license": "mit",
+      "license_name": null,
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "36e22e166e495b1eff6195687673c880eb21bbe39a793a0551ecbee964f1ff95",
+      "documents": [
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/facebook/w2v-bert-2.0/resolve/da985ba0987f70aaeb84a80f2851cfac8c697a7b/README.md",
+          "sha256": "478afeacb3b4ce0d86b361f099416d28a7e7673ade31775c0f85f396979b7fc2",
+          "bytes": 4792
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "mit",
+      "scope": "Separately downloaded weights and upstream code; not included in release"
+    },
+    {
+      "kind": "model",
+      "name": "funasr/campplus",
+      "revision": "e4b6ede7ce16997aff4ae69fbca1f0175e2afede",
+      "url": "https://huggingface.co/funasr/campplus",
+      "distributed": false,
+      "declared_license": "apache-2.0",
+      "license_name": null,
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "ec4a60e24d0301c1dc8dc8d4595088b5ca7264281298782e5842eb63c1b380a9",
+      "documents": [
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/funasr/campplus/resolve/e4b6ede7ce16997aff4ae69fbca1f0175e2afede/README.md",
+          "sha256": "c6025ccc42e290640f44e06f0742c584b99afe738bb819d74889330c692446f9",
+          "bytes": 2020
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "apache-2.0",
+      "scope": "Separately downloaded weights and upstream code; not included in release"
+    },
+    {
+      "kind": "model",
+      "name": "google-t5/t5-base",
+      "revision": "a9723ea7f1b39c1eae772870f3b547bf6ef7e6c1",
+      "url": "https://huggingface.co/google-t5/t5-base",
+      "distributed": false,
+      "declared_license": "apache-2.0",
+      "license_name": null,
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "1942c9532b52b49d7509fb3328f333eabd161560729013ed91c112fdbc4d3293",
+      "documents": [
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/google-t5/t5-base/resolve/a9723ea7f1b39c1eae772870f3b547bf6ef7e6c1/README.md",
+          "sha256": "c43c23f205b6839a6adb10f0757265f76c1c6f96b7793a4e53582d3a61cbfb23",
+          "bytes": 8477
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "apache-2.0",
+      "scope": "Separately downloaded weights and upstream code; not included in release"
+    },
+    {
+      "kind": "model",
+      "name": "laion/clap-htsat-unfused",
+      "revision": "8fa0f1c6d0433df6e97c127f64b2a1d6c0dcda8a",
+      "url": "https://huggingface.co/laion/clap-htsat-unfused",
+      "distributed": false,
+      "declared_license": "apache-2.0",
+      "license_name": null,
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "5f36189a6ff3afa29e8cf54b7942e435b50d9f5eee78b1a7bcf26936a350e4dc",
+      "documents": [
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/laion/clap-htsat-unfused/resolve/8fa0f1c6d0433df6e97c127f64b2a1d6c0dcda8a/README.md",
+          "sha256": "3542c5c4ce25e7868f2c9c97c16229d876bd8d02049e1e0f4d7675da0e5b5db6",
+          "bytes": 4454
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "apache-2.0",
+      "scope": "Separately downloaded weights and upstream code; not included in release"
+    },
+    {
+      "kind": "model",
+      "name": "mrfakename/sam-audio-large",
+      "revision": "497809f191dd4f673a2c93557176387cf2a06cf2",
+      "url": "https://huggingface.co/mrfakename/sam-audio-large",
+      "distributed": false,
+      "declared_license": "other",
+      "license_name": "sam-license",
+      "license_link": "LICENSE",
+      "gated": false,
+      "metadata_sha256": "9d01882f9879db53a4dcec19dcc7e366265cd9c607a5442d35423091168728f4",
+      "documents": [
+        {
+          "file": "LICENSE",
+          "url": "https://huggingface.co/mrfakename/sam-audio-large/resolve/497809f191dd4f673a2c93557176387cf2a06cf2/LICENSE",
+          "sha256": "4dea99bfaa016e21bc860d73f344236bd1e5c4977d1a9a8fd32f822b500ae1be",
+          "bytes": 7353,
+          "license_label": "LicenseRef-SAM"
+        },
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/mrfakename/sam-audio-large/resolve/497809f191dd4f673a2c93557176387cf2a06cf2/README.md",
+          "sha256": "3532c31c353bcea7a18cd999e0f8988b1a4b6e9a44e4a4bf5d36220e33f67eb8",
+          "bytes": 6372
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "LicenseRef-SAM",
+      "scope": "historical_documentation_only_extension_reference_not_an_active_dependency",
+      "note": "Mirror includes SAM License; neither checkpoint identity with the official repository nor mirror authority is established by this inventory. Official model: https://huggingface.co/facebook/sam-audio-large . No weight redistribution by X-Edit."
+    },
+    {
+      "kind": "model",
+      "name": "nvidia/bigvgan_v2_22khz_80band_256x",
+      "revision": "633ff708ed5b74903e86ff1298cf4a98e921c513",
+      "url": "https://huggingface.co/nvidia/bigvgan_v2_22khz_80band_256x",
+      "distributed": false,
+      "declared_license": "mit",
+      "license_name": null,
+      "license_link": "https://huggingface.co/nvidia/BigVGAN/blob/main/LICENSE",
+      "gated": false,
+      "metadata_sha256": "5a529830a352564a7ecb438e44e604aea421f94bb43f32799e298ee20ea89f40",
+      "documents": [
+        {
+          "file": "LICENSE",
+          "url": "https://huggingface.co/nvidia/bigvgan_v2_22khz_80band_256x/resolve/633ff708ed5b74903e86ff1298cf4a98e921c513/LICENSE",
+          "sha256": "90459cd52fc41bd723df7c0c76fac1e4dd60e6bfd644a7e2a93f325bed4f6d95",
+          "bytes": 1076,
+          "license_label": "MIT"
+        },
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/nvidia/bigvgan_v2_22khz_80band_256x/resolve/633ff708ed5b74903e86ff1298cf4a98e921c513/README.md",
+          "sha256": "e70574f9ca1a0fac3a1faea840898c4c814552e46f5c160639db1397f9c7ddf4",
+          "bytes": 8038
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "MIT",
+      "scope": "Separately downloaded weights and upstream code; not included in release"
+    },
+    {
+      "kind": "model",
+      "name": "openai/whisper-small",
+      "revision": "973afd24965f72e36ca33b3055d56a652f456b4d",
+      "url": "https://huggingface.co/openai/whisper-small",
+      "distributed": false,
+      "declared_license": "apache-2.0",
+      "license_name": null,
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "39ac205885f42ce3d0caa1b0c6bb001d3638c63d41a38753164fa46556dd3c7f",
+      "documents": [
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/openai/whisper-small/resolve/973afd24965f72e36ca33b3055d56a652f456b4d/README.md",
+          "sha256": "967fa44eefe5d3436e040b0f171fc54da67aad96923bae10af37dac9be5bb6b0",
+          "bytes": 20153
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "apache-2.0",
+      "scope": "Separately downloaded weights and upstream code; not included in release"
+    },
+    {
+      "kind": "model",
+      "name": "pyannote/wespeaker-voxceleb-resnet34-LM",
+      "revision": "837717ddb9ff5507820346191109dc79c958d614",
+      "url": "https://huggingface.co/pyannote/wespeaker-voxceleb-resnet34-LM",
+      "distributed": false,
+      "declared_license": "cc-by-4.0",
+      "license_name": null,
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "985efd7c602457823c602351a1fc3d008f4210056ebc69ed67ae3fb961833cd1",
+      "documents": [
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/pyannote/wespeaker-voxceleb-resnet34-LM/resolve/837717ddb9ff5507820346191109dc79c958d614/README.md",
+          "sha256": "ffc47d6f225a9341771a8304c0b8a354f706184956737661cb2c695e310551e3",
+          "bytes": 3319
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "cc-by-4.0",
+      "scope": "Separately downloaded weights and upstream code; not included in release"
+    },
+    {
+      "kind": "model",
+      "name": "tencent/AuK",
+      "revision": "790742b71a4430120daf2b2099192abae449eb9f",
+      "url": "https://huggingface.co/tencent/AuK",
+      "distributed": false,
+      "declared_license": "mit",
+      "license_name": null,
+      "license_link": null,
+      "gated": false,
+      "metadata_sha256": "10ea36e06582b27e5d9d300fa61d3173cfbfa8a28a5006748d2a456908a1f211",
+      "documents": [
+        {
+          "file": "LICENSE",
+          "url": "https://huggingface.co/tencent/AuK/resolve/790742b71a4430120daf2b2099192abae449eb9f/LICENSE",
+          "sha256": "40eebc5270decd68865db9efad73c7fa86e1ab2ebe815195bf3c5903375ad2a1",
+          "bytes": 1653,
+          "license_label": "MIT"
+        },
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/tencent/AuK/resolve/790742b71a4430120daf2b2099192abae449eb9f/README.md",
+          "sha256": "2678b9160fdc23bd53d9e88b0a7586702d5704fff447cf0954d2dbb52be8e355",
+          "bytes": 10096
+        }
+      ],
+      "status": "declared_upstream",
+      "checked_date": "2026-09-30",
+      "license_summary": "MIT",
+      "scope": "Separately downloaded weights and upstream code; not included in release"
+    },
+    {
+      "kind": "source",
+      "name": "AuK",
+      "revision": "d9f30ffe4231dbc90b48cc83a35d310fece0b060",
+      "url": "https://github.com/Tencent-Hunyuan/AuK",
+      "distributed": false,
+      "documents": [
+        {
+          "file": "LICENSE",
+          "url": "https://raw.githubusercontent.com/Tencent-Hunyuan/AuK/d9f30ffe4231dbc90b48cc83a35d310fece0b060/LICENSE",
+          "sha256": "40eebc5270decd68865db9efad73c7fa86e1ab2ebe815195bf3c5903375ad2a1",
+          "bytes": 1653,
+          "license_label": "MIT"
+        }
+      ],
+      "status": "license_document_fetched",
+      "checked_date": "2026-09-30",
+      "license_summary": "MIT",
+      "scope": "Separately fetched source; not included in release"
+    },
+    {
+      "kind": "source",
+      "name": "DiCoW",
+      "revision": "801e2130d00142a7da5845754f87b97550053a75",
+      "url": "https://github.com/BUTSpeechFIT/DiCoW.git",
+      "distributed": false,
+      "documents": [
+        {
+          "file": "LICENSE",
+          "url": "https://raw.githubusercontent.com/BUTSpeechFIT/DiCoW/801e2130d00142a7da5845754f87b97550053a75/LICENSE",
+          "sha256": "35353edb5f2e92d177849ef609f72e0e4c22377a0854439294c7e68a8cf2e7c6",
+          "bytes": 11344,
+          "license_label": "Apache-2.0"
+        }
+      ],
+      "status": "license_document_fetched",
+      "checked_date": "2026-09-30",
+      "license_summary": "Apache-2.0",
+      "scope": "Separately fetched source; not included in release"
+    },
+    {
+      "kind": "source",
+      "name": "DiariZen",
+      "revision": "a60b18151dbbe246e4199d8ef5cd2ece3872ea94",
+      "url": "https://github.com/BUTSpeechFIT/DiariZen.git",
+      "distributed": false,
+      "documents": [
+        {
+          "file": "LICENSE",
+          "url": "https://raw.githubusercontent.com/BUTSpeechFIT/DiariZen/a60b18151dbbe246e4199d8ef5cd2ece3872ea94/LICENSE",
+          "sha256": "98ad14ba39e3d59dde3a6c237197510e666a3591cee74bb5edb213f21ddf037e",
+          "bytes": 1071,
+          "license_label": "MIT"
+        }
+      ],
+      "status": "license_document_fetched",
+      "checked_date": "2026-09-30",
+      "license_summary": "MIT",
+      "scope": "Separately fetched source; not included in release"
+    },
+    {
+      "kind": "source",
+      "name": "FlexSED",
+      "revision": "89aac3351e807de57c4fe3148d982922a3318e46",
+      "url": "https://github.com/JHU-LCAP/FlexSED.git",
+      "distributed": false,
+      "documents": [
+        {
+          "file": "LICENSE",
+          "url": "https://raw.githubusercontent.com/JHU-LCAP/FlexSED/89aac3351e807de57c4fe3148d982922a3318e46/LICENSE",
+          "sha256": "1265290fd05283ade80b96e9101fc5e71ed87ed984b36993eb88a8932674b26a",
+          "bytes": 1067,
+          "license_label": "MIT"
+        }
+      ],
+      "status": "license_document_fetched",
+      "checked_date": "2026-09-30",
+      "license_summary": "MIT",
+      "scope": "Separately fetched source; not included in release"
+    },
+    {
+      "kind": "source",
+      "name": "MOSS-Transcribe-Diarize",
+      "revision": "9990574e6ac62390a21bcce25a914d66ac92c25e",
+      "url": "https://github.com/OpenMOSS/MOSS-Transcribe-Diarize.git",
+      "distributed": false,
+      "documents": [
+        {
+          "file": "LICENSE",
+          "url": "https://raw.githubusercontent.com/OpenMOSS/MOSS-Transcribe-Diarize/9990574e6ac62390a21bcce25a914d66ac92c25e/LICENSE",
+          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+          "bytes": 11357,
+          "license_label": "Apache-2.0"
+        }
+      ],
+      "status": "license_document_fetched",
+      "checked_date": "2026-09-30",
+      "license_summary": "Apache-2.0",
+      "scope": "Separately fetched source; not included in release"
+    },
+    {
+      "kind": "source",
+      "name": "SAM-Audio",
+      "revision": "bb4c6999d2677c7402360e426afc01ddfad6dce0",
+      "url": "https://github.com/facebookresearch/sam-audio.git",
+      "distributed": false,
+      "documents": [
+        {
+          "file": "LICENSE",
+          "url": "https://raw.githubusercontent.com/facebookresearch/sam-audio/bb4c6999d2677c7402360e426afc01ddfad6dce0/LICENSE",
+          "sha256": "4dea99bfaa016e21bc860d73f344236bd1e5c4977d1a9a8fd32f822b500ae1be",
+          "bytes": 7353,
+          "license_label": "LicenseRef-SAM"
+        }
+      ],
+      "status": "license_document_fetched",
+      "checked_date": "2026-09-30",
+      "license_summary": "LicenseRef-SAM",
+      "scope": "historical_documentation_only_extension_reference_not_an_active_dependency"
+    },
+    {
+      "kind": "source",
+      "name": "dacvae",
+      "revision": "414c20785fc3a28373073ea8ef7a1316eeeaca6e",
+      "url": "https://github.com/facebookresearch/dacvae.git",
+      "distributed": false,
+      "documents": [
+        {
+          "file": "LICENSE",
+          "url": "https://raw.githubusercontent.com/facebookresearch/dacvae/414c20785fc3a28373073ea8ef7a1316eeeaca6e/LICENSE",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+          "bytes": 11358,
+          "license_label": "Apache-2.0"
+        }
+      ],
+      "status": "license_document_fetched",
+      "checked_date": "2026-09-30",
+      "license_summary": "Apache-2.0",
+      "scope": "historical_documentation_only_extension_reference_not_an_active_dependency"
+    },
+    {
+      "kind": "source",
+      "name": "imagebind",
+      "revision": "53680b02d7e37b19b124fa37bae4b6c98c38f5be",
+      "url": "https://github.com/facebookresearch/ImageBind.git",
+      "distributed": false,
+      "documents": [
+        {
+          "file": "LICENSE",
+          "url": "https://raw.githubusercontent.com/facebookresearch/ImageBind/53680b02d7e37b19b124fa37bae4b6c98c38f5be/LICENSE",
+          "sha256": "9e502ba75fd0fd30cea5497b438a4bc12f07f02bc932a7a6041fd6a18b8f46a0",
+          "bytes": 20848,
+          "license_label": "CC-BY-NC-SA-4.0"
+        }
+      ],
+      "status": "license_document_fetched",
+      "checked_date": "2026-09-30",
+      "license_summary": "CC-BY-NC-SA-4.0",
+      "scope": "historical_documentation_only_extension_reference_not_an_active_dependency"
+    },
+    {
+      "kind": "source",
+      "name": "laion-clap",
+      "revision": "b85cb7ecac0af7d064cbf03ebd990e709e959fe7",
+      "url": "https://github.com/lematt1991/CLAP.git",
+      "distributed": false,
+      "documents": [
+        {
+          "file": "LICENSE",
+          "url": "https://raw.githubusercontent.com/lematt1991/CLAP/b85cb7ecac0af7d064cbf03ebd990e709e959fe7/LICENSE",
+          "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
+          "bytes": 7048,
+          "license_label": "CC0-1.0"
+        }
+      ],
+      "status": "license_document_fetched",
+      "checked_date": "2026-09-30",
+      "license_summary": "CC0-1.0",
+      "scope": "historical_documentation_only_extension_reference_not_an_active_dependency"
+    },
+    {
+      "kind": "source",
+      "name": "perception-models",
+      "revision": "e72b6810b1133e1c879f2cc965d276eb73803f1f",
+      "url": "https://github.com/facebookresearch/perception_models",
+      "distributed": false,
+      "documents": [
+        {
+          "file": "LICENSE.PE",
+          "url": "https://raw.githubusercontent.com/facebookresearch/perception_models/e72b6810b1133e1c879f2cc965d276eb73803f1f/LICENSE.PE",
+          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+          "bytes": 11357,
+          "license_label": "Apache-2.0"
+        },
+        {
+          "file": "LICENSE.PLM",
+          "url": "https://raw.githubusercontent.com/facebookresearch/perception_models/e72b6810b1133e1c879f2cc965d276eb73803f1f/LICENSE.PLM",
+          "sha256": "b9ea4f505c0fac36ad16015fc673fb233f30beca3b0f2f0ad0de4d119510be85",
+          "bytes": 11529,
+          "license_label": "LicenseRef-FAIR-Research"
+        }
+      ],
+      "status": "license_documents_fetched",
+      "checked_date": "2026-09-30",
+      "license_summary": "Apache-2.0; LicenseRef-FAIR-Research",
+      "scope": "historical_documentation_only_extension_reference_not_an_active_dependency"
+    },
+    {
+      "kind": "source",
+      "name": "pytorchvideo",
+      "revision": "6cdc929315aab1b5674b6dcf73b16ec99147735f",
+      "url": "https://github.com/facebookresearch/pytorchvideo.git",
+      "distributed": false,
+      "documents": [
+        {
+          "file": "LICENSE",
+          "url": "https://raw.githubusercontent.com/facebookresearch/pytorchvideo/6cdc929315aab1b5674b6dcf73b16ec99147735f/LICENSE",
+          "sha256": "eb2e7c520ac305e46ca8345c4efa1f77669a77779fd6f53acd3a9616f2144518",
+          "bytes": 10242,
+          "license_label": "Apache-2.0"
+        }
+      ],
+      "status": "license_document_fetched",
+      "checked_date": "2026-09-30",
+      "license_summary": "Apache-2.0",
+      "scope": "historical_documentation_only_extension_reference_not_an_active_dependency"
+    },
+    {
+      "kind": "service_asset",
+      "name": "service_assets/roformer/download_checks.json",
+      "url": "https://raw.githubusercontent.com/TRvlvr/application_data/3826b05b570dbd4fbedbc807758803b35348ba1b/filelists/download_checks.json",
+      "sha256": "d3622e1fa19c161d3cf704927711b453d593a3f1eb0f2e0838c3136907935151",
+      "distributed": false,
+      "license_summary": "Upstream metadata/configuration; no checkpoint license inferred",
+      "status": "source_and_hash_recorded; separate_license_not_established",
+      "delivery": "Fetched and SHA256-verified at deployment; not redistributed"
+    },
+    {
+      "kind": "service_asset",
+      "name": "service_assets/roformer/vr_model_data.json",
+      "url": "https://raw.githubusercontent.com/TRvlvr/application_data/3826b05b570dbd4fbedbc807758803b35348ba1b/vr_model_data/model_data_new.json",
+      "sha256": "6a2021b9aa355c10f845b68c73944d47bd9e1fdf37b8a584b14ce8f88b09bb2f",
+      "distributed": false,
+      "license_summary": "Upstream metadata/configuration; no checkpoint license inferred",
+      "status": "source_and_hash_recorded; separate_license_not_established",
+      "delivery": "Fetched and SHA256-verified at deployment; not redistributed"
+    },
+    {
+      "kind": "service_asset",
+      "name": "service_assets/roformer/mdx_model_data.json",
+      "url": "https://raw.githubusercontent.com/TRvlvr/application_data/3826b05b570dbd4fbedbc807758803b35348ba1b/mdx_model_data/model_data_new.json",
+      "sha256": "1aca8f9bcc57233bc714029663a9ec2345d9c7721f91e5e08f46392a879c6a9a",
+      "distributed": false,
+      "license_summary": "Upstream metadata/configuration; no checkpoint license inferred",
+      "status": "source_and_hash_recorded; separate_license_not_established",
+      "delivery": "Fetched and SHA256-verified at deployment; not redistributed"
+    },
+    {
+      "kind": "service_asset",
+      "name": "service_assets/roformer/model_bs_roformer_ep_317_sdr_12.9755.yaml",
+      "url": "https://raw.githubusercontent.com/TRvlvr/application_data/3826b05b570dbd4fbedbc807758803b35348ba1b/mdx_model_data/mdx_c_configs/model_bs_roformer_ep_317_sdr_12.9755.yaml",
+      "sha256": "2bfdd16c656bd9519aba757cc4f8834b7ede675eb1e00ec4772d74ae1c41af7f",
+      "distributed": false,
+      "license_summary": "Upstream metadata/configuration; no checkpoint license inferred",
+      "status": "source_and_hash_recorded; separate_license_not_established",
+      "delivery": "Fetched and SHA256-verified at deployment; not redistributed"
+    },
+    {
+      "kind": "service_asset",
+      "name": "service_assets/roformer/vocals_mel_band_roformer.yaml",
+      "url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/vocals_mel_band_roformer.yaml",
+      "sha256": "b958b29c8f7195f0d86bee6759a33980db675c4ecaf2fcaa80fa125828e6cd38",
+      "distributed": false,
+      "license_summary": "Upstream metadata/configuration; no checkpoint license inferred",
+      "status": "source_and_hash_recorded; separate_license_not_established",
+      "delivery": "Fetched and SHA256-verified at deployment; not redistributed"
+    },
+    {
+      "kind": "source",
+      "name": "dots.tts",
+      "revision": "8e1f5881b86a679ecdebfcd9d206e502d1b4008e",
+      "url": "https://github.com/studio-dots-ai/dots.tts",
+      "distributed": false,
+      "declared_license": "Apache-2.0",
+      "license_summary": "Apache-2.0",
+      "status": "declared_upstream",
+      "checked_date": "2026-10-28",
+      "documents": [
+        {
+          "file": "LICENSE",
+          "url": "https://github.com/studio-dots-ai/dots.tts/blob/8e1f5881b86a679ecdebfcd9d206e502d1b4008e/LICENSE",
+          "sha256": "d4f4eb4ef1480fed48420b88bcbd887c90f0fee416ad7f2f5e5b165857a7b410"
+        }
+      ]
+    },
+    {
+      "kind": "model",
+      "name": "dots-studio/dots.tts.edit",
+      "revision": "e2aea9cab95a802a63f1a491702a1cc8bf796b30",
+      "url": "https://huggingface.co/dots-studio/dots.tts.edit",
+      "distributed": false,
+      "declared_license": "other",
+      "license_summary": "Apache-2.0 (project README declaration); model card metadata: other",
+      "status": "upstream_declarations_require_scope_confirmation",
+      "checked_date": "2026-10-28",
+      "scope": "Model card refers to dots.tts project; pinned project README declares code and released checkpoints Apache-2.0. No separate model LICENSE file. Preserve this metadata discrepancy for review, not an unrestricted stack certification.",
+      "documents": [
+        {
+          "file": "README.md",
+          "url": "https://huggingface.co/dots-studio/dots.tts.edit/blob/e2aea9cab95a802a63f1a491702a1cc8bf796b30/README.md",
+          "sha256": "d40b3812bff51e9ef110c973c5c939c591b94980391c248d879bbaacbb8bd79f"
+        },
+        {
+          "file": "project README.md",
+          "url": "https://github.com/studio-dots-ai/dots.tts/blob/8e1f5881b86a679ecdebfcd9d206e502d1b4008e/README.md#-license",
+          "sha256": "827992bdb66ffe68229bf086e995c237cb13017f106fa52b30e9bef54ec3d74e"
+        }
+      ]
+    }
+  ],
+  "pipeline_manifest": "external_pipeline.json",
+  "pipeline_status": "External historical pin predates root license; upstream reference now declares Apache-2.0 at a different revision. See docs/LICENSES.md."
+}

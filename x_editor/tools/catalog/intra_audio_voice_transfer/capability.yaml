@@ -1,0 +1,30 @@
+tool_id: intra_audio_voice_transfer
+display_name: Intra-Audio Voice Transfer
+backend: diarization_service_seedvc_runtime
+category: speaker_voice_conversion
+purpose: >
+  Transfer timbre between speakers that already occur inside the same input
+  audio by diarizing speaker turns, extracting internal reference clips, running
+  SeedVC on target-speaker segments, and reconstructing the original timeline.
+when_to_use:
+  - User asks one speaker in a dialogue to sound like another speaker in the same audio.
+  - User asks to replace adult/male/female/child speaker timbre with another speaker already present in the same audio and no external reference audio is provided.
+  - User asks to swap or exchange voices between the two speakers in one audio file.
+do_not_use_when:
+  - External reference audio is provided; use seed_vc directly.
+  - User asks to rewrite text, emotion, pitch, speed, volume, or pause; use edit_data_pipeline.
+  - User asks to remove or isolate a speaker only; that needs extraction/reconstruction rather than timbre transfer.
+inputs:
+  - input_audio_path
+  - instruction
+  - perception_report.speaker_segments
+outputs:
+  - output_audio_path
+  - manifest_path
+  - speaker_segments_path
+constraints:
+  - Requires at least two diarized speakers.
+  - Requires SeedVC service online.
+  - If state has no speaker_segments, runtime calls the isolated diarization service using BUT-FIT/diarizen-wavlm-large-s80-md-v2.
+  - Converted chunks are duration-fitted before timeline replacement, so global audio duration is preserved.
+  - Overlapped speech cannot be perfectly preserved because target-speaker separation is not yet available.

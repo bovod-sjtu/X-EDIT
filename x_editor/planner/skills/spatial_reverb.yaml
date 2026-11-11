@@ -1,0 +1,31 @@
+skill_id: spatial_reverb
+description: Apply static room impulse response effects without changing speech content.
+priority: 72
+selected_tools: [spatial_reverb]
+positive_signals:
+  - sense of space
+  - spatial
+  - spatial sense
+  - spatial feeling
+  - spacious
+  - space around the voice
+  - large room
+  - empty room
+  - hall
+  - cathedral
+  - bathroom
+  - reverb
+  - echo
+  - acoustic space
+  - 空间感
+  - 空间效果
+  - 混响
+  - 回声
+workflow:
+  - spatial_reverb
+rationale: Apply static room impulse response effects without changing speech content.
+guardrails:
+  - spatial_reverb changes only room/reverb/echo characteristics; it must not change transcript, speaker identity, emotion, or foreground/background selection.
+  - Use it after local span editing when only one utterance should receive reverb, then reconstruct the original timeline.
+  - Telephone, radio, underwater, wind, muffled, and reference channel effects belong to audio_effects, not spatial_reverb.
+  - Dereverb and denoise requests belong to speech_enhancement, not spatial_reverb.

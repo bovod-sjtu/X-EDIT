@@ -1,0 +1,25 @@
+tool_id: seed_vc
+display_name: SeedVC Reference Voice Conversion
+backend: seed_vc_service
+category: voice_conversion
+purpose: >
+  Convert source speech to match a reference speaker while preserving linguistic content and broad prosody.
+when_to_use:
+  - User provides reference audio for the desired target speaker.
+  - User asks to sound like the reference speaker.
+  - Text content should remain unchanged.
+do_not_use_when:
+  - User only provides a textual target voice description and no reference audio; prefer qwen3_tts custom voice or return unsupported if exact content preservation is required.
+  - User wants to change the spoken words; use qwen3_tts first.
+  - Reference audio is too noisy or does not contain the target speaker.
+inputs:
+  - source_audio
+  - reference_audio
+outputs:
+  - converted_audio
+cost:
+  gpu_required: true
+  expected_latency: high
+constraints:
+  - Reference audio should be clean and dominated by the target speaker.
+  - Should validate both speaker similarity and content preservation.

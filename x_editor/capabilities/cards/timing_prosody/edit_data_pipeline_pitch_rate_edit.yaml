@@ -1,0 +1,118 @@
+schema_version: x-editor.operation-capability-card/v1
+operation: edit_data_pipeline.pitch_rate_edit
+semantic_effects:
+  - change_local_pitch
+  - change_local_speech_rate
+supported_scopes:
+  - global
+  - segment
+requirements:
+  inputs:
+    - inputs.input_audio
+  evidence:
+    - source_text
+    - target_text_span
+preservation:
+  - dimension: source_wording
+    level: strong
+    evidence_kind: declared_design_fact
+    rationale: Removing supported pitch or rate tags must yield the exact source_text.
+  - dimension: non_target_speech
+    level: moderate
+    evidence_kind: declared_design_fact
+    rationale: The tagged contract identifies local target text while leaving other text untagged.
+  - dimension: speaker_identity
+    level: unknown
+    evidence_kind: unknown
+    rationale: No reviewed development prior establishes identity preservation for each backend method.
+quality_characteristics:
+  - dimension: pitch_or_rate_target_accuracy
+    level: unknown
+    evidence_kind: unknown
+    rationale: Numeric legality does not establish perceptual accuracy.
+  - dimension: prosody_naturalness
+    level: unknown
+    evidence_kind: unknown
+    rationale: Naturalness depends on method, magnitude, source, and target span.
+artifact_risks:
+  - risk: local_splice_artifact
+    level: unknown
+    evidence_kind: unknown
+    rationale: The repository does not provide a reviewed artifact prior for this route.
+  - risk: duration_drift
+    level: unknown
+    evidence_kind: unknown
+    rationale: Pitch-only calls enforce a duration-preserving policy, but achieved duration remains unmeasured here.
+composition:
+  supports_batch_targets: true
+  cumulative_degradation_risk: unknown
+parameter_contract:
+  additional_parameters: reject
+  planner_selectable:
+    - path: inputs.input_audio
+      value_type: string
+      required: true
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: source_audio_ref
+    - path: params.source_text
+      value_type: string
+      required: true
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: reviewed_source_transcript
+    - path: params.instruction_st
+      value_type: string
+      required: true
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: prosody_tagged_text
+      value_guidance:
+        - The value is the complete source transcript with unchanged words wrapped only by pitch or rate tags.
+        - Removing tags must reproduce params.source_text character-for-character, including capitalization, whitespace, and punctuation; this operation cannot replace, insert, or delete words.
+        - A request that changes wording and prosody requires a separate lexical edit step followed by this operation on the edited artifact.
+      value_examples:
+        - '<rate, factor=0.85>The complete source sentence.</rate>'
+        - '<pitch, semitones=2>The complete source sentence.</pitch>'
+    - path: params.language
+      value_type: string
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: source_language
+  framework_owned:
+    - params.output_path
+    - params.service_url
+    - params.aligner_backend
+    - params.pitch_method
+    - params.rate_method
+    - params.psola_indextts2_cco_pitch_boost
+    - params.smooth_policy
+    - params.crossfade_ms
+    - params.smooth_margin_sec
+    - params.evaluate
+    - params.persist
+  conditional_rules: []
+limitations:
+  - Supported local tags can express different rate or pitch changes across source spans. A reference trajectory requires separately grounded source/reference observations and a justified mapping; one global factor does not reproduce arbitrary timing or intonation.
+  - This operation expresses pitch and rate through tagged source text, not through free-form pitch contours or direct rate fields.
+  - Method and smoothing knobs are framework-owned because the repository does not establish an exhaustive Planner-facing legal domain for every service deployment.
+  - A mechanically legal pitch or rate value is not evidence that it is the best perceptual choice.
+  - The v1 capability schema cannot express instruction_st tag grammar, embedded semitone/rate ranges, pitch-only versus rate-only tag exclusivity, or tag-stripped equality with source_text; runtime validation remains authoritative.
+provenance:
+  - source_path: x_editor/runtime/operation_normalizers.py
+    source_kind: runtime_handler
+  - source_path: x_editor/tools/catalog/edit_data_pipeline/manual.yaml
+    source_kind: manual
+  - source_path: x_editor/tools/catalog/edit_data_pipeline/client.py
+    source_kind: runtime_handler
+  - source_path: tests/test_operation_normalizers.py
+    source_kind: test

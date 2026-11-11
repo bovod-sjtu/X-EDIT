@@ -1,0 +1,27 @@
+skill_id: speech_to_speech_translation
+description: Translate full or localized speech spans into a target language with explicit expressive-preservation boundaries.
+priority: 65
+selected_tools: [seamless_expressive_s2st, artifact_ops]
+runtime_operations: [seamless_expressive_s2st, artifact_ops.speaker_scoped_edit]
+positive_signals:
+  - translate to
+  - translate into
+  - translate the Spanish parts
+  - translate the Chinese utterances
+  - spoken by the woman
+  - keep other English part unchanged
+  - speech-to-speech
+  - target language
+  - preserve vocal style
+  - preserve pauses
+required_evidence: [target_language]
+workflow:
+  - seamless_expressive_s2st
+  - for_language_or_speaker_scoped_translation_use_artifact_ops_speaker_scoped_edit_with_translation_direct_op
+  - if_gemini_planner_is_unavailable_and_target_language_plus_local_translation_scope_are_explicit_use_deterministic_local_translation_fallback
+rationale: Translate speech into a target language with explicit expressive-preservation boundaries. Localized requests such as translating only Spanish parts should first ground the requested spans and preserve unrelated speech.
+guardrails:
+  - Require an explicit target language.
+  - Do not use this skill for accent/dialect translation within the same language, such as Taiwanese Mandarin or 台语/台湾腔 into standard Mandarin; use accent_dialect_translation instead.
+  - Do not globally translate when the user asks to keep other language/speaker parts unchanged.
+  - For localized translation, keep selection_instruction as the full request so artifact_ops can use transcript, segment language descriptions, and speaker evidence to select only target spans.

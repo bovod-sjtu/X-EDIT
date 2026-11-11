@@ -1,0 +1,73 @@
+schema_version: x-editor.operation-capability-card/v1
+operation: speech_enhancement
+semantic_effects: [speech_cleanup, speech_denoise, speech_dereverb, speech_clarity]
+supported_scopes: [global, segment]
+requirements:
+  inputs: [inputs.input_audio]
+  evidence: []
+preservation:
+  - dimension: speech_content
+    level: unknown
+    evidence_kind: unknown
+    rationale: The service is designed for enhancement, but content preservation has no reviewed development prior in this card.
+  - dimension: intentional_background
+    level: unknown
+    evidence_kind: unknown
+    rationale: preserve_background is exposed, but exact background fidelity is not established.
+quality_characteristics:
+  - dimension: intelligibility_improvement
+    level: unknown
+    evidence_kind: unknown
+    rationale: Improvement is an evaluation target rather than a guaranteed design fact.
+artifact_risks:
+  - risk: over_enhancement_or_speech_distortion
+    level: unknown
+    evidence_kind: unknown
+    rationale: The manual requires checking this risk; no measured severity prior is available.
+composition:
+  supports_batch_targets: false
+  cumulative_degradation_risk: unknown
+parameter_contract:
+  additional_parameters: reject
+  planner_selectable:
+    - path: inputs.input_audio
+      value_type: string
+      required: true
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: source_speech_audio
+    - path: params.mode
+      value_type: enum
+      required: false
+      enum_values: [general, denoise, dereverb, clarity]
+      minimum: null
+      maximum: null
+      default: general
+      semantic_role: enhancement_mode
+    - path: params.preserve_background
+      value_type: boolean
+      required: false
+      minimum: null
+      maximum: null
+      default: false
+      semantic_role: preserve_intentional_background
+    - path: params.enhancement_goal
+      value_type: string
+      required: false
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: quality_target
+  framework_owned: [params.output_path]
+  conditional_rules: []
+limitations:
+  - The operation is for speech quality cleanup, not speaker separation, text editing, or voice conversion.
+  - Exact intentional ambience preservation is not guaranteed by the current service contract.
+provenance:
+  - source_path: x_editor/tools/catalog/speech_enhancement/manual.yaml
+    source_kind: manual
+  - source_path: x_editor/tools/catalog/speech_enhancement/mcp_server.py
+    source_kind: service_schema
+  - source_path: x_editor/runtime/audio_plan_executor.py
+    source_kind: runtime_handler

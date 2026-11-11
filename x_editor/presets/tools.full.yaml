@@ -1,0 +1,24 @@
+schema_version: x-edit.tools/v1
+edit_backend: dots_tts_edit
+enabled_tools:
+  - artifact_ops
+  - edit_data_pipeline
+  - edit_pitch_shift
+  - edit_speech_rate
+  - edit_volume
+  - edit_boundary_smooth
+  - edit_audio_assembly
+  - qwen3_tts
+  - seed_vc
+  - auk
+  - audio_effects
+  - spatial_reverb
+  - speech_enhancement
+  - speech_separation
+  - asr
+  - aligner
+  - omni
+  - flexsed
+  - diarization
+  - sedicow_asr
+  - moss_transcribe_diarize

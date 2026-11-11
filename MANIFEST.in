@@ -1,0 +1,23 @@
+include .gitmodules README.md LICENSE NOTICE SOURCE_EXPORT.json uv.lock .python-version .env.example .dockerignore .gitignore
+recursive-include configs *.json *.yaml
+recursive-include deployment *.py *.sh *.json *.lock Dockerfile
+include deployment/Dockerfile.gpu
+include third_party/manifest.json third_party/external_pipeline.json third_party/licenses.json third_party/NOTICE.md
+include third_party/release_review.json
+prune third_party/dots_tts_edit
+recursive-include docs *.md *.json
+prune tests
+prune runs
+prune models
+prune checkpoints
+prune third_party/src
+prune third_party/service_assets
+prune x_editor/tools/catalog/*/vendor
+prune x_editor/tools/catalog/*/checkpoints
+prune x_editor/tools/catalog/*/.cache
+global-exclude __pycache__ *.py[cod] .env .env.* *.wav *.mp3 *.flac *.ogg *.opus *.m4a *.aac *.mp4 *.webm *.safetensors *.pt *.pth *.ckpt *.bin *.onnx *.so *.so.* *.dll *.dylib *.exe *.pem *.key
+include .env.example
+recursive-exclude .venv *
+recursive-exclude x_editor/tools/catalog/*/.venv *
+
+prune x_editor/accent_library/data

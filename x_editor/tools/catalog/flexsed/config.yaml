@@ -1,0 +1,29 @@
+name: flexsed
+server:
+  command: [".venv/bin/python", "mcp_server.py"]
+  working_dir: "."
+  env:
+    FLEXSED_SERVICE_URL: "http://127.0.0.1:8057"
+    HF_HOME: "./.cache/huggingface"
+    HF_HUB_CACHE: "./.cache/huggingface/hub"
+  resources:
+    gpu: true
+    memory_gb: 16
+  lifecycle: session
+  startup_timeout_sec: 180
+managed_services:
+  - name: flexsed
+    url_env: FLEXSED_SERVICE_URL
+    default_url: "http://127.0.0.1:8057"
+    working_dir: "."
+    command_env: FLEXSED_SERVICE_COMMAND
+    command: [".venv/bin/python", "service.py", "--host", "127.0.0.1", "--port", "8057"]
+    env:
+      HF_HOME: "./.cache/huggingface"
+      HF_HUB_CACHE: "./.cache/huggingface/hub"
+      FLEXSED_DEVICE: "cuda"
+    health_path: "/health"
+    smoke:
+      - {method: "GET", path: "/health"}
+    startup_timeout_sec: 360
+    setup_hint: "cd x_editor/tools/catalog/flexsed && ./setup.sh; set FLEXSED_REPO_DIR to the official JHU-LCAP/FlexSED checkout or FLEXSED_SERVICE_COMMAND/FLEXSED_SERVICE_URL"

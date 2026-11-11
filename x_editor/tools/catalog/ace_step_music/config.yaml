@@ -1,0 +1,37 @@
+name: ace_step_music
+server:
+  command: [".venv/bin/python", "mcp_server.py"]
+  working_dir: "."
+  env:
+    ACE_STEP_API_URL: "http://127.0.0.1:8044"
+  resources:
+    gpu: true
+    memory_gb: 8
+  lifecycle: session
+  startup_timeout_sec: 120
+managed_services:
+  - name: ace_step_music
+    url_env: ACE_STEP_API_URL
+    default_url: "http://127.0.0.1:8044"
+    command_env: ACE_STEP_API_COMMAND
+    command:
+      - bash
+      - -lc
+      - >-
+        cd "${ACE_STEP_REPO_DIR:?Set ACE_STEP_REPO_DIR to your installed ACE-Step checkout}"
+        && exec uv run acestep-api
+        --host "${ACE_STEP_API_HOST:-127.0.0.1}"
+        --port "${ACE_STEP_API_PORT:-8044}"
+    env:
+      ACE_STEP_API_HOST: "127.0.0.1"
+      ACE_STEP_API_PORT: "8044"
+      ACESTEP_INIT_LLM: "false"
+      ACESTEP_SAVE_MEMORY: "1"
+      PYTORCH_CUDA_ALLOC_CONF: "expandable_segments:True"
+      UV_LINK_MODE: "copy"
+    health_path: "/health"
+    smoke:
+      - {method: "OPTIONS", path: "/release_task"}
+      - {method: "OPTIONS", path: "/query_result"}
+    startup_timeout_sec: 900
+    setup_hint: "set ACE_STEP_REPO_DIR to an official ACE-Step checkout, or set ACE_STEP_API_COMMAND/ACE_STEP_API_URL"

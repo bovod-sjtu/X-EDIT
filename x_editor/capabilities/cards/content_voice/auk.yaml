@@ -1,0 +1,118 @@
+schema_version: x-editor.operation-capability-card/v1
+operation: auk
+semantic_effects:
+- vocal_delivery_conversion
+- deaccent
+- voice_description
+- whisper_conversion
+- nonverbal_vocal_editing
+- emotion_conversion
+- speech_content_editing
+- speech_restoration
+- source_isolation
+supported_scopes:
+- global
+- segment
+requirements:
+  inputs:
+  - inputs.input_audio
+  evidence: []
+preservation:
+- dimension: spoken_content
+  level: unknown
+  evidence_kind: unknown
+  rationale: Regeneration may alter words or timing; inspect the actual output.
+quality_characteristics:
+- dimension: requested_acoustic_change
+  level: unknown
+  evidence_kind: unknown
+  rationale: Model availability is not a qualified performance prior.
+artifact_risks:
+- risk: regeneration_content_or_identity_loss
+  level: unknown
+  evidence_kind: unknown
+  rationale: Check every requested and preserved attribute.
+composition:
+  supports_batch_targets: false
+  cumulative_degradation_risk: unknown
+parameter_contract:
+  additional_parameters: reject
+  planner_selectable:
+  - path: inputs.input_audio
+    value_type: string
+    required: true
+    enum_values: []
+    minimum: null
+    maximum: null
+    default: null
+    semantic_role: source_audio
+    runtime_value_source: source_audio_refs
+  - path: params.instruction
+    value_type: string
+    required: true
+    enum_values: []
+    minimum: null
+    maximum: null
+    default: null
+    semantic_role: Explicit acoustic edit intent and all applicable preservation requirements;
+      no hidden rewriting.
+  - path: params.gen_seconds
+    value_type: number
+    required: false
+    enum_values: []
+    minimum: 0.001
+    maximum: null
+    default: null
+    semantic_role: Explicit requested generation duration when needed; omission matches
+      source duration.
+  framework_owned:
+  - params.output_path
+  - params.service_url
+  conditional_rules: []
+limitations:
+- One bound audio file per call; multiple audio references are separate assets, not channels.
+- Accepts mono or multichannel input; declared arithmetic-mean preparation conditions
+  the native mono model, with source hash, channel policy and PE receipts retained.
+- Output is mono. Stereo input alone does not disqualify this operation when the
+  instruction has no spatial or channel-specific requirement. Explicit spatial
+  positioning, independent-channel preservation or exact waveform requirements
+  need a compatible operation or composition.
+- Consider AuK early for natural whisper/normal conversion, de-accenting and supported
+  nonverbal vocal edits when existing operations lack that expressive capability.
+  This is a capability-coverage preference, not a benchmark-validated superiority claim.
+- Prefer native-PE AuK for compatible perceptual age changes and whisper/normal
+  conversion based on development listening. Keep other tools available; no
+  mandatory routing or benchmark-specific conditions follow from this preference.
+- Emotion conversion has no established general priority over existing tools.
+  Audio-evidence feedback may motivate a Guider to try it as another compatible
+  workflow, while preserving the current target, successful content and scope.
+- For local emotion, pitch or rate changes expressible by edit_data_pipeline tags,
+  compare that span-aware route first. Multiple tagged spans can express different
+  supported changes within one recording. AuK is an alternative when its exposed
+  capability better meets the unresolved goal, not a default replacement for these
+  controls. An unsupported AuK argument does not mean the catalog lacks the edit.
+- Existing precise gain, pitch/rate and timeline operations remain preferable when
+  exact quantities or sample preservation are required; never approximate them by a nearest style.
+- Standard deployment enables native PE with a configured semantic model and ASR service; it revises native
+  parameter wording against the original constraints without changing task or schema.
+  Deployment health and each result declare whether PE was used. This is model-based
+  preparation, not a proof of semantic equivalence or output quality.
+- No exact waveform or timing guarantee.
+- Use explicit extraction/reconstruction for local scope; service has no session history.
+- The current native PE contract does not expose music composition/rearrangement
+  or translation into another language/dialect. De-accenting standardizes toward
+  Mandarin; it is not arbitrary accent transfer. Use a capable explicit workflow
+  when the user's requirements extend beyond a single exposed edit.
+- Emotion preparation supports happy, angry, sad, fearful, surprised, disgusted,
+  calm and excited. Never drop a requested attribute or choose a merely similar
+  emotion to make a call fit this domain.
+- The native single-edit request has no reference-audio conditioning input and no
+  time-varying emotion or rate trajectory argument. A textual description of a
+  reference does not add either control. For varying changes, consider grounded
+  local controls and explicit composition available elsewhere in the catalog;
+  do not replace the requested variation by one global emotion or speed value.
+provenance:
+- source_path: x_editor/tools/catalog/auk/manual.yaml
+  source_kind: manual
+- source_path: x_editor/tools/catalog/auk/service.py
+  source_kind: service_schema

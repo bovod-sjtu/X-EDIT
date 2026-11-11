@@ -1,0 +1,56 @@
+skill_id: emphasis_stress_p1_local_resynthesis
+description: Prefer P1 local resynthesis for existing-audio emphasis or lexical stress edits on quoted words/phrases.
+priority: 145
+selected_tools: [qwen3_tts, seed_vc, edit_data_pipeline]
+runtime_operations: [emphasis_stress_edit, edit_data_pipeline.audio_assembly, edit_data_pipeline.pitch_rate_edit]
+negative_signals:
+  - faster
+  - slower
+  - speaking rate
+  - speech rate
+  - raise pitch
+  - lower pitch
+  - semitone
+  - 音高
+  - 语速
+positive_signals:
+  - emphasis
+  - emphasize
+  - emphasise
+  - stress
+  - add stress
+  - stress to
+  - stress the
+  - word stress
+  - speech stress
+  - stressed
+  - more prominent
+  - pronunciation of
+  - 重音
+  - 重读
+  - 强调
+  - 着重
+required_evidence: [source_text, word_timestamps, target_phrase]
+workflow:
+  - route_to_emphasis_stress_edit
+  - recover_or_reuse_source_text_and_word_timestamps
+  - synthesize_full_sentence_with_strong_target_stress_using_qwen3_tts
+  - convert_generated_target_back_to_source_speaker_using_seed_vc
+  - splice_only_target_phrase_with_edit_data_pipeline_audio_assembly_and_f5_boundary_normalization
+  - fallback_to_pitch_rate_edit_only_if_p1_services_are_unavailable_or_fail
+rationale: >
+  Pitch-only DSP often makes emphasis/stress under-detectable in speech judging.
+  The preferred method is a generative local resynthesis path: produce a strongly
+  stressed full-sentence target, recover the original speaker with SeedVC, and
+  splice only the target phrase back with audio_assembly/F5 smoothing. This
+  preserves surrounding speech while making lexical stress more audible.
+guardrails:
+  - Use emphasis_stress_edit for quoted word/phrase emphasis or lexical stress when available.
+  - Do not use this for ordinary pitch/rate requests; those remain edit_data_pipeline.pitch_rate_edit or speech_rate.
+  - Do not use this for accent conversion, translation, reference voice conversion, lexical rewrite, or broad emotion/style alteration.
+  - The target word or phrase must be explicit in quoted text, target_phrase params, or a prior tagged local span.
+  - emphasis_stress_edit requires source_text plus word_timestamps before execution. If reviewed evidence has source_text but no word_timestamps, plan perception.speech_context first with params.need_words=true and make emphasis_stress_edit depend on that step.
+  - Preserve the exact source wording; qwen3_tts is only used to generate the stressed reference sentence, not to rewrite content.
+  - SeedVC must use the original/source audio as the speaker reference before audio_assembly splices the stressed target phrase.
+  - audio_assembly must use edit_tagged_text with <target>...</target> spans; do not send instruction_st to audio_assembly.
+  - If qwen3_tts, seed_vc, or audio_assembly is unavailable, fall back to edit_data_pipeline.pitch_rate_edit with a strong local <pitch> tag and record the degraded method.

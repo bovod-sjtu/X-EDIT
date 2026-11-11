@@ -1,0 +1,19 @@
+{
+  "f5": {
+    "name": "F5-TTS",
+    "enable_env": "X_EDITOR_ENABLE_F5_TTS",
+    "url_env": "F5_SERVICE_URL",
+    "setup_message": "请自行下载并安装F5-TTS",
+    "source_url": "https://github.com/SWivid/F5-TTS",
+    "model_url": "https://huggingface.co/SWivid/F5-TTS",
+    "terms": "Code: MIT; selected weights: CC-BY-NC-4.0. External installation does not grant commercial rights.",
+    "pipeline_operations": [
+      "text_edit",
+      "pitch_rate_edit",
+      "emotion_style_edit",
+      "pause_edit",
+      "boundary_smooth",
+      "audio_assembly"
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+name: seed_vc
+server:
+  command: ["uv", "run", "--frozen", "--project", ".", "python", "mcp_server.py"]
+  working_dir: "."
+  env:
+    UV_PROJECT_ENVIRONMENT: ".venv"
+    UV_LINK_MODE: "copy"
+    RUST_LOG: "warn"
+    PYTHONNOUSERSITE: "1"
+    HF_HOME: "./.cache/huggingface"
+    HF_HUB_CACHE: "./.cache/huggingface/hub"
+    SEED_VC_SERVICE_URL: "http://127.0.0.1:8003"
+  resources:
+    gpu: true
+    memory_gb: 16
+  lifecycle: session
+  startup_timeout_sec: 240
+managed_services:
+  - name: seed_vc
+    url_env: SEED_VC_SERVICE_URL
+    default_url: "http://127.0.0.1:8003"
+    command_env: SEED_VC_SERVICE_COMMAND
+    health_path: "/health"
+    smoke:
+      - {method: "OPTIONS", path: "/convert"}
+    startup_timeout_sec: 300
+    setup_hint: "start the SeedVC service or set SEED_VC_SERVICE_COMMAND to a launch command"

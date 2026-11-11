@@ -1,0 +1,84 @@
+skill_id: speaker_attributed_speech_span_grounding
+description: Use the speech perception subagent for speech-content, speaker-attributed transcript, and speaker-scoped span grounding.
+priority: 96
+selected_tools: [perception.speaker_attributed_review, artifact_ops]
+runtime_operations:
+  - perception.speaker_attributed_review
+  - artifact_ops.extract_spans
+  - artifact_ops.remove_spans
+  - artifact_ops.mute_spans
+  - artifact_ops.beep_spans
+  - artifact_ops.speaker_scoped_edit
+positive_signals:
+  - multi speaker
+  - multiple speakers
+  - speaker switch
+  - overlapping speech
+  - overlap
+  - barge-in
+  - final speaker
+  - last speaker
+  - final male speaker
+  - final female speaker
+  - male speaker
+  - female speaker
+  - child speaker
+  - baby speaker
+  - first speaker
+  - second speaker
+  - speaker's question
+  - speaker question
+  - speech content
+  - spoken content
+  - spoken by
+  - speech spoken by
+  - voice of
+  - speaker's voice
+  - male speech
+  - female speech
+  - woman voice
+  - woman's voice
+  - man's voice
+  - baby
+  - quoted phrase
+  - quoted sentence
+  - phrase
+  - phrase spoken by
+  - words said by
+  - sentence spoken by
+  - speaker says
+  - says
+  - respondent
+  - interviewer
+  - question
+  - answer
+  - 说话人
+  - 多说话人
+  - 最后一个说话人
+  - 第一个说话人
+  - 第二个说话人
+  - 问题
+  - 回答
+required_evidence:
+  - source_text
+  - timestamped_speaker_segments
+  - selected_speaker_ids_and_selected_spans_for_resolved_targets
+  - target_bindings
+  - optional_speaker_aware_ts_asr_hints
+workflow:
+  - perception.speaker_attributed_review
+  - resolve_role_or_speaker_target_spans_from_supported_observations
+  - artifact_ops_span_operation
+  - downstream_local_edit_or_reconstruct_when_requested
+rationale: Observed speaker turns and transcript timing support speech and speaker boundaries. Audible voice attributes require a capability whose output includes those observations.
+guardrails:
+  - Use this for observed speaker IDs, turn order, overlap, and transcript boundaries. Its transcript-line review does not supply speaker profiles or audible voice attributes.
+  - Generic audio captions may mention speech, male/female speaker, question, or overlap, but those labels are coarse evidence only and must not replace speaker_attributed_review for exact speech/speaker boundaries.
+  - If the target is constrained by both speech/speaker evidence and general sound/effect evidence, run this together with audio_event_span_grounding or audio_caption_span_grounding and reconcile/intersect the returned spans before destructive edits.
+  - The perception subagent must preserve existing audio-scoped speaker IDs and reject invented identities; display labels must retain their binding to those IDs.
+  - Prefer evidence-summary review over model-driven slice planning: pass available specialist ASR, diarization, alignment, and speaker-aware TS-ASR evidence directly to the reviewer, suppress unnecessary slice_audio review, and do not require a fixed minimum slice count.
+  - Audio-capable review may use targeted slice_audio diagnostics when needed, but slice count is an audit signal rather than a benchmark-specific hard requirement.
+  - Treat role/speaker/entity requests as multi-hop plans: first obtain reviewed speaker-attributed evidence, then resolve the role/span target, then execute extract/remove/mute/beep or a nested local edit only on confirmed spans.
+  - If a requested property is not observed, request a capability with a matching observation output and join its evidence to the audio-scoped speaker candidates; do not default to all speech or the only speaker unless the user requests all speech.
+  - After this step, pass the original user instruction to artifact_ops so runtime selection uses the reviewed speaker_segments.
+  - When reviewed evidence publishes selected_speaker_ids, selected_spans, and target_bindings, consume those fields directly; do not guess a different speaker id from the candidate list.

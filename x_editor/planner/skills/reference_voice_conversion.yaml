@@ -1,0 +1,54 @@
+skill_id: reference_voice_conversion
+description: Convert source speech to a provided reference speaker while preserving content.
+priority: 85
+selected_tools: [perception.speaker_attributed_review, perception.timestamped_caption, artifact_ops, seed_vc]
+runtime_operations:
+  - perception.speaker_attributed_review
+  - perception.timestamped_caption
+  - artifact_ops.extract_spans
+  - artifact_ops.speaker_scoped_edit
+  - seed_vc
+positive_signals:
+  - reference voice
+  - reference audio
+  - voice from audio1
+  - voice from audio2
+  - replace speech in audio2 with voice from audio1
+  - replace the male speech in audio1 with the female voice from audio2
+  - replace scoped speech in audio1 with voice from audio2
+  - use the voice from audio1 to read the content of audio2
+  - read the content of audio2 with the voice from audio1
+  - convert audio2 to match the voice of audio1
+  - convert audio2 to match the timbre of audio1
+  - sound like
+  - voice conversion
+  - timbre
+  - speaker identity
+negative_signals:
+  - acoustic channel condition
+  - same acoustic channel
+  - same channel condition
+  - recorded in the same acoustic
+  - recorded with the same acoustic
+required_evidence: [reference_audio_path]
+requires_reference_audio: true
+workflow:
+  - if_reference_clip_or_enrollment_span_is_unknown_ground_it_before_extracting
+  - for_reference_speech_speaker_or_voice_clip_use_perception_speaker_attributed_review_then_artifact_ops_extract_spans
+  - for_reference_sound_event_or_acoustic_context_clip_use_perception_timestamped_caption_with_an_optional_event_prior_then_artifact_ops_extract_spans
+  - seed_vc
+  - for_speaker_or_segment_scoped_cross_file_vc_use_artifact_ops_speaker_scoped_edit_with_seed_vc
+  - keep_target_selection_instruction_separate_from_reference_voice_description
+  - when_target_and_reference_have_different_audio1_audio2_scopes_resolve_target_spans_on_the_source_audio_only
+  - if_reference_speaker_selection_has_no_timed_segments_use_whole_reference_audio_as_seed_vc_enrollment_and_record_reference_voice_fallback
+  - if_gemini_planner_is_unavailable_and_audio1_audio2_source_reference_direction_is_explicit_use_deterministic_seed_vc_fallback
+rationale: Convert source speech to a provided reference speaker while preserving content.
+guardrails:
+  - Require a concrete reference_audio_path.
+  - Do not use qwen3_tts for reference VC when SeedVC is available.
+  - For "use the voice from audio1 to read the content of audio2", treat audio2 as the source/content audio and audio1 as the reference voice.
+  - If the request references an audio input that is not provided, emit missing_inputs rather than substituting another provided audio. Benchmark adapters may canonicalize known metadata repairs before planning and must record that evidence outside core runtime.
+  - For scoped replacement such as "replace the male speech in audio1 with the female voice from audio2", resolve "male speech in audio1" as the target spans and use "female voice from audio2" only as reference selection/description.
+  - Do not localize an unknown reference clip with bare artifact_ops.extract_spans. Use the relevant perception grounding step first and pass explicit selected_spans to artifact_ops.
+  - If the reference audio perception can identify the desired speaker but cannot provide reliable timestamps, using the whole reference audio as a VC enrollment fallback is allowed and must be recorded as a limitation.
+  - If the target is only a speaker or segment inside the source audio, first localize that region and apply SeedVC only to the selected spans before stitching.

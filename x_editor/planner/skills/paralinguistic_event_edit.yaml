@@ -1,0 +1,101 @@
+skill_id: paralinguistic_event_edit
+description: Add or remove audible paralinguistic events (breath, laugh, cough, sigh) without rewriting speech.
+priority: 132
+selected_tools: [paralinguistic_event_add, paralinguistic_event_remove]
+runtime_operations:
+  - paralinguistic_event_add
+  - paralinguistic_event_remove
+  - perception.flexsed_events
+  - edit_data_pipeline.boundary_smooth
+  - seed_vc
+positive_signals:
+  - add audible breathing
+  - add audible coughing
+  - add audible cough
+  - add audible laughter
+  - add audible laugh
+  - add audible sigh
+  - add breathing
+  - add breath
+  - add laughter
+  - add laugh
+  - add coughing
+  - add cough
+  - add sigh
+  - insert breathing
+  - insert laughter
+  - insert cough
+  - insert sigh
+  - remove audible breathing
+  - remove audible coughing
+  - remove audible cough
+  - remove audible laughter
+  - remove audible laugh
+  - remove audible sigh
+  - remove the breathing
+  - remove the breath
+  - remove the coughing
+  - remove the cough
+  - remove the laughter
+  - remove the laugh
+  - remove the sigh
+  - remove breathing
+  - remove breath
+  - remove laughter
+  - remove laughing
+  - remove cough
+  - remove coughing
+  - remove sigh
+  - delete breathing
+  - delete laughter
+  - delete cough
+  - delete sigh
+  - 添加呼吸
+  - 加入呼吸
+  - 添加笑声
+  - 加入笑声
+  - 添加咳嗽
+  - 加入咳嗽
+  - 添加叹气
+  - 加入叹气
+  - 去除呼吸
+  - 移除呼吸
+  - 去掉呼吸
+  - 去除笑声
+  - 移除笑声
+  - 去除咳嗽
+  - 移除咳嗽
+  - 去除叹气
+  - 移除叹气
+negative_signals:
+  - replace the word
+  - replace all
+  - change the word
+  - text edit
+  - sing
+  - singing
+  - rap
+  - music vocal
+required_evidence:
+  - input_audio
+  - target_event_from_natural_language_instruction
+  - for_remove_flexsed_or_runtime_span_grounding_when_available
+workflow:
+  - parse_add_or_remove_and_normalize_event_to_breath_laugh_cough_or_sigh
+  - for_add_choose_or_generate_event_asset_then_insert_at_vad_pause_or_safe_boundary
+  - for_add_loudness_match_crossfade_and_optionally_run_boundary_smooth_or_seedvc_self_conversion
+  - for_remove_ground_event_span_with_flexsed_or_prior_runtime_evidence
+  - for_remove_if_grounding_is_missing_try_local_energy_peak_fallback_but_never_whole_file_subtract
+  - preserve_original_speech_content_and_speaker_identity_around_the_local_edit
+rationale: >
+  Paralinguistic add/remove requests can target nonverbal events such as breath,
+  laugh, cough, and sigh. These are not lexical edits and should not
+  trigger full-sentence TTS. Add is best handled by event-asset insertion; remove
+  is best handled by local event span grounding followed by local inpaint/ducking.
+guardrails:
+  - Never route these add/remove paralinguistic event requests to edit_data_pipeline.text_edit.
+  - Never route these requests to qwen3_tts as whole-utterance regeneration.
+  - Do not treat laugh/cough/sigh/breath add/remove as emotion_style_edit or generic pitch/rate editing.
+  - Remove must be local-only and must fail or record degraded grounding when no event span can be found.
+  - Add may increase output duration by the inserted event duration; avoid covering speech when a pause or boundary is available.
+  - SeedVC self conversion and boundary_smooth are optional post-processing/fallback stages and must preserve the pre-SeedVC/pre-smooth output in metadata.

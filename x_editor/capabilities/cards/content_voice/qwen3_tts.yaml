@@ -1,0 +1,164 @@
+schema_version: x-editor.operation-capability-card/v1
+operation: qwen3_tts
+semantic_effects:
+  - synthesize_standalone_speech
+  - synthesize_custom_voice_speech
+  - synthesize_reference_voice_speech
+supported_scopes:
+  - global
+  - standalone_asset
+requirements:
+  inputs: []
+  evidence: []
+preservation:
+  - dimension: source_waveform
+    level: weak
+    evidence_kind: declared_design_fact
+    rationale: This operation synthesizes a new utterance rather than editing a source waveform.
+  - dimension: reference_speaker_identity
+    level: unknown
+    evidence_kind: unknown
+    rationale: Voice-clone similarity requires listening review on the intended task slice.
+quality_characteristics:
+  - dimension: speech_naturalness
+    level: unknown
+    evidence_kind: unknown
+    rationale: No route-comparison listening prior is approved yet.
+  - dimension: exact_text_delivery
+    level: unknown
+    evidence_kind: unknown
+    rationale: Exact delivery is a validation target, not an established quality score.
+artifact_risks:
+  - risk: full_utterance_resynthesis_drift
+    level: unknown
+    evidence_kind: unknown
+    rationale: Drift relative to source timing and acoustics must be measured in comparison cases.
+composition:
+  supports_batch_targets: false
+  cumulative_degradation_risk: unknown
+parameter_contract:
+  additional_parameters: reject
+  planner_selectable:
+    - path: params.text
+      value_type: string
+      required: true
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: synthesis_text
+    - path: params.mode
+      value_type: enum
+      required: false
+      enum_values:
+        - custom_voice
+        - voice_clone
+      minimum: null
+      maximum: null
+      default: custom_voice
+      semantic_role: synthesis_mode
+    - path: params.voice_design_backend
+      value_type: enum
+      required: false
+      enum_values:
+        - qwen3_tts
+        - auto
+      minimum: null
+      maximum: null
+      default: qwen3_tts
+      semantic_role: custom_voice_backend
+    - path: params.speaker
+      value_type: string
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: vivian
+      semantic_role: preset_speaker
+    - path: params.instruct
+      value_type: string
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: voice_style_instruction
+    - path: params.voice_prompt
+      value_type: string
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: voice_design_description
+    - path: params.language
+      value_type: string
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: Auto
+      semantic_role: speech_language
+    - path: inputs.reference_audio_path
+      value_type: string
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: voice_clone_reference_audio
+    - path: params.ref_text
+      value_type: string
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: voice_clone_reference_transcript
+    - path: params.x_vector_only_mode
+      value_type: boolean
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: false
+      semantic_role: reference_embedding_only
+  framework_owned:
+    - params.output_path
+    - params.timeout_seconds
+    - params.service_url
+  conditional_rules:
+    - when:
+        path: params.mode
+        operator: equals
+        value: voice_clone
+      require:
+        - inputs.reference_audio_path
+      forbid:
+        - params.voice_design_backend
+    - when:
+        path: params.mode
+        operator: equals
+        value: custom_voice
+      require: []
+      forbid:
+        - inputs.reference_audio_path
+    - when:
+        path: inputs.reference_audio_path
+        operator: present
+      require:
+        - params.mode
+      forbid: []
+limitations:
+  - This operation creates synthetic speech and is not a source-waveform-preserving lexical editor.
+  - Voice-clone mode requires reference audio and normally reference text unless embedding-only mode is selected.
+  - The conditional alternative between params.ref_text and params.x_vector_only_mode cannot be represented by the single-condition parameter DSL and remains a tool-verifier check.
+provenance:
+  - source_path: x_editor/tools/catalog/qwen3_tts/manual.yaml
+    source_kind: manual
+  - source_path: x_editor/tools/catalog/qwen3_tts/mcp_server.py
+    source_kind: service_schema
+  - source_path: x_editor/runtime/audio_plan_executor.py
+    source_kind: runtime_handler
+  - source_path: x_editor/runtime/tool_contract_verifier.py
+    source_kind: runtime_handler

@@ -1,0 +1,7 @@
+{
+  "python": "Python 3.10.12",
+  "packages": 195,
+  "nonportable_packages": [],
+  "source": "running local Qwen services, 2026-09-29",
+  "cold_start_verified": false
+}

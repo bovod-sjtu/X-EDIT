@@ -1,0 +1,104 @@
+tool_id: spatial_reverb
+mcp_tool_name: spatial_reverb.apply
+input_schema:
+  type: object
+  required:
+    - input_audio_path
+    - output_path
+  properties:
+    input_audio_path:
+      type: string
+    output_path:
+      type: string
+    instruction:
+      type: string
+      description: Natural-language spatial target, used when explicit room parameters are omitted.
+    room_preset:
+      type: string
+      enum: [dry_studio, small_room, medium_room, large_empty_room, hall, cathedral, bathroom]
+      default: medium_room
+    room_size_m:
+      type: array
+      items:
+        type: number
+      minItems: 3
+      maxItems: 3
+      description: Room dimensions in meters [x, y, z].
+    t60:
+      type: number
+      description: Reverberation time in seconds.
+    dry_wet:
+      type: number
+      description: Wet mix ratio from 0.0 to 0.95.
+    source_distance_m:
+      type: number
+      description: Approximate source-to-receiver distance in meters.
+    receiver_position_m:
+      type: array
+      items:
+        type: number
+      minItems: 3
+      maxItems: 3
+    source_position_m:
+      type: array
+      items:
+        type: number
+      minItems: 3
+      maxItems: 3
+    rir_length_sec:
+      type: number
+      description: RIR duration in seconds.
+    preserve_duration:
+      type: boolean
+      default: false
+    backend:
+      type: string
+      enum: [auto, gpuRIR, synthetic]
+      default: auto
+    wet_gain_db:
+      type: number
+      default: 0.0
+    output_dir:
+      type: string
+      description: Directory for manifest and RIR debug artifacts.
+output_schema:
+  type: object
+  required:
+    - output_audio_path
+  properties:
+    output_audio_path:
+      type: string
+    manifest_path:
+      type: string
+    rir_path:
+      type: string
+    backend:
+      type: string
+    room_parameters:
+      type: object
+defaults:
+  room_preset: medium_room
+  backend: auto
+  preserve_duration: false
+  wet_gain_db: 0.0
+validation:
+  frontend_check:
+    - Speech content and speaker identity should remain unchanged.
+    - Perceived space should match requested room size/reverberation.
+    - Reverb should not introduce clipping or excessive intelligibility loss unless explicitly requested.
+examples:
+  - scenario: Put speech in a large empty room.
+    arguments:
+      input_audio_path: /path/to/source.wav
+      output_path: /data/xedit/runs/large_empty_room.wav
+      instruction: make it sound like it is in a very large empty room
+      room_preset: large_empty_room
+      t60: 1.8
+      dry_wet: 0.42
+  - scenario: Add subtle room ambience without changing duration.
+    arguments:
+      input_audio_path: /path/to/source.wav
+      output_path: /data/xedit/runs/subtle_room.wav
+      room_preset: medium_room
+      dry_wet: 0.18
+      preserve_duration: true

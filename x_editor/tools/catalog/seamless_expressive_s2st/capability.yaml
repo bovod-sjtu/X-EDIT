@@ -1,0 +1,37 @@
+tool_id: seamless_expressive_s2st
+display_name: SeamlessExpressive S2ST
+backend: meta_seamless_expressive_or_m4t_v2_service
+category: speech_to_speech_translation
+purpose: >
+  Translate input speech directly into target-language speech. Prefer Meta
+  SeamlessExpressive when the user asks to preserve vocal style, speech rate,
+  or pauses across languages; use SeamlessM4T v2 only for non-expressive S2ST
+  or explicitly allowed fallback.
+when_to_use:
+  - User asks for cross-language speech-to-speech translation.
+  - User wants translated speech output, not just transcript text.
+  - User asks to keep vocal style, speaking rhythm, speech rate, pauses, prosody, or expressive delivery while translating.
+  - Target language is documented for SeamlessExpressive or SeamlessM4T v2 speech output.
+do_not_use_when:
+  - User only asks for text translation or ASR/transcription.
+  - User asks for same-language text rewrite, emotion edit, voice conversion, denoise, or loudness changes without cross-language translation.
+  - The requested target language is outside documented speech-output coverage and fallback is not acceptable.
+  - Commercial or production use has not cleared Meta license restrictions.
+inputs:
+  - input_audio_path
+  - target_language
+  - optional_source_language
+  - preservation_flags
+outputs:
+  - translated_speech_audio
+cost:
+  gpu_required: true
+  expected_latency: very_high
+  model_size: SeamlessM4T v2 Large is 2.3B parameters; SeamlessExpressive also requires gated artifacts.
+constraints:
+  - SeamlessM4T v2 models are CC-BY-NC 4.0; SeamlessExpressive/Seamless models use Meta's Seamless license for noncommercial research use.
+  - SeamlessExpressive model artifacts require Meta approval/download; this repository does not include model weights.
+  - Expressive primary target languages are treated as eng, fra, deu, spa; cmn and ita are treated as experimental; other target speech languages fall back only if allow_fallback_to_m4t is true.
+  - SeamlessM4T v2 speech output is limited to the documented speech target language set, not all text translation languages.
+  - Input audio should be speech; the upstream CLI resamples to 16 kHz, but clean mono/near-mono WAV/FLAC input is recommended.
+  - Expressive preservation is model capability, not a hard guarantee; X-Editor currently validates only output existence unless external perceptual/metric evaluation is added.

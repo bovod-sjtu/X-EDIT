@@ -1,0 +1,17 @@
+skill_id: singing_or_rap_music_vocal
+description: Use ACE-Step for singing or rap vocal generation over selected speech spans.
+priority: 68
+selected_tools: [ace_step_music]
+positive_signals:
+  - sing
+  - singing
+  - rap
+  - music vocal
+  - song-like
+workflow:
+  - ace_step_music.timeline_edit
+  - fit_generated_segments
+  - reconstruct_timeline
+rationale: Use ACE-Step for singing or rap vocal generation over selected speech spans.
+guardrails:
+  - Treat identity and exact timing as best-effort.

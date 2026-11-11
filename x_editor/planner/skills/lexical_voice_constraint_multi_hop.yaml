@@ -1,0 +1,49 @@
+skill_id: lexical_voice_constraint_multi_hop
+description: Decompose existing-audio lexical edits that also require a target voice or timbre constraint into separate text-edit and voice-conversion hops.
+priority: 132
+selected_tools: [perception.speech_context, edit_data_pipeline, no_reference_voice_conversion]
+runtime_operations:
+  - perception.speech_context
+  - edit_data_pipeline.text_edit
+  - artifact_ops.extract_spans
+  - artifact_ops.speaker_scoped_edit
+  - no_reference_voice_conversion
+positive_signals:
+  - replace with
+  - replace all
+  - replace every
+  - change the word
+  - change all
+  - change every
+  - with a female voice
+  - with a woman's voice
+  - with a women voice
+  - women's voice
+  - woman voice
+  - female voice
+  - with a male voice
+  - man's voice
+  - male voice
+  - child voice
+  - kid voice
+  - elderly voice
+  - old voice
+  - younger voice
+  - target voice
+  - voice constraint
+  - perfectly cloning the speaker's voice
+required_evidence: [source_text, lexical_target_spans, target_voice_description]
+workflow:
+  - identify_each_high_level_objective_as_lexical_content_change_and_voice_or_timbre_constraint
+  - run_or_reuse_speech_context_for_source_text_and_optional_word_timestamps
+  - perform_existing_audio_lexical_change_with_edit_data_pipeline_text_edit
+  - feed_the_text_edit_output_audio_to_no_reference_voice_conversion_or_scoped_speaker_conversion
+  - preserve_successful_prior_hops_and_only_repair_the_failed_hop_when_verifier_feedback_is_returned
+rationale: A request can require both changed words and a different target voice. The lexical edit and the target voice rendering are separate objectives with different tool contracts, so they should be planned as an ordered multi-hop workflow instead of collapsing either constraint into unsupported or a single text-edit call.
+guardrails:
+  - Do not mark the whole request unsupported merely because edit_data_pipeline.text_edit cannot render a requested female, male, child, elderly, or otherwise described target voice.
+  - Do not ask text_edit to synthesize a voice class; it only changes existing-source words while preserving local timing and identity as much as possible.
+  - Do not ask pitch_rate_edit to perform lexical replacement, deletion, insertion, or name/entity substitution.
+  - If the voice constraint applies only to edited spans, preserve the rest of the audio and stitch the converted edited spans back with artifact_ops.
+  - If no reference audio is provided for the target voice, synthesize or select an independent target voice reference through the no-reference voice design path before SeedVC-style conversion.
+  - If either hop is unsupported or unavailable, return a structured boundary for that hop without weakening the other objective.

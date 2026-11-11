@@ -1,0 +1,114 @@
+skill_id: affective_speaker_style_edit
+description: Apply scoped emotion or affective speaking-style edits by selecting the target span and then using the matching edit-data-pipeline operation.
+priority: 105
+selected_tools: [perception.audio_fallback, artifact_ops]
+runtime_operations: [artifact_ops.speaker_scoped_edit, edit_data_pipeline.emotion_style_edit, edit_data_pipeline.pitch_rate_edit]
+negative_signals:
+  - sing
+  - singing
+  - song
+  - rap
+  - rapping
+  - accent
+  - dialect
+  - telephone
+  - radio
+  - underwater
+  - wind
+  - muffled
+  - 唱歌
+  - 歌唱
+  - 说唱
+  - 口音
+  - 方言
+positive_signals:
+  - female speaker
+  - male speaker
+  - child speaker
+  - speaker's first sentence
+  - speaker's second sentence
+  - speaker's first utterance
+  - speaker's last utterance
+  - first speaker's first sentence
+  - second speaker's first sentence
+  - speaker's first line
+  - speaker's last utterance
+  - ordinal speaker sentence
+  - doting
+  - affectionate
+  - loving
+  - tender
+  - caring
+  - fond
+  - cheerful
+  - soothing
+  - calm
+  - calmer
+  - happy
+  - happier
+  - sad
+  - sadder
+  - angry
+  - angrier
+  - surprised
+  - melancholic
+  - fearful
+  - afraid
+  - disgusted
+  - depressed
+  - hushed
+  - reflective
+  - emotional style
+  - theatrical style
+  - theatrical
+  - dramatic
+  - whisper style
+  - whispering voice
+  - shouting voice
+  - yelling style
+  - questioning tone
+  - declarative tone
+  - rising intonation
+  - falling intonation
+  - deeper voice
+  - sound deeper
+  - lower pitch
+  - make male speaker sound deeper
+  - male speaker voices sound deeper
+  - all instances of a quoted word spoken with a questioning tone
+  - change a quoted phrase from questioning to declarative
+  - change the last word to a questioning tone
+  - make the final word rising
+  - sound more
+  - speaker sound more
+required_evidence: [target_speaker_or_segment, source_text_for_selected_spans]
+workflow:
+  - decompose_compound_requests_into_explicit_style_event_and_preservation_objectives_before_step_selection
+  - ground_the_requested_speaker_or_segment_with_perception_audio_fallback_when_needed
+  - for_all_instances_of_a_quoted_word_or_phrase_filter_candidate_segments_by_the_source_side_prosody_property_before_editing
+  - for_short_phrase_level_questioning_to_declarative_edits_shrink_segment_spans_to_the_phrase_or_question_mark_subspan_then_try_emotion_style_edit_first
+  - for_last_word_to_questioning_tone_requests_use_source_text_or_perception_transcript_to_quote_the_final_word_then_apply_pitch_rate_edit
+  - for_speaker_scoped_deeper_or_lower_pitch_requests_keep_the_gender_or_role_selector_and_normalize_pitch_shift_semitones_to_pitch_rate_edit
+  - preserve_ordinal_speaker_plus_local_sentence_or_turn_selectors_for_speaker_scoped_edit
+  - for_whisper_or_shouting_target_styles_use_audio_effects_vocal_effort_presets_when_emotion_service_lacks_desc_support
+  - map_affective_style_words_to_supported_emotion_or_pitch_rate_tags
+  - use_pitch_rate_or_local_declarative_pitch_fallback_only_when_pitch_is_explicitly_requested_or_emotion_style_is_unavailable
+  - call_artifact_ops_speaker_scoped_edit_or_foreground_remix_only_as_a_span_wrapper_with_nested_edit_data_pipeline_style_operation
+  - reconstruct_only_the_selected_spans_and_preserve_other_audio
+  - if_the_selection_is_entire_dialogue_apply_to_all_speech_segments
+rationale: User-facing affect, vocal effort, and intonation words are broader than the edit-data-pipeline level-tag set. The planner and executor should map labels such as doting, affectionate, anger, questioning tone, declarative tone, theatrical style, whispering, or shouting into supported audio_effects vocal-effort presets, emotion tags, or explicit pitch_rate_edit tags rather than failing argument construction. For questioning-to-declarative tone changes, prefer emotion_style_edit as the first attempt because the request is a perceived delivery/tone change rather than a lexical edit or a purely mechanical pitch shift. When an affective request is combined with event cleanup, reference matching, or preservation constraints, those are separate high-level objectives that must be visible in plan metadata before choosing steps. When an instruction says "the second speaker's first sentence", "the first line by the male speaker", or similar, keep that selector as a local speaker-scoped span request instead of converting it to a global first sentence. When a quoted word/phrase is further constrained by source prosody, e.g. "all instances of 'friends' spoken with a questioning tone", select only matching source-side phrase occurrences and pass phrase-level text/audio to emotion_style_edit first so unrelated trailing words are preserved.
+guardrails:
+  - artifact_ops.speaker_scoped_edit is not the style model. For scoped emotion/tone/style/rate/pitch/text edits, it must carry edit_op=edit_data_pipeline.emotion_style_edit, edit_data_pipeline.pitch_rate_edit, or edit_data_pipeline.text_edit as appropriate.
+  - If the request is not actually scoped to a speaker/role/time/semantic segment, use edit_data_pipeline.emotion_style_edit or pitch_rate_edit directly instead of wrapping in artifact_ops.speaker_scoped_edit.
+  - Do not use this for speaker identity or timbre conversion; use voice conversion skills for timbre.
+  - Do not apply the style globally when the instruction scopes the edit to a female, male, child, role, or ordinal speaker.
+  - Do not let emotion_style_edit stand in for a separate cleanup objective such as removing laughter, coughs, sighs, applause, or background events. Keep the cleanup objective explicit in metadata.high_level_objectives and either plan a separate artifact_ops event edit or keep the event-removal requirement in artifact_ops.speaker_scoped_edit executable params.
+  - For "change emotion/style and remove laughter" requests, plan objective coverage for both the style transformation and the laughter-removal target; preserving original voice/text is a third preservation objective, not optional prose.
+  - For scoped deeper/lower-pitch requests, keep the selector separate from the edit instruction; the nested edit should carry pitch_shift/pitch_rate_edit with concrete semitones, not only "male speaker" as the edit text.
+  - Do not treat "all instances of a quoted word/phrase" as the whole dialogue merely because the selector contains the word "all"; localize each matching phrase occurrence.
+  - Do not edit declarative, chant, or unrelated occurrences of the same word when the instruction says the source occurrence must be questioning/interrogative/rising.
+  - For "last word" questioning-tone requests, target only the final lexical word and preserve the earlier sentence tone/rate.
+  - For ordinal speaker plus ordinal sentence/line/turn instructions, select the Nth utterance inside the resolved speaker's own ordered turns; do not select the global Nth sentence.
+  - Do not encode whispering or shouting as fake angry/happy emotion tags; route them to audio_effects whisper_style/shouting_style unless a dedicated generative vocal-effort tool is available.
+  - Keep rap/singing style generation on the ACE-Step/singing-rap workflow instead of emotion_style_edit.
+  - If selected spans lack transcript text, fail with the missing transcript reason or skip only nonverbal spans that cannot be rendered by tagged speech editing.

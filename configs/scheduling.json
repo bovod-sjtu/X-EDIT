@@ -1,0 +1,17 @@
+{
+  "planner": {
+    "component": "planner",
+    "max_concurrency": 2,
+    "queue_timeout_sec": 900.0,
+    "request_timeout_sec": 900.0,
+    "schema_version": "x-editor.component-request-budget/v2"
+  },
+  "reasoner": {
+    "component": "reasoner",
+    "max_concurrency": 2,
+    "queue_timeout_sec": 900.0,
+    "request_timeout_sec": 900.0,
+    "schema_version": "x-editor.component-request-budget/v2"
+  },
+  "schema_version": "x-editor.provider-scheduling/v2"
+}

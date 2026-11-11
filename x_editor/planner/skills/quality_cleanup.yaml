@@ -1,0 +1,26 @@
+skill_id: quality_cleanup
+description: Improve speech clarity without changing speaker identity or content.
+priority: 70
+selected_tools: [speech_enhancement]
+runtime_operations: [speech_enhancement, artifact_ops.speaker_scoped_edit]
+positive_signals:
+  - denoise
+  - noise
+  - clean
+  - clear
+  - clarity
+  - enhance
+  - dereverb
+  - electronic voice to natural voice
+  - robotic voice to natural voice
+  - synthetic voice to natural voice
+  - make the man's electronic voice natural
+workflow:
+  - if_request_is_scoped_to_speaker_or_segment_first_ground_that_span_with_perception_audio_fallback
+  - for_electronic_robotic_or_processed_voice_to_natural_voice_use_speech_enhancement_not_no_reference_voice_design
+  - speech_enhancement
+rationale: Improve speech clarity without changing speaker identity or content.
+guardrails:
+  - Do not use enhancement for extraction, voice conversion, or content edits.
+  - Electronic/robotic/processed voice to natural/normal voice is a cleanup/de-processing request; do not synthesize a new target voice unless the user asks for a different speaker identity or age/gender class.
+  - When scoped to a man/woman/role/segment, use artifact_ops.speaker_scoped_edit with nested speech_enhancement and preserve the rest of the audio.

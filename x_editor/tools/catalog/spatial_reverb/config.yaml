@@ -1,0 +1,14 @@
+name: spatial_reverb
+server:
+  command: ["uv", "run", "--frozen", "--project", ".", "python", "mcp_server.py"]
+  working_dir: "."
+  env:
+    UV_PROJECT_ENVIRONMENT: ".venv"
+    UV_LINK_MODE: "copy"
+    RUST_LOG: "warn"
+    PYTHONNOUSERSITE: "1"
+  resources:
+    gpu: false
+    memory_gb: 4
+  lifecycle: session
+  startup_timeout_sec: 120

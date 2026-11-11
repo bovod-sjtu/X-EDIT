@@ -1,0 +1,504 @@
+{
+  "allowed_edit_operations": [
+    "artifact_ops.beep_spans",
+    "artifact_ops.concat",
+    "artifact_ops.extract_spans",
+    "artifact_ops.mute_spans",
+    "artifact_ops.reconstruct",
+    "artifact_ops.remove_spans",
+    "artifact_ops.reorder_spans",
+    "artifact_ops.silence",
+    "artifact_ops.speaker_scoped_edit",
+    "audio_effects",
+    "edit_data_pipeline.audio_assembly",
+    "edit_data_pipeline.boundary_smooth",
+    "edit_data_pipeline.emotion_style_edit",
+    "edit_data_pipeline.pause_edit",
+    "edit_data_pipeline.pitch_rate_edit",
+    "edit_data_pipeline.pitch_shift",
+    "edit_data_pipeline.speech_rate",
+    "edit_data_pipeline.text_edit",
+    "edit_data_pipeline.volume_normalize",
+    "emphasis_stress_edit",
+    "intra_audio_voice_transfer",
+    "no_reference_voice_conversion",
+    "qwen3_tts",
+    "seed_vc",
+    "spatial_reverb",
+    "speech_enhancement",
+    "speech_separation",
+    "foreground_background_remix",
+    "artifact_ops.apply_gain",
+    "auk"
+  ],
+  "allowed_perception_operations": [
+    "perception.speech_context",
+    "perception.speaker_attributed_review",
+    "perception.semantic_span_review",
+    "perception.audio_fallback",
+    "perception.timestamped_caption",
+    "perception.flexsed_events"
+  ],
+  "edit_operation_params": {
+    "emphasis_stress_edit": {
+      "emphasis_strategy": "p1_local_resynthesis"
+    },
+    "foreground_background_remix": {
+      "preserve_duration": true
+    },
+    "no_reference_voice_conversion": {
+      "voice_design_backend": "qwen3_tts"
+    },
+    "speech_separation": {
+      "output_format": "WAV"
+    }
+  },
+  "evaluator_mode": "disabled",
+  "evidence_required_operations": [
+    "artifact_ops.beep_spans",
+    "artifact_ops.extract_spans",
+    "artifact_ops.mute_spans",
+    "artifact_ops.remove_spans",
+    "artifact_ops.speaker_scoped_edit"
+  ],
+  "executor_llm_mode": "disabled",
+  "fallback_mode": "disabled",
+  "max_perception_review_attempts": 1,
+  "perception": {
+    "audio_content_part": null,
+    "authentication_mode": "none",
+    "base_url": "http://127.0.0.1:8011/v1",
+    "cache_mode": "disabled",
+    "chat_template_kwargs": {},
+    "component": "perception",
+    "credential_env": null,
+    "json_repair": "disabled",
+    "max_output_tokens": 1536,
+    "max_transport_retries": 0,
+    "model": "Qwen3Omni-Instruct",
+    "provider": "qwen3_omni",
+    "request_body": {},
+    "response_format_fallback": "disabled",
+    "schema_repair": "disabled",
+    "schema_version": "x-editor.frozen-provider-policy/v1",
+    "seed": 0,
+    "temperature": 0.0,
+    "timeout_sec": 180.0
+  },
+  "perception_operation_params": {
+    "perception.audio_fallback": {
+      "force_gemini": true,
+      "refresh_cache": true,
+      "run_specialized": false,
+      "strict": true
+    },
+    "perception.flexsed_events": {
+      "strict": true
+    },
+    "perception.semantic_span_review": {
+      "strict": true
+    },
+    "perception.speaker_attributed_review": {
+      "enable_omni_review": false,
+      "refresh_cache": true,
+      "run_specialized": true,
+      "speaker_evidence_backend": "auto",
+      "strict": false,
+      "supplement_speaker_attributes": true,
+      "use_sedicow": true,
+      "use_specialist_prior": true,
+      "use_temporal_reasoning": false
+    },
+    "perception.speech_context": {
+      "refresh_cache": true,
+      "strict": true
+    },
+    "perception.timestamped_caption": {
+      "enable_candidate_rubric": false,
+      "require_flexsed_prior_success": false,
+      "strict": true,
+      "use_flexsed_prior": true
+    }
+  },
+  "perception_operation_providers": {},
+  "perception_route_policies": [
+    {
+      "cache_mode": "refresh",
+      "fallback_mode": "disabled",
+      "max_provider_calls": 0,
+      "max_service_calls": 2,
+      "max_tool_calls": 0,
+      "operation": "perception.speech_context",
+      "route_id": "ts_asr_grounding",
+      "schema_version": "x-editor.open-provider-perception-route-policy/v1"
+    },
+    {
+      "cache_mode": "refresh",
+      "fallback_mode": "disabled",
+      "max_provider_calls": 2,
+      "max_service_calls": 4,
+      "max_tool_calls": 0,
+      "operation": "perception.speaker_attributed_review",
+      "route_id": "speaker_specialists_plus_omni_review",
+      "schema_version": "x-editor.open-provider-perception-route-policy/v1"
+    },
+    {
+      "cache_mode": "refresh",
+      "fallback_mode": "disabled",
+      "max_provider_calls": 1,
+      "max_service_calls": 2,
+      "max_tool_calls": 0,
+      "operation": "perception.semantic_span_review",
+      "route_id": "ts_asr_optional_omni_rubric",
+      "schema_version": "x-editor.open-provider-perception-route-policy/v1"
+    },
+    {
+      "cache_mode": "disabled",
+      "fallback_mode": "disabled",
+      "max_provider_calls": 1,
+      "max_service_calls": 0,
+      "max_tool_calls": 0,
+      "operation": "perception.audio_fallback",
+      "route_id": "qwen3_omni_direct",
+      "schema_version": "x-editor.open-provider-perception-route-policy/v1"
+    },
+    {
+      "cache_mode": "disabled",
+      "fallback_mode": "disabled",
+      "max_provider_calls": 3,
+      "max_service_calls": 0,
+      "max_tool_calls": 1,
+      "operation": "perception.timestamped_caption",
+      "route_id": "flexsed_prior_plus_qwen3_omni_caption",
+      "schema_version": "x-editor.open-provider-perception-route-policy/v1"
+    },
+    {
+      "cache_mode": "disabled",
+      "fallback_mode": "disabled",
+      "max_provider_calls": 0,
+      "max_service_calls": 0,
+      "max_tool_calls": 1,
+      "operation": "perception.flexsed_events",
+      "route_id": "flexsed_event_detection",
+      "schema_version": "x-editor.open-provider-perception-route-policy/v1"
+    }
+  ],
+  "planner": {
+    "audio_content_part": null,
+    "authentication_mode": "none",
+    "base_url": "http://127.0.0.1:8040/v1",
+    "cache_mode": "disabled",
+    "chat_template_kwargs": {
+      "enable_thinking": false
+    },
+    "component": "planner",
+    "credential_env": null,
+    "json_repair": "disabled",
+    "max_output_tokens": 8192,
+    "max_transport_retries": 0,
+    "model": "Qwen/Qwen3.8-27B",
+    "provider": "qwen3_8",
+    "request_body": {},
+    "response_format_fallback": "disabled",
+    "schema_repair": "disabled",
+    "schema_version": "x-editor.frozen-provider-policy/v1",
+    "seed": 0,
+    "temperature": 0.0,
+    "timeout_sec": 900.0
+  },
+  "planner_prompt_profile": "robust_contract_v6",
+  "reasoner_shadow": {
+    "calls_per_planner_gateway": 1,
+    "execution_authority": "none",
+    "mode": "disabled",
+    "planner_input_authority": "none",
+    "provider": null,
+    "schema_version": "x-editor.open-provider-reasoner-shadow-policy/v1",
+    "strategy": "direct_json"
+  },
+  "repair_mode": "disabled",
+  "runtime_capability_profile": "custom",
+  "schema_version": "x-editor.open-provider-workflow-profile/v1",
+  "semantic_planning": {
+    "action_abstraction_version": "hierarchical_v1",
+    "action_representation": "graph",
+    "evidence_review_max_output_tokens": 8192,
+    "mode": "advisory_plan",
+    "planner_argument_contract_format": "argument-table/v1",
+    "planner_evidence_index_format": "prefix-plus-suffix/v1",
+    "planner_retry_guidance_mode": "actionable/v1",
+    "reasoner": {
+      "audio_content_part": null,
+      "authentication_mode": "none",
+      "base_url": "http://127.0.0.1:8040/v1",
+      "cache_mode": "disabled",
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      },
+      "component": "reasoner",
+      "credential_env": null,
+      "json_repair": "disabled",
+      "max_output_tokens": 8192,
+      "max_transport_retries": 0,
+      "model": "Qwen/Qwen3.8-27B",
+      "provider": "qwen3_8",
+      "request_body": {},
+      "response_format_fallback": "disabled",
+      "schema_repair": "disabled",
+      "schema_version": "x-editor.frozen-provider-policy/v1",
+      "seed": 0,
+      "temperature": 0.0,
+      "timeout_sec": 900.0
+    },
+    "reasoner_retry_context_mode": "current_state/v1",
+    "reasoner_strategy": "evidence_memo",
+    "schema_version": "x-editor.open-provider-semantic-planning-policy/v2",
+    "source_observation_bootstrap": "speech_context_per_audio"
+  },
+  "targeted_perception_rounds": 2,
+  "tool_prior_binding": {
+    "eligible_as_final_outcome": false,
+    "evaluator_role": "offline_prior_estimator",
+    "freeze_status": "explicitly_frozen",
+    "schema_version": "x-editor.tool-prior-experiment-binding/v1",
+    "snapshot_fingerprint": "3d36a6f9ff4f55399e37f9f26f4d1e559645ab6a3d19213ef1edee44c06534c7",
+    "snapshot_id": "tool_prior_dev_20260820",
+    "snapshot_version": "2026-08-20.1",
+    "source_data_role": "development_calibration",
+    "usage": "route_selection_guidance_only"
+  },
+  "tool_prior_snapshot": {
+    "content_sha256": "3d36a6f9ff4f55399e37f9f26f4d1e559645ab6a3d19213ef1edee44c06534c7",
+    "guidance": [
+      {
+        "comparison_group": "pause_method_v1",
+        "decision": "prefer",
+        "decision_reason": "Only this paired development comparison has a bootstrap interval entirely above zero; prefer speech-aware pause editing for matched natural in-speech pause requests.",
+        "guidance_id": "natural_in_speech_pause_route_preference_v1",
+        "ordering_semantics": "explicit_preference_only",
+        "pairwise_evidence": [
+          {
+            "bootstrap_95pct_ci": [
+              0.2666666667,
+              0.6
+            ],
+            "conclusion": "preferred_better",
+            "losses": 0,
+            "mean_capacity_delta_a_minus_b": 0.4333333333,
+            "paired_sample_count": 10,
+            "route_a_id": "speech_aware_pause_edit",
+            "route_b_id": "deterministic_silence_reconstruct",
+            "ties": 2,
+            "wins": 8
+          }
+        ],
+        "preferred_route_id": "speech_aware_pause_edit",
+        "routes": [
+          {
+            "empirical_flow_capacity_itt": 0.9333333333,
+            "frozen_sample_count": 10,
+            "operations": [
+              "edit_data_pipeline.pause_edit"
+            ],
+            "route_id": "speech_aware_pause_edit"
+          },
+          {
+            "empirical_flow_capacity_itt": 0.5,
+            "frozen_sample_count": 10,
+            "operations": [
+              "artifact_ops.silence",
+              "artifact_ops.reconstruct"
+            ],
+            "route_id": "deterministic_silence_reconstruct"
+          }
+        ],
+        "task_scope": "natural_in_speech_pause"
+      },
+      {
+        "comparison_group": "emphasis_route_v1",
+        "decision": "no_preference",
+        "decision_reason": "The paired development interval crosses zero; do not rank these routes or introduce an implicit tie-break.",
+        "guidance_id": "emphasis_route_no_preference_v1",
+        "ordering_semantics": "none",
+        "pairwise_evidence": [
+          {
+            "bootstrap_95pct_ci": [
+              -0.1,
+              0.1333333333
+            ],
+            "conclusion": "not_distinguished",
+            "losses": 1,
+            "mean_capacity_delta_a_minus_b": 0.0333333333,
+            "paired_sample_count": 10,
+            "route_a_id": "p1_local_resynthesis",
+            "route_b_id": "local_pitch_plus_4",
+            "ties": 7,
+            "wins": 2
+          }
+        ],
+        "preferred_route_id": null,
+        "routes": [
+          {
+            "empirical_flow_capacity_itt": 0.6666666667,
+            "frozen_sample_count": 10,
+            "operations": [
+              "emphasis_stress_edit"
+            ],
+            "route_id": "p1_local_resynthesis"
+          },
+          {
+            "empirical_flow_capacity_itt": 0.6333333333,
+            "frozen_sample_count": 10,
+            "operations": [
+              "edit_data_pipeline.pitch_rate_edit"
+            ],
+            "route_id": "local_pitch_plus_4"
+          }
+        ],
+        "task_scope": "local_emphasis"
+      },
+      {
+        "comparison_group": "local_pitch_method_v1",
+        "decision": "no_preference",
+        "decision_reason": "The paired development interval crosses zero; do not rank codec and IndexTTS2 routes or introduce an implicit tie-break.",
+        "guidance_id": "local_pitch_method_no_preference_v1",
+        "ordering_semantics": "none",
+        "pairwise_evidence": [
+          {
+            "bootstrap_95pct_ci": [
+              -0.1,
+              0.2666666667
+            ],
+            "conclusion": "not_distinguished",
+            "losses": 2,
+            "mean_capacity_delta_a_minus_b": 0.0666666667,
+            "paired_sample_count": 10,
+            "route_a_id": "local_pitch_qwen3_codec",
+            "route_b_id": "local_pitch_indextts2_cco",
+            "ties": 5,
+            "wins": 3
+          }
+        ],
+        "preferred_route_id": null,
+        "routes": [
+          {
+            "empirical_flow_capacity_itt": 0.7333333333,
+            "frozen_sample_count": 10,
+            "operations": [
+              "edit_data_pipeline.pitch_rate_edit"
+            ],
+            "route_id": "local_pitch_qwen3_codec"
+          },
+          {
+            "empirical_flow_capacity_itt": 0.6666666667,
+            "frozen_sample_count": 10,
+            "operations": [
+              "edit_data_pipeline.pitch_rate_edit"
+            ],
+            "route_id": "local_pitch_indextts2_cco"
+          }
+        ],
+        "task_scope": "local_pitch_edit"
+      },
+      {
+        "comparison_group": "global_rate_route_v1",
+        "decision": "no_preference",
+        "decision_reason": "Both available paired development intervals cross zero; do not rank the three rate routes or introduce an implicit tie-break.",
+        "guidance_id": "global_rate_route_no_preference_v1",
+        "ordering_semantics": "none",
+        "pairwise_evidence": [
+          {
+            "bootstrap_95pct_ci": [
+              -0.0666666667,
+              0.1333333334
+            ],
+            "conclusion": "not_distinguished",
+            "losses": 1,
+            "mean_capacity_delta_a_minus_b": 0.0333333333,
+            "paired_sample_count": 10,
+            "route_a_id": "hybrid_wsola_indextts2_rate",
+            "route_b_id": "tagged_prosody_rate",
+            "ties": 7,
+            "wins": 2
+          },
+          {
+            "bootstrap_95pct_ci": [
+              -0.0666666667,
+              0.1333333334
+            ],
+            "conclusion": "not_distinguished",
+            "losses": 1,
+            "mean_capacity_delta_a_minus_b": 0.0333333333,
+            "paired_sample_count": 10,
+            "route_a_id": "hybrid_wsola_indextts2_rate",
+            "route_b_id": "waveform_wsola_rate",
+            "ties": 7,
+            "wins": 2
+          }
+        ],
+        "preferred_route_id": null,
+        "routes": [
+          {
+            "empirical_flow_capacity_itt": 0.8,
+            "frozen_sample_count": 10,
+            "operations": [
+              "edit_data_pipeline.speech_rate"
+            ],
+            "route_id": "hybrid_wsola_indextts2_rate"
+          },
+          {
+            "empirical_flow_capacity_itt": 0.7666666667,
+            "frozen_sample_count": 10,
+            "operations": [
+              "edit_data_pipeline.pitch_rate_edit"
+            ],
+            "route_id": "tagged_prosody_rate"
+          },
+          {
+            "empirical_flow_capacity_itt": 0.7666666667,
+            "frozen_sample_count": 10,
+            "operations": [
+              "edit_data_pipeline.speech_rate"
+            ],
+            "route_id": "waveform_wsola_rate"
+          }
+        ],
+        "task_scope": "global_speech_rate_edit"
+      }
+    ],
+    "prior_snapshot_status": "development_only_requires_explicit_freeze",
+    "schema_version": "x-editor.tool-prior-snapshot/v1",
+    "snapshot_id": "tool_prior_dev_20260820",
+    "snapshot_version": "2026-08-20.1",
+    "source": {
+      "capacity_report_path": "artifacts/tool_comparison/20260820_diverse_quality_prior/scoring_qwen3_omni_tool_prior_v1/capacity_report.json",
+      "capacity_report_schema_version": "x-editor.tool-prior-capacity-report/v1",
+      "capacity_report_sha256": "068ce4689a5e9abba209c8869e7145ed7bf1a91db29ecace32db0b74396f376c",
+      "claim_boundary": "Empirical route-selection prior over the frozen v4 development distribution and Qwen3-Omni judge protocol; not a universal tool capacity, held-out result, final outcome, or human preference.",
+      "data_role": "development_calibration",
+      "eligible_as_final_outcome": false,
+      "evaluator_role": "offline_prior_estimator",
+      "experiment_kind": "offline_evaluator_tool_prior_calibration",
+      "heldout_or_test_outcomes_used": false,
+      "release_sha256": "309c5090efd2f7254bd031715b2dc3c588ed6dca4b5fdea2260c04fd1602e2d6"
+    },
+    "usage_policy": {
+      "automatic_catalog_update": false,
+      "automatic_planner_update": false,
+      "automatic_runtime_update": false,
+      "can_gate_runtime": false,
+      "guidance_scope": "route_selection_guidance_only",
+      "prohibited_uses": [
+        "derive_or_update_from_heldout_or_test_outcomes",
+        "report_as_heldout_or_final_outcome",
+        "per_case_route_adaptation",
+        "automatic_policy_mutation"
+      ],
+      "requires_experiment_profile_fingerprint": true,
+      "requires_explicit_freeze": true,
+      "requires_explicit_validation": true
+    }
+  },
+  "w2_general_perception_operation": "perception.audio_fallback",
+  "workflow_protocol_profile": "flow_safe"
+}

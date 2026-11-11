@@ -1,0 +1,48 @@
+tool_id: paralinguistic_event_bank
+mcp_tool_name: paralinguistic_event_bank.materialize
+input_schema:
+  type: object
+  required:
+    - event
+    - output_path
+  properties:
+    event:
+      type: string
+      enum: [breath, laugh, cough, sigh]
+    output_path:
+      type: string
+    source_audio_path:
+      type: string
+      description: Optional source audio whose sample rate/channels should be matched.
+    event_asset_path:
+      type: string
+      description: Optional explicit event asset path.
+    event_bank_dir:
+      type: string
+      description: Optional directory searched recursively for files whose stem contains the event name.
+output_schema:
+  type: object
+  required:
+    - output_audio_path
+    - event
+  properties:
+    output_audio_path:
+      type: string
+    event:
+      type: string
+    event_asset_source:
+      type: string
+    event_asset_debug:
+      type: object
+    duration_sec:
+      type: number
+defaults: {}
+validation:
+  frontend_check:
+    - Asset should audibly match the requested breath/laugh/cough/sigh class.
+    - Synthetic fallback metadata must be visible when no offline asset was found.
+examples:
+  - scenario: Materialize a cough asset for deterministic insertion.
+    arguments:
+      event: cough
+      output_path: "/data/xedit/runs/cough_asset.wav"

@@ -1,0 +1,35 @@
+tool_id: spatial_reverb
+display_name: Spatial Room Reverb
+backend: optional_gpuRIR_or_synthetic_rir
+category: spatial_audio_effect
+purpose: >
+  Add physically motivated room reverberation so speech sounds as if it is in a
+  requested space such as a small room, large empty room, hall, cathedral, or
+  tiled bathroom. Uses gpuRIR when available and falls back to a deterministic
+  synthetic RIR in CPU-only environments.
+when_to_use:
+  - User asks to make audio sound like it is in a room, hall, cathedral, bathroom, tunnel-like echo, or large empty space.
+  - User asks for more/less room reverb, echo, reverberation, spaciousness, or distance without changing words or speaker identity.
+  - User describes spatial acoustic conditions, such as "very large empty room" or "空荡的大房间".
+do_not_use_when:
+  - User asks to remove reverb or improve clarity; prefer speech_enhancement with dereverb/clarity.
+  - User asks to change background music independently from speech; current foreground/background scene editing remains unsupported.
+  - User asks for spatial trajectory or moving source simulation; this tool currently applies a static source/receiver RIR.
+  - User asks to change text, emotion, pitch, speed, volume, or speaker identity; use the corresponding edit or VC tool first.
+inputs:
+  - input_audio
+  - room_preset
+  - optional_room_size_m
+  - optional_t60
+  - optional_dry_wet
+outputs:
+  - reverberant_audio
+  - room_impulse_response
+cost:
+  gpu_required: false
+  expected_latency: medium
+constraints:
+  - gpuRIR backend requires CUDA/CMake-compatible installation; otherwise the wrapper uses synthetic RIR fallback.
+  - Applies one static room response to the whole input; it does not model a moving source or changing room over time.
+  - Reverb can extend the output tail unless preserve_duration=true.
+  - Strong wet settings may reduce intelligibility; use moderate dry_wet for speech unless the user explicitly requests a very reverberant space.

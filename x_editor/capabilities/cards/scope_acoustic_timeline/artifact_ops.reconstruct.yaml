@@ -1,0 +1,120 @@
+schema_version: x-editor.operation-capability-card/v1
+operation: artifact_ops.reconstruct
+semantic_effects: [timeline_reconstruct, timeline_replace]
+supported_scopes: [segment, timeline]
+requirements:
+  inputs: [inputs.input_audio]
+  evidence: [base_timeline_binding]
+preservation:
+  - dimension: non_target_waveform
+    level: strong
+    evidence_kind: declared_design_fact
+    rationale: Local-region modes replace only declared spans in the base waveform.
+  - dimension: timeline_duration
+    level: strong
+    evidence_kind: declared_design_fact
+    rationale: span_replacement and timeline edit mode replace fit audio to target durations; explicit splice preserves generated duration and shifts subsequent content.
+quality_characteristics:
+  - dimension: multi_edit_coordinate_consistency
+    level: high
+    evidence_kind: declared_design_fact
+    rationale: Batch edits are sorted and validated against one base timeline before application.
+artifact_risks:
+  - risk: replacement_boundary_discontinuity
+    level: high
+    evidence_kind: declared_design_fact
+    rationale: Current replacement uses direct range concatenation without a boundary crossfade.
+composition:
+  supports_batch_targets: true
+  cumulative_degradation_risk: low
+parameter_contract:
+  additional_parameters: reject
+  planner_selectable:
+    - path: inputs.input_audio
+      value_type: string
+      required: true
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: base_timeline_audio
+    - path: params.edits
+      value_type: array
+      required: false
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: base_timeline_edit_records
+    - path: params.selected_spans
+      value_type: array
+      required: false
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: replacement_target_spans
+    - path: params.edited_spans_audio_paths
+      value_type: array
+      required: false
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: replacement_audio_list
+    - path: params.edited_audio_path
+      value_type: string
+      required: false
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: replacement_or_full_timeline_audio
+    - path: params.instruction_st
+      value_type: array
+      required: false
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: timeline_edit_specs
+    - path: params.reconstruction_mode
+      value_type: enum
+      required: false
+      enum_values: [timeline_edits, span_replacement, full_timeline_passthrough]
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: reconstruction_contract_mode
+    - path: params.edited_artifact_scope
+      value_type: enum
+      required: false
+      enum_values: [local_regions, full_timeline]
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: edited_artifact_scope
+  framework_owned: [params.output_path, params.output_dir, params._agentic_mode]
+  conditional_rules:
+    - when: {path: params.edits, operator: present}
+      require: [params.reconstruction_mode, params.edited_artifact_scope]
+      forbid: [params.edited_audio_path, params.edited_spans_audio_paths]
+    - when: {path: params.edited_spans_audio_paths, operator: present}
+      require: [params.selected_spans, params.reconstruction_mode, params.edited_artifact_scope]
+      forbid: [params.edits]
+    - when: {path: params.reconstruction_mode, operator: equals, value: timeline_edits}
+      require: [params.edits, params.edited_artifact_scope]
+      forbid: [params.edited_audio_path, params.edited_spans_audio_paths]
+    - when: {path: params.reconstruction_mode, operator: equals, value: span_replacement}
+      require: [params.selected_spans, params.edited_artifact_scope]
+      forbid: [params.edits]
+    - when: {path: params.edited_artifact_scope, operator: equals, value: full_timeline}
+      require: [params.edited_audio_path, params.reconstruction_mode]
+      forbid: [params.edits, params.selected_spans]
+limitations:
+  - 'timeline_edits params.edits entries contain start_sec, end_sec, audio_path, mode. mode=replace fits the generated audio to the source interval; mode=splice removes that interval and inserts the generated audio at its native duration, retaining the source prefix and suffix. Both use source coordinates and require nonoverlapping positive-length intervals. mode=insert is only for zero-length insertion; mode=overlay mixes without removing the source.'
+  - Planner output must not request placeholder_compatibility; that mode is not acceptance eligible.
+  - Span replacement accepts one replacement for all spans or exactly one replacement per span.
+  - This operation replaces or reassembles timeline content; it is not a plain extraction or removal tool.
+  - Do not select it for retain-only grounded spans unless an actual replacement artifact or explicit timeline edit record is available.
+provenance:
+  - source_path: x_editor/runtime/artifact_ops.py
+    source_kind: runtime_handler
+  - source_path: x_editor/runtime/reconstruct_contract.py
+    source_kind: runtime_handler
+  - source_path: tests/test_artifact_ops.py
+    source_kind: test

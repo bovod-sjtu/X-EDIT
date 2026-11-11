@@ -1,0 +1,56 @@
+skill_id: pitch_shift_rubberband
+display_name: Rubberband 高质量变调
+source_mcp: ffmpeg
+tool_names: [pitch_shift_rubberband]
+
+description: 使用 Rubberband 库进行高质量音高变换，不改变播放速度，适合性别转换和音高调整。
+detailed_capability: |
+  通过调整 pitch_ratio 实现音高升降。
+  - ratio < 1.0: 降调（声音变低沉）
+  - ratio > 1.0: 升调（声音变尖锐）
+  - ratio = 1.0: 无变化
+  注意：该工具仅改变基频（pitch），不改变 formant（共振峰）。
+  对于明显的性别转换（如女转男），通常需要配合 EQ 增强低频来弥补 formant 差异。
+
+dimensions: [pitch]
+
+parameters:
+  - name: audio_path
+    type: string
+    required: true
+    description: 输入音频文件路径
+  - name: pitch_ratio
+    type: number
+    required: true
+    description: 音高比例系数
+    constraints: "建议范围 0.5~2.0。女性转男性通常 0.65~0.85；男性转女性通常 1.15~1.4"
+  - name: output_path
+    type: string
+    required: false
+    default: auto
+    description: 输出文件路径，使用 auto 让系统自动生成
+
+output:
+  type: audio_file
+  description: 变调后的音频文件
+
+execution_constraints:
+  should_run_before: [equalizer, bass_boost, deesser, acompressor]
+  should_run_after: [afftdn_denoise, silenceremove]
+  mutually_exclusive_with: [apply_pitch_shift]
+  can_repeat: false
+
+examples:
+  - scenario: "女声转低沉男声"
+    parameters:
+      pitch_ratio: 0.75
+    expected_outcome: "基频从 ~220Hz 降至 ~165Hz，进入男性音高范围，但 formant 仍偏女性，需后续 EQ 补偿"
+  - scenario: "女声转年轻男声"
+    parameters:
+      pitch_ratio: 0.85
+    expected_outcome: "轻微降调，偏中性/年轻男性，自然度较高"
+
+instruction_mapping:
+  "pitch.direction:lower": "pitch_ratio < 1.0，具体值根据 semitones_estimate 估算: ratio ≈ 2^(semitones/12)"
+  "pitch.direction:raise": "pitch_ratio > 1.0"
+  "gender.source:female && gender.target:male": "推荐 pitch_ratio 0.65~0.85，并配合 bass_boost/equalizer"

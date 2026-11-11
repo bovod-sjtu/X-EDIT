@@ -1,0 +1,50 @@
+tool_id: edit_data_pipeline
+display_name: Tagged Speech Editing Toolkit
+backend: selected_dots_model_or_edit_data_pipeline_http
+category: audio_editing_toolkit
+purpose: >
+  Use the dots.tts.edit model by default, or an explicitly selected
+  edit-data-pipeline microservice toolchain, for
+  service-layer tagged text editing, tagged pitch/rate editing, speech-rate
+  conversion with WSOLA plus IndexTTS2 re-synthesis, volume normalization,
+  pause insertion editing, boundary smoothing, and source/target audio assembly.
+when_to_use:
+  - User asks to edit spoken text while preserving the source audio context; use operation text_edit with instruction_st. This is the mandatory first-choice route for replace/delete/insert/swap/correct/modify word, phrase, sentence, or number requests on existing audio.
+  - User asks to raise/lower pitch or make marked speech faster/slower; use operation pitch_rate_edit with <pitch> or <rate> tags.
+  - User asks to change emotion, tone, or speaking style while keeping words unchanged; use operation emotion_style_edit when the requested style can be represented by a supported emotion/type or descriptive <emo desc="..."> tag.
+  - User asks to make speech faster or slower through the legacy rate service; speech_rate still defaults to WSOLA stretch plus IndexTTS2 re-synthesis.
+  - User asks to normalize loudness, adjust volume, or match a target dB level.
+  - User asks to insert a short/medium/long pause; use pause_edit with a point tag in instruction_st.
+  - User provides explicit pause positions or pause intervals for low-level boundary smoothing.
+  - User provides source audio, target audio, and target-tagged transcript spans for audio assembly.
+do_not_use_when:
+  - User needs broad denoising or speech enhancement; prefer speech_enhancement.
+  - User needs reference-speaker voice conversion; prefer seed_vc.
+  - User needs standalone TTS with no source audio to edit; prefer qwen3_tts or another TTS tool.
+  - User asks for emotion/style edit but the emotion_style_edit service stack is not running on the configured HTTP port.
+  - User asks for rap, singing, accent/dialect conversion, voice/timbre identity conversion, acoustic-channel effects, or background/scene effects; use the dedicated tool or fail explicitly.
+  - Required edit positions, transcript, or target audio are missing for pause editing, smoothing, or assembly.
+inputs:
+  - input_audio
+  - operation
+  - operation_specific_parameters
+outputs:
+  - edited_audio
+cost:
+  gpu_required: false
+  expected_latency: medium
+constraints:
+  - Set X_EDITOR_EDIT_BACKEND to dots_tts_edit (default) or edit_data_pipeline before controller startup. The selected HTTP service must be running; never silently switch backends.
+  - "text_edit calls the tagged text-edit pipeline service on /execute and rejects operations/edit_operations payloads."
+  - "Pipeline backend only: text_edit input_audio_path must be a frontend-cut segment strictly shorter than 30 seconds. The dots model instead enforces its own source-plus-output context budget."
+  - "text_edit instruction_st supports only <sub targ=\"new\">old</sub>, <ins>new</ins>, and <del>old</del> labels."
+  - "pitch_rate_edit calls the latest prosody edit pipeline service on /execute; speed and pitch controls must be encoded in instruction_st tags."
+  - "pitch_rate_edit instruction_st supports only <pitch, semitones=N>...</pitch> and <rate, factor=F>...</rate>; use <rate>, not <speed>."
+  - "pause_edit calls the pause edit pipeline service on /execute; pause insertions must be encoded in instruction_st tags such as '<pause act=\"ins\" level=\"2\"/>'."
+  - "Speech-rate resynthesis methods need transcript text and an IndexTTS2 service; the wrapper uses input_audio_path as speaker_audio_path when no explicit speaker reference is provided."
+  - "Some operations depend on upstream services: boundary smoothing needs F5-TTS and may need aligner/VAD; audio assembly may need aligner and smoother."
+  - "Pitch refinement methods can require Qwen3-TTS, IndexTTS2, or MiMo services; pure psola is CPU-only."
+  - "emotion_style_edit calls the emotion/style edit pipeline service on /execute; emotion/style controls must be encoded as '<emo type=\"happy\" level=\"2\">...</emo>' tags or '<emo desc=\"style description\">...</emo>'."
+  - "audio_assembly uses edit_tagged_text with <target>...</target> spans, not instruction_st; speech_rate, volume_normalize, pitch_shift, and boundary_smooth are parameter-only operations."
+  - "If a local edit is scoped to a speaker/role/time span, artifact_ops.speaker_scoped_edit may select and stitch the spans, but its nested edit_op must remain the matching edit_data_pipeline operation when the requested change is lexical, emotion/style, pitch/rate, pause, or volume."
+  - This tool is a service wrapper; it does not import edit-data-pipeline Python modules directly.

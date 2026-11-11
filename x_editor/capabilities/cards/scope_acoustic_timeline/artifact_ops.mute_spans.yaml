@@ -1,0 +1,72 @@
+schema_version: x-editor.operation-capability-card/v1
+operation: artifact_ops.mute_spans
+semantic_effects: [timeline_mute]
+supported_scopes: [speaker, segment, timeline]
+requirements:
+  inputs: [inputs.input_audio]
+  evidence: [timeline_target_grounding]
+preservation:
+  - dimension: timeline_duration
+    level: strong
+    evidence_kind: declared_design_fact
+    rationale: Each target span is replaced by silence of the same duration.
+  - dimension: non_target_waveform
+    level: strong
+    evidence_kind: declared_design_fact
+    rationale: Samples outside selected spans are retained.
+quality_characteristics:
+  - dimension: target_suppression
+    level: high
+    evidence_kind: declared_design_fact
+    rationale: The selected interval is replaced with deterministic zero-valued silence.
+artifact_risks:
+  - risk: hard_silence_boundary
+    level: high
+    evidence_kind: declared_design_fact
+    rationale: The current implementation inserts silence without a boundary fade.
+composition:
+  supports_batch_targets: true
+  cumulative_degradation_risk: low
+parameter_contract:
+  additional_parameters: reject
+  planner_selectable:
+    - path: inputs.input_audio
+      value_type: string
+      required: true
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: source_audio
+    - path: params.selected_spans
+      value_type: array
+      required: true
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: grounded_target_spans
+    - path: params.selection_instruction
+      value_type: string
+      required: false
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: target_selector
+    - path: params.span_padding_sec
+      value_type: number
+      required: false
+      minimum: 0
+      maximum: null
+      default: 0.0
+      semantic_role: target_boundary_padding_sec
+  framework_owned: [params.output_path, params.output_dir, params.strict_explicit_spans, params._agentic_mode]
+  conditional_rules: []
+limitations:
+  - This is a time-interval operation, not source separation. It silences every simultaneous component in each selected interval, including speech, music, other speakers and the target event.
+  - Precise event boundaries do not establish permission to silence protected components. For selective event removal, use evidence of non-overlap or choose an available source-selective workflow; when overlap is unknown, obtain the missing component evidence.
+  - Hard zero-valued silence can expose background discontinuity at span boundaries.
+  - Use removal instead when the user explicitly wants the timeline shortened.
+provenance:
+  - source_path: x_editor/runtime/artifact_ops.py
+    source_kind: runtime_handler
+  - source_path: tests/test_artifact_ops.py
+    source_kind: test

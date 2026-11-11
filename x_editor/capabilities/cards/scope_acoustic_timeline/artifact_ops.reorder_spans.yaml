@@ -1,0 +1,88 @@
+schema_version: x-editor.operation-capability-card/v1
+operation: artifact_ops.reorder_spans
+semantic_effects: [timeline_reorder]
+supported_scopes: [speaker, segment, timeline]
+requirements:
+  inputs: [inputs.input_audio]
+  evidence: [multiple_non_overlapping_target_spans]
+preservation:
+  - dimension: surrounding_timeline
+    level: strong
+    evidence_kind: declared_design_fact
+    rationale: Audio outside destination spans is copied from the base timeline.
+  - dimension: timeline_duration
+    level: strong
+    evidence_kind: declared_design_fact
+    rationale: The default preserve_duration mode fits every source span to its destination slot.
+quality_characteristics:
+  - dimension: turn_order_accuracy
+    level: high
+    evidence_kind: declared_design_fact
+    rationale: Explicit order must be a complete permutation of selected spans.
+artifact_risks:
+  - risk: duration_fit_truncation_or_padding
+    level: high
+    evidence_kind: declared_design_fact
+    rationale: preserve_duration fits source audio to destination slots by truncation or silence padding.
+composition:
+  supports_batch_targets: true
+  cumulative_degradation_risk: low
+parameter_contract:
+  additional_parameters: reject
+  planner_selectable:
+    - path: inputs.input_audio
+      value_type: string
+      required: true
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: base_timeline_audio
+    - path: params.selected_spans
+      value_type: array
+      required: true
+      minimum: null
+      maximum: null
+      min_items: 2
+      default: null
+      semantic_role: reorder_target_spans
+    - path: params.order
+      value_type: array
+      required: false
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: span_index_permutation
+    - path: params.target_speaker_order
+      value_type: array
+      required: false
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: speaker_id_permutation
+    - path: params.preserve_duration
+      value_type: boolean
+      required: false
+      minimum: null
+      maximum: null
+      default: true
+      semantic_role: preserve_destination_slots
+  framework_owned: [params.output_path, params.output_dir, params._agentic_mode]
+  conditional_rules:
+    - when: {path: params.order, operator: present}
+      require: [params.selected_spans]
+      forbid: [params.target_speaker_order]
+    - when: {path: params.target_speaker_order, operator: present}
+      require: [params.selected_spans]
+      forbid: [params.order]
+limitations:
+  - Selected spans must be positive-duration and non-overlapping.
+  - Reordering changes only the playback order of existing acoustic spans; it does not change spoken words, dates, times, quantities, or other semantic values expressed by the speech.
+  - params.order must be a zero-based complete permutation containing every selected span index exactly once.
+  - Duration fitting can audibly truncate or pad turns with unequal lengths.
+provenance:
+  - source_path: x_editor/runtime/artifact_ops.py
+    source_kind: runtime_handler
+  - source_path: x_editor/runtime/reorder_contract.py
+    source_kind: runtime_handler
+  - source_path: tests/test_artifact_ops.py
+    source_kind: test

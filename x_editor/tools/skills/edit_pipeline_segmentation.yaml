@@ -1,0 +1,99 @@
+skill_id: edit_pipeline_segmentation
+display_name: Edit Pipeline 长音频安全切分
+source_mcp: runtime-segmented-edit
+tool_names:
+  - edit_data_pipeline
+  - segmented_edit
+  - ctc_forced_aligner
+  - diarization
+
+description: |
+  对所有需要 edit_data_pipeline 的 speech editing 样例，统一约束长音频切分：
+  每个送入 service 的音频段必须严格小于 30 秒，切分点必须在词边界，且每段必须单说话人。
+
+detailed_capability: |
+  适用 operation：
+  - text_edit
+  - pitch_rate_edit
+  - emotion_style_edit
+  - pause_edit
+  - speech_rate
+  - volume_normalize
+
+  核心规则：
+  - input duration < 30s：可直接调用 edit_data_pipeline。
+  - input duration >= 30s：必须走 segmented_edit。
+  - max_segment_sec 默认 29.5，且不能被调到 >=30。
+  - text_edit 最严格：传给 tagged text-edit service 的 input_audio_path 必须已经是 <30s。
+  - 每个 chunk 必须只包含一个 speaker；默认要求 speaker_segments。
+  - 每个 chunk 边界必须落在 word_timestamps 上。
+  - 缺少 word_timestamps：先跑 forced alignment 或 Gemini perception 补 transcript 后再 alignment。
+  - 缺少 speaker_segments：先跑 diarization。
+
+  输出要求：
+  - 每个 chunk 保存 input/output。
+  - segment_manifest.json 记录 chunk start/end/text/speaker_id/edit result。
+  - 最终音频由 chunk outputs 按原顺序拼接。
+
+dimensions: [segmentation, text, pitch, tempo, emotion, dynamics, analysis]
+
+parameters:
+  - name: input_audio_path
+    type: string
+    required: true
+    description: 待编辑音频。
+  - name: operation
+    type: enum
+    required: true
+    enum_values: [text_edit, pitch_rate_edit, emotion_style_edit, pause_edit, speech_rate, volume_normalize]
+    description: 要分段执行的 edit_data_pipeline operation。
+  - name: source_text
+    type: string
+    required: true
+    description: 全局或当前 segment transcript。
+  - name: word_timestamps
+    type: string
+    required: true
+    description: 词级时间戳。
+  - name: speaker_segments
+    type: string
+    required: true
+    description: 说话人时间段。
+  - name: max_segment_sec
+    type: number
+    required: false
+    default: 29.5
+    description: 最大分段时长。
+    constraints: "0 < max_segment_sec < 30；框架强制上限 29.5"
+
+output:
+  type: audio_file
+  description: 拼接后的编辑音频和 segment_manifest.json。
+
+execution_constraints:
+  should_run_before: [edit_data_pipeline]
+  should_run_after: [ctc_forced_aligner, diarization]
+  mutually_exclusive_with: []
+  can_repeat: true
+
+examples:
+  - scenario: "60 秒音频中替换某个词"
+    parameters:
+      operation: text_edit
+      max_segment_sec: 29.5
+      word_timestamps: required
+      speaker_segments: required
+    expected_outcome: "只对含目标词的 chunk 调 text_edit，其它 chunk copy，最终拼接"
+  - scenario: "长音频整体提升情绪"
+    parameters:
+      operation: emotion_style_edit
+      max_segment_sec: 29.5
+    expected_outcome: "每个单说话人 chunk 独立做 emotion edit，避免 service 上下文超限"
+
+instruction_mapping:
+  "edit_data_pipeline && audio_duration >= 30s": "必须使用 segmented_edit"
+  "text_edit && duration unknown": "禁止直接调用；先验证时长或切分"
+  "missing word_timestamps": "先 forced alignment；不能随机时间切"
+  "missing speaker_segments": "先 diarization；不能跨 speaker chunk 编辑"
+  "chunk contains multiple speakers": "继续细分，直到每段单说话人"
+  "speech editing benchmark": "所有 edit_data_pipeline 长音频样例默认遵循该 skill"

@@ -1,0 +1,25 @@
+name: sedicow_asr
+server:
+  command: ["bash", "-lc", "exec \"${SEDICOW_SERVICE_PYTHON:-python}\" service.py"]
+  working_dir: "."
+  env:
+    X_EDITOR_SEDICOW_URL: "http://127.0.0.1:8046"
+  resources:
+    gpu: true
+    memory_gb: 16
+  lifecycle: session
+  startup_timeout_sec: 300
+managed_services:
+  - name: sedicow_asr
+    url_env: X_EDITOR_SEDICOW_URL
+    default_url: "http://127.0.0.1:8046"
+    command_env: X_EDITOR_SEDICOW_SERVICE_COMMAND
+    command:
+      - "bash"
+      - "-lc"
+      - "exec \"${SEDICOW_SERVICE_PYTHON:-python}\" service.py --host 127.0.0.1 --port \"${X_EDITOR_SEDICOW_PORT:-8046}\""
+    health_path: "/health"
+    smoke:
+      - {method: "OPTIONS", path: "/transcribe_speaker"}
+    startup_timeout_sec: 300
+    setup_hint: "cd x_editor/tools/catalog/sedicow_asr && ./setup.sh && python download_official_assets.py"

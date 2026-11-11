@@ -1,0 +1,39 @@
+skill_id: speech_like_vocalization_span_grounding
+description: Ground speech-like vocalizations, interjections, chants, and call-and-response phrases with ASR-like approximate matching before extraction, repetition, insertion, or editing.
+priority: 112
+selected_tools: [perception.speaker_attributed_review, perception.timestamped_caption, artifact_ops]
+runtime_operations:
+  - perception.speech_context
+  - perception.speaker_attributed_review
+  - perception.timestamped_caption
+  - artifact_ops.extract_spans
+  - artifact_ops.concat
+  - artifact_ops.reconstruct
+positive_signals:
+  - vocalization
+  - interjection
+  - non-word utterance
+  - chant
+  - cheering phrase
+  - audience response
+  - audience answers
+  - call and response
+  - repeated phrase
+  - repeat the phrase
+  - repeat
+  - before the audience
+  - after the audience
+required_evidence: [source_text_or_asr_candidates, optional_caption_segments, optional_speaker_segments]
+workflow:
+  - treat_speech_like_sounds_as_approximate_asr_content_before_generic_sound_events
+  - build_candidate_spans_from_asr_word_timestamps_speaker_segments_and_nearby_caption_segments
+  - when_exact_text_is_absent_use_phonetic_or_semantic_approximate_matching_over_candidate_segments
+  - if_candidates_remain_ambiguous_ask_the_perception_model_yes_no_per_candidate_segment_without_changing_speaker_labels
+  - pass_confirmed_spans_to_artifact_ops_for_extract_repeat_concat_reconstruct_or_downstream_edits
+rationale: Some targets are not clean dictionary words but are still produced by voices and often appear in ASR approximately. They need speech-aware grounding first, optionally backed by caption/event evidence, instead of relying only on open-ended audio captions.
+guardrails:
+  - Do not require the ASR transcript to exactly match the user's spelling for elongated or stylized vocalizations.
+  - Use approximate ASR, phonetic, or semantic matching only to form candidate spans; keep the final edit grounded in confirmed time ranges.
+  - Do not use generic caption segments as the sole source for exact speech-like boundaries when ASR, speaker turns, or word timestamps can provide candidate spans.
+  - The perception model may review whether a candidate segment contains the requested vocalization, but it must not rename, renumber, or invent speaker labels.
+  - If no candidate span can be confirmed, fail with a span-grounding boundary rather than selecting the whole audio.

@@ -1,0 +1,158 @@
+tool_id: flexsed
+mcp_tool_name: flexsed.detect_events
+input_schema:
+  type: object
+  required:
+    - events
+  properties:
+    audio_path:
+      type: string
+      description: Source audio path. Either audio_path or input_audio_path is required.
+    input_audio_path:
+      type: string
+      description: Alias for audio_path.
+    events:
+      type: array
+      items:
+        type: string
+      description: Open-vocabulary event labels in the exact row order desired for the heatmap.
+    event_list:
+      type: string
+      description: Optional comma/semicolon/newline-separated labels appended to events.
+    threshold:
+      type: number
+      default: 0.5
+      description: Frame probability threshold used to form timestamps.
+    min_duration_sec:
+      type: number
+      default: 0.08
+      description: Drop active runs shorter than this duration after merging.
+    merge_gap_sec:
+      type: number
+      default: 0.08
+      description: Merge active runs separated by gaps no longer than this value.
+    norm_audio:
+      type: boolean
+      default: true
+    output_dir:
+      type: string
+      description: Directory for heatmap PNG and NPY score matrix.
+    save_heatmap_png:
+      type: boolean
+      default: true
+    save_heatmap_npy:
+      type: boolean
+      default: true
+    include_scores:
+      type: boolean
+      default: false
+      description: Include score matrix in JSON only for short clips/debugging; prefer NPY path.
+    max_scores_json_frames:
+      type: integer
+      default: 2000
+    fname:
+      type: string
+    start_sec:
+      type: number
+      description: Optional local window start time in seconds. Provide with end_sec to request top-p event summary for this window.
+    end_sec:
+      type: number
+      description: Optional local window end time in seconds. Provide with start_sec.
+    p:
+      type: number
+      default: 3.0
+      description: If p > 1, return top int(p) events. If 0 < p <= 1, return the smallest sorted event prefix whose normalized cumulative window score reaches p.
+    score_mode:
+      type: string
+      default: max
+      description: "Window event score aggregation: max for short events, mean for sustained ambience, p95 for robust high activation."
+    min_score:
+      type: number
+      default: 0.0
+      description: Drop candidate events whose aggregated window score is below this value.
+    timeout_seconds:
+      type: number
+output_schema:
+  type: object
+  required:
+    - timestamps
+    - heatmap
+    - frame_rate_hz
+  properties:
+    input_audio_path:
+      type: string
+    events:
+      type: array
+      items:
+        type: string
+    frame_rate_hz:
+      type: number
+    frame_step_sec:
+      type: number
+    audio_duration_sec:
+      type: number
+    num_frames:
+      type: integer
+    timestamps:
+      type: object
+      description: Map from event label to merged timestamp spans.
+    heatmap:
+      type: object
+      description: Heatmap artifact paths and matrix/time-axis metadata.
+    window_event_summary:
+      type: object
+      description: Optional top-p summary when start_sec and end_sec are supplied.
+    window_event_line:
+      type: string
+      description: Human-readable summary formatted as "[start-end] event1, event2, event3".
+defaults:
+  threshold: 0.5
+  min_duration_sec: 0.08
+  merge_gap_sec: 0.08
+  norm_audio: true
+  save_heatmap_png: true
+  save_heatmap_npy: true
+  include_scores: false
+  p: 3.0
+  score_mode: max
+  min_score: 0.0
+validation:
+  planner_check:
+    - Event labels should be concrete audible sounds or paralinguistic events.
+    - Do not use FlexSED as ASR, diarization, speaker identification, or text edit.
+    - Treat timestamps as perception evidence; pass selected spans to artifact_ops only after verifying the event label matches the edit intent.
+  timestamp_semantics:
+    - Scores are sampled at 25 frames per second.
+    - frame_start and frame_end are inclusive frame indices.
+    - start_sec = frame_start / 25; end_sec = (frame_end + 1) / 25, clipped to audio duration when known.
+  heatmap_semantics:
+    - The NPY matrix has shape [num_events, num_frames].
+    - Row order is exactly the requested events order.
+    - The PNG uses time in seconds on the x axis and probability color from 0 to 1.
+  window_top_p_semantics:
+    - FlexSED is open-vocabulary but still scores the event labels supplied in events/event_list; provide a sufficiently broad candidate list when asking for top-p events.
+    - start_sec and end_sec are local seconds in the input audio and are converted to frame indices at 25 Hz.
+    - For short events, score_mode=max is preferred; for sustained ambience, score_mode=mean can be used.
+    - The compact output is window_event_line in the form "[start-end] event1, event2, event3".
+examples:
+  - scenario: Locate dog bark and door sounds before removing only those spans.
+    arguments:
+      audio_path: "/path/to/source.wav"
+      events: ["Dog bark", "Door knock"]
+      threshold: 0.45
+      min_duration_sec: 0.12
+      merge_gap_sec: 0.1
+      output_dir: "/data/xedit/runs/flexsed/example"
+  - scenario: Provide heatmap evidence for laughter in a multi-speaker clip.
+    arguments:
+      input_audio_path: "/path/to/conversation.wav"
+      events: ["Laughter", "Male speech", "Female speech"]
+      include_scores: false
+  - scenario: Summarize the strongest events inside one known window.
+    arguments:
+      audio_path: "/path/to/source.wav"
+      events: ["Dog bark", "Door knock", "Laughter", "Siren", "Music"]
+      start_sec: 4.2
+      end_sec: 8.6
+      p: 3
+      score_mode: max

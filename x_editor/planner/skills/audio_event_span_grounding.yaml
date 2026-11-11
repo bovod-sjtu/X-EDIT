@@ -1,0 +1,69 @@
+skill_id: audio_event_span_grounding
+description: Use FlexSED to ground concrete non-speech or paralinguistic audio events into timestamp spans before local artifact edits.
+priority: 94
+selected_tools: [flexsed, artifact_ops]
+runtime_operations: [perception.flexsed_events, artifact_ops.extract_spans, artifact_ops.remove_spans, artifact_ops.mute_spans, artifact_ops.beep_spans, artifact_ops.reconstruct]
+positive_signals:
+  - sound event
+  - audio event
+  - dog bark
+  - barking
+  - door
+  - siren
+  - alarm
+  - applause
+  - clapping
+  - cough
+  - coughing
+  - sneeze
+  - laughter
+  - laughing
+  - crying
+  - shouting
+  - shout
+  - screaming
+  - babbling
+  - breathing
+  - whisper
+  - phone ring
+  - footsteps
+  - radio noise
+  - underwater
+  - wind
+  - reverb
+  - echo
+  - music
+  - background music
+  - room tone
+  - animal
+  - cat
+  - bird
+  - crowd noise
+  - background event
+  - remove the sound of
+  - extract the sound of
+  - mute the sound of
+negative_signals:
+  - keeping the background music unchanged
+  - keep the background music unchanged
+  - background music unchanged
+  - while keeping the background music
+  - preserving the background music
+  - preserve the background music
+required_evidence: [event_labels, flexsed_timestamps, heatmap_evidence]
+workflow:
+  - derive_concrete_event_labels_from_instruction
+  - run_perception_flexsed_events_with_thresholded_timestamp_output
+  - inspect_heatmap_or_confidence_for_ambiguous_events
+  - if_no_event_candidates_survive_run_provider_neutral_yes_no_review_over_generic_candidate_segments
+  - pass_only_confirmed_event_spans_to_artifact_ops
+rationale: Audio-caption/event span grounding should use an event detector when the target is an audible event rather than words, speaker identity, or transcript content.
+guardrails:
+  - Use this for general sound, environmental sound, music, acoustic effects, animal sounds, and paralinguistic events that are audible without transcript reasoning.
+  - Do not use FlexSED for exact word timestamps, sentence/question/answer boundaries, speaker turns, speaker order, ASR text, speaker role, gender/age identity, or quoted speech content; use speaker_attributed_review first for those.
+  - FlexSED labels such as speech, male speech, female speech, or overlapping speech are coarse event priors only and must not drive speaker/content span extraction by themselves.
+  - If an edit target is defined by both a speaker/content condition and a sound/effect condition, combine this with speaker_attributed_speech_span_grounding and edit only spans confirmed by both evidence types.
+  - Keep event labels concrete and audible; if labels are abstract, ask the configured perception fallback to propose grounded audible labels first.
+  - Use threshold, peak_score, mean_score, and heatmap evidence before destructive remove/mute/beep operations.
+  - Per-segment model review must ask only whether the candidate segment contains the target audible event and must return a yes/no style decision with uncertainty; it must not invent timestamps outside the candidate window.
+  - Downstream reconstruction should edit only confirmed spans and preserve the rest of the source audio.

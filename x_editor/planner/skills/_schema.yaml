@@ -1,0 +1,18 @@
+# X-Editor planner skill schema.
+#
+# This directory is the non-legacy skill registry for the current
+# AudioEditPlan/AudioEditExecutor-centered chain. Do not add new routing skills
+# under x_editor/tools/skills; that directory is legacy prompt material.
+
+skill_id: string
+description: string
+priority: integer
+selected_tools: [string]
+runtime_operations: [string]
+positive_signals: [string]
+negative_signals: [string]
+required_evidence: [string]
+requires_reference_audio: boolean
+workflow: [string]
+rationale: string
+guardrails: [string]

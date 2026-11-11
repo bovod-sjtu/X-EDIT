@@ -1,0 +1,47 @@
+skill_id: censor_masking_span_edit
+description: Mask profane, sensitive, or redacted spoken spans with an audible censor tone while preserving the rest of the source audio.
+priority: 134
+selected_tools: [perception.speech_context, perception.semantic_span_review, artifact_ops]
+runtime_operations:
+  - perception.speech_context
+  - perception.semantic_span_review
+  - perception.speaker_attributed_review
+  - artifact_ops.beep_spans
+  - artifact_ops.mute_spans
+  - artifact_ops.reconstruct
+positive_signals:
+  - profanity
+  - profane
+  - sensitive profanity
+  - swear word
+  - swear words
+  - curse word
+  - curse words
+  - cursing
+  - censor
+  - censored
+  - bleep
+  - bleeping sound
+  - censor tone
+  - masking tone
+  - redact
+  - redacted
+  - mask sensitive
+  - replace with a bleep
+  - replace with bleeping
+required_evidence: [confirmed_target_spans, source_text, word_timestamps_or_speaker_segments]
+workflow:
+  - use_speech_context_for_transcript_and_word_timestamps_when_the_category_can_be_judged_from_text
+  - let_planner_reasoner_select_the_matching_words_but_copy_each_admitted_boundary_from_exact_timestamp_evidence
+  - use_semantic_span_review_when_the_classification_is_ambiguous_or_requires_listening_to_audio_cues
+  - apply_artifact_ops_beep_spans_or_mute_spans_to_confirmed_spans
+  - preserve_non_target_speech_background_and_timeline
+rationale: Censor beeps are non-lexical audio artifacts. They should be applied as span-level artifact operations over located speech spans, not encoded as spoken replacement text in edit-data-pipeline text tags.
+guardrails:
+  - Do not encode censor tones as text_edit target_text or <sub targ="[BLEEP]"> unless the user explicitly asks someone to say the word "bleep".
+  - The target spans must be explicitly confirmed by semantic span review, exact lexical matching, speaker-attributed transcript evidence, or explicit user timestamps before destructive masking.
+  - A category such as profanity, sensitive speech, or redacted content is not a verbatim quoted_text target even when the user places the category word in quotes; represent it as a semantic target while still permitting transcript evidence when text is sufficient.
+  - If the runtime has no beep/masking implementation available, return structured unsupported for the masking hop rather than switching to unrelated TTS.
+  - Keep masking generic and policy-independent; do not depend on benchmark sample ids, filenames, expected answers, or a fixed profanity list in the planner skill.
+  - Prefer reviewed selected_spans when available. Otherwise bind each start/end value to an existing individual word-timestamp leaf; never invent one aggregate timestamp path covering several words.
+  - Copy admitted start_sec/end_sec values exactly. Never widen evidence timestamps in Planner output; request deterministic tool-boundary padding with params.span_padding_sec instead.

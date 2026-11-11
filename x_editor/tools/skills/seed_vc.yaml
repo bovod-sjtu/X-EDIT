@@ -1,0 +1,109 @@
+skill_id: seed_vc
+display_name: Seed-VC 零样本声音转换
+source_mcp: seed-vc
+tool_names: [seed_vc_convert]
+
+description: |
+  基于扩散模型的零样本声音转换。将源音频的说话人身份转换为参考音频的音色特征，
+  同时保留原始内容和韵律。支持语音转换(VC)和歌声转换(SVC)。
+detailed_capability: |
+  Seed-VC 是 X-Editor 中最强大的音色/说话人转换工具，远超简单的 pitch_shift。
+  核心能力：
+  1. **音色克隆**：只需 1~30 秒的参考音频，即可克隆目标说话人音色
+  2. **内容保留**：完整保留源音频的文本内容和韵律/情感
+  3. **音高控制**：支持 f0_condition 和 semi_tone_shift，可控制输出音高
+  4. **语速控制**：通过 length_adjust 调整输出语速
+  5. **V2 版本**：支持 accent & emotion conversion（不只是音色）
+
+  与 pitch_shift_rubberband 的区别：
+  - pitch_shift：仅改变基频，保留原始 formant，听起来像"同一个人变了调"
+  - seed_vc：真正替换说话人特征，听起来像"另一个人说了同样的话"
+
+  典型使用场景：
+  - "把这个女声变成参考音频里那个男声" → 直接用 seed_vc（reference=男声）
+  - "保留内容，只换音色" → seed_vc
+  - "把 A 的声音变成 B 的声音" → seed_vc（source=A, reference=B）
+
+dimensions: [pitch, timbre, dynamics]
+
+parameters:
+  - name: source_audio
+    type: string
+    required: true
+    description: 源音频文件路径（要转换的音频）
+  - name: reference_audio
+    type: string
+    required: true
+    description: 参考音频文件路径（目标音色）
+  - name: diffusion_steps
+    type: integer
+    required: false
+    default: 30
+    description: 扩散步数，越多质量越高但越慢
+    constraints: "4~50。实时用 4~10，高质量用 30~50"
+  - name: length_adjust
+    type: number
+    required: false
+    default: 1.0
+    description: 语速调整因子
+    constraints: "<1.0 加速，>1.0 减速。推荐 0.8~1.2"
+  - name: inference_cfg_rate
+    type: number
+    required: false
+    default: 0.7
+    description: CFG 引导强度，影响输出与参考音色的相似度
+    constraints: "0.0~1.0"
+  - name: f0_condition
+    type: boolean
+    required: false
+    default: false
+    description: 是否基于源音频音高条件生成。歌声转换时设为 true
+  - name: auto_f0_adjust
+    type: boolean
+    required: false
+    default: false
+    description: 自动将源音高调整到参考音高范围
+  - name: semi_tone_shift
+    type: integer
+    required: false
+    default: 0
+    description: 半音偏移（仅歌声转换有效）
+    constraints: "-12 ~ +12"
+  - name: output_path
+    type: string
+    required: false
+    default: auto
+    description: 输出文件路径
+
+output:
+  type: audio_file
+  description: 转换后的音频，音色匹配 reference，内容匹配 source
+
+execution_constraints:
+  should_run_before: [loudnorm, volume_normalizer, equalizer]
+  should_run_after: [afftdn_denoise, silenceremove]
+  mutually_exclusive_with: [pitch_shift_rubberband, apply_pitch_shift]
+  can_repeat: false
+
+examples:
+  - scenario: "女声转为参考男声音色"
+    parameters:
+      diffusion_steps: 30
+      length_adjust: 1.0
+      inference_cfg_rate: 0.7
+      f0_condition: false
+    expected_outcome: "源音频内容不变，说话人音色完全变为参考音频的男性音色"
+  - scenario: "歌声转换，同时降调"
+    parameters:
+      diffusion_steps: 40
+      f0_condition: true
+      semi_tone_shift: -4
+      length_adjust: 1.0
+    expected_outcome: "歌声音色转换，同时降低 4 个半音"
+
+instruction_mapping:
+  "gender.source != gender.target": "首选工具。提供 reference_audio 为目标性别的样本"
+  "timbre_qualities 有大幅变化需求": "首选工具。reference_audio 提供目标音色样本"
+  "user_prompt 包含 '变成...的声音' / '克隆...的音色'": "seed_vc 是最佳工具"
+  "user_prompt 包含 '保留内容，换音色'": "seed_vc"
+  "reference_audio_paths 非空 && 目标是音色转换": "seed_vc 优于 pitch_shift"

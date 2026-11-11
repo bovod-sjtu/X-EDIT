@@ -1,0 +1,88 @@
+skill_id: qwen3_tts_voice_design
+display_name: Qwen3-TTS 无参考音色设计
+source_mcp: qwen3_tts
+tool_names:
+  - qwen3_tts
+  - qwen3_tts.synthesize
+
+description: |
+  用于无 reference audio 的 speaker/timbre/persona 控制。Planner 应把自然语言声线目标
+  转成明确 voice-design prompt，而不是用 edit_data_pipeline 的 pitch/volume 近似。
+
+detailed_capability: |
+  适用场景：
+  - Make the speaker sound like a child / elderly man / deep male voice.
+  - Change the voice to a gentle female voice without reference audio.
+  - Make it sound raspy, warm, magnetic, youthful, robotic-like speech voice.
+  - 同时要求文本内容变化和目标声线变化时，直接合成目标文本和目标声线。
+
+  Prompt 必须包含：
+  - gender/age/persona: male/female/child/elderly/young adult 等。
+  - pitch range: low / medium-low / high / childlike 等。
+  - timbre texture: warm, bright, raspy, breathy, clear, magnetic 等。
+  - emotion/intensity: neutral/happy/angry/surprised/calm，强度。
+  - speaking rate: slow/normal/fast。
+  - delivery: natural speech, no singing unless requested。
+  - exact-word preservation: do not add, omit, paraphrase, translate, or reorder words。
+
+  边界：
+  - 有 reference_audio_path 时，音色转换首选 seed_vc，不用 qwen3_tts 无参考捏声线。
+  - 如果用户只要求明确参数，如 raise pitch/lower volume/speed up，则使用 edit_data_pipeline。
+  - 如果用户要求保留原始时间线局部替换，需要 artifact_ops_timeline reconstruct。
+  - qwen3_tts 是 text-to-speech，不保证保留源音频韵律和微小时序。
+
+dimensions: [timbre, speaker, text, emotion, pitch, tempo]
+
+parameters:
+  - name: text
+    type: string
+    required: true
+    description: 要合成的精确文本；必须来自 source_text、target_text 或用户明确给出的内容。
+  - name: instruct
+    type: string
+    required: true
+    description: 结构化 voice-design prompt，不能只复制用户原句。
+  - name: mode
+    type: enum
+    required: false
+    default: custom_voice
+    enum_values: [custom_voice]
+    description: 无参考音色设计模式。
+  - name: language
+    type: string
+    required: false
+    default: Auto
+    description: 语言，默认自动。
+  - name: output_path
+    type: string
+    required: true
+    description: 输出 WAV 路径。
+
+output:
+  type: audio_file
+  description: 合成的目标声线语音；metadata 应记录 text、instruct、voice attributes。
+
+execution_constraints:
+  should_run_before: [artifact_ops, speech_enhancement, spatial_reverb]
+  should_run_after: []
+  mutually_exclusive_with: [seed_vc]
+  can_repeat: true
+
+examples:
+  - scenario: "无参考音频，将声音变成低沉男声"
+    parameters:
+      text: "Please submit the report before Friday."
+      instruct: "Speak as an adult male with a low pitch range, warm and resonant timbre, calm neutral emotion, normal speaking rate, clear articulation. Say exactly the provided text; do not add, omit, paraphrase, translate, or reorder words."
+      mode: custom_voice
+    expected_outcome: "合成目标文本，听感接近低沉男声，但不声称是特定真实说话人"
+  - scenario: "无参考音频，变成小孩声音并保持文本"
+    parameters:
+      instruct: "Speak as a young child with high pitch, bright small timbre, excited but intelligible delivery, normal-fast rate. Preserve every word exactly."
+    expected_outcome: "合成儿童声线语音"
+
+instruction_mapping:
+  "reference_audio_paths empty && wants male/female/child/elderly/raspy/warm/deep voice": "使用 qwen3_tts custom_voice"
+  "reference_audio_paths non-empty && wants sound like reference": "不要用 qwen3_tts；使用 seed_vc"
+  "wants exact pitch/rate/volume parameter edit on source audio": "不要用 qwen3_tts；使用 edit_data_pipeline"
+  "wants text change + no-reference voice persona": "qwen3_tts 直接合成 target text + voice-design instruct"
+  "needs timeline replacement": "qwen3_tts 后接 artifact_ops.reconstruct"

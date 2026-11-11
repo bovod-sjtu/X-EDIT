@@ -1,0 +1,66 @@
+skill_id: speech_rate_conversion
+display_name: 语速转换 (WSOLA)
+source_mcp: speech-rate-conversion
+tool_names: [speech_rate_convert]
+
+description: 使用 WSOLA 算法改变音频语速（时长），同时保持音高不变。专为语音优化。
+detailed_capability: |
+  WSOLA (Waveform Similarity Overlap-Add) 是一种专门用于语音的时间拉伸算法，
+  相比 ffmpeg change_tempo，它在语音自然度上表现更好，artifact 更少。
+
+  rate 参数含义：
+  - rate = 1.0: 原速
+  - rate = 1.2: 语速加快 20%，时长缩短 17%
+  - rate = 0.8: 语速减慢 20%，时长增加 25%
+  - rate = 2.0: 2倍速，时长减半
+
+  注意：rate 与 ffmpeg change_tempo 的参数含义一致。
+
+dimensions: [tempo]
+
+parameters:
+  - name: audio_path
+    type: string
+    required: true
+    description: 输入音频文件路径
+  - name: rate
+    type: number
+    required: true
+    description: 速度因子
+    constraints: "0.5 ~ 2.0。推荐语音范围 0.8~1.3，超出此范围可能不自然"
+  - name: method
+    type: string
+    required: false
+    default: wsola
+    description: 拉伸算法
+    enum_values: [wsola]
+  - name: output_path
+    type: string
+    required: false
+    default: auto
+    description: 输出文件路径
+
+output:
+  type: audio_file
+  description: 语速调整后的音频文件，音高保持不变
+
+execution_constraints:
+  should_run_before: [seed_vc, pitch_shift_rubberband, equalizer, loudnorm]
+  should_run_after: [afftdn_denoise]
+  mutually_exclusive_with: [change_tempo]
+  can_repeat: false
+
+examples:
+  - scenario: "轻微加快语速"
+    parameters:
+      rate: 1.15
+    expected_outcome: "语速加快约 15%，听起来更紧凑但保持自然"
+  - scenario: "明显放慢语速"
+    parameters:
+      rate: 0.85
+    expected_outcome: "语速减慢约 15%，更从容清晰"
+
+instruction_mapping:
+  "tempo.target:faster": "rate > 1.0，推荐 1.1~1.3"
+  "tempo.target:slower": "rate < 1.0，推荐 0.8~0.95"
+  "tempo.ratio_estimate is not null": "rate = 1.0 / ratio_estimate（如果 ratio 表示时长比）或直接等于 ratio（如果 ratio 表示速度比）"

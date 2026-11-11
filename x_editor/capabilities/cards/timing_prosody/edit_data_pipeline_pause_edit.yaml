@@ -1,0 +1,113 @@
+schema_version: x-editor.operation-capability-card/v1
+operation: edit_data_pipeline.pause_edit
+semantic_effects:
+  - insert_pause_inside_speech
+supported_scopes:
+  - lexical_boundary
+requirements:
+  inputs:
+    - inputs.input_audio
+  evidence:
+    - source_text
+    - word_timestamps
+    - lexical_boundary
+preservation:
+  - dimension: source_wording
+    level: strong
+    evidence_kind: declared_design_fact
+    rationale: The pause tag must strip back to the exact source_text.
+  - dimension: speaker_identity
+    level: unknown
+    evidence_kind: unknown
+    rationale: No reviewed development prior establishes identity preservation yet.
+  - dimension: background_continuity
+    level: unknown
+    evidence_kind: unknown
+    rationale: Boundary continuity remains an input-dependent listening-review question.
+quality_characteristics:
+  - dimension: boundary_naturalness
+    level: unknown
+    evidence_kind: unknown
+    rationale: Naturalness must be measured against other legal insertion routes.
+  - dimension: pause_duration_fidelity
+    level: unknown
+    evidence_kind: unknown
+    rationale: Pause levels are ordinal and do not establish an exact duration guarantee.
+artifact_risks:
+  - risk: boundary_discontinuity
+    level: unknown
+    evidence_kind: unknown
+    rationale: No reviewed development prior quantifies splice artifacts.
+composition:
+  supports_batch_targets: true
+  cumulative_degradation_risk: unknown
+parameter_contract:
+  additional_parameters: reject
+  planner_selectable:
+    - path: inputs.input_audio
+      value_type: string
+      required: true
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: source_audio_ref
+    - path: params.source_text
+      value_type: string
+      required: true
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: reviewed_source_transcript
+    - path: params.instruction_st
+      value_type: string
+      required: true
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: pause_insertion_tagged_text
+      value_guidance:
+        - Insert a self-closing pause tag at a grounded lexical boundary inside the complete source transcript.
+        - Removing pause tags must reproduce params.source_text exactly.
+        - act must be ins and level must be 1, 2, or 3; never write a requested duration as an undeclared parameter.
+        - Keep every original character, punctuation mark, and space in place. Insert the tag between non-empty left and right source context; do not replace a period or other boundary character with the tag.
+        - This operation inserts a new pause only. To shorten or reshape an existing grounded pause, use edit_data_pipeline.boundary_smooth with explicit grounded boundary points.
+      value_examples:
+        - 'First sentence.<pause act="ins" level="2"/> Second sentence.'
+    - path: params.language
+      value_type: string
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: source_language
+  framework_owned:
+    - params.output_path
+    - params.service_url
+    - params.aligner_backend
+    - params.persist
+    - params.evaluate
+    - params.profile_id
+    - params.stage2_method
+    - params.expand_radius
+    - params.center_regen_second_pass
+    - params.center_regen_margin_sec
+  conditional_rules: []
+limitations:
+  - This operation inserts ordinal short, medium, or long pauses; the repository does not declare exact seconds for each level.
+  - An external aligner failure is reported as alignment_backend_failure; it is not converted into a copied input or successful delivery.
+  - stage2_method and profile_id are accepted by the wrapper, but their exhaustive legal domains are not established in this repository and are not Planner-selectable.
+  - Source text and a grounded lexical insertion boundary must be supplied by reviewed evidence rather than invented by the Planner.
+  - The v1 capability schema cannot express the instruction_st grammar, the allowed pause levels inside that string, or the requirement that stripping tags reproduces source_text; runtime validation remains authoritative for those constraints.
+provenance:
+  - source_path: x_editor/runtime/operation_normalizers.py
+    source_kind: runtime_handler
+  - source_path: x_editor/tools/catalog/edit_data_pipeline/manual.yaml
+    source_kind: manual
+  - source_path: x_editor/tools/catalog/edit_data_pipeline/client.py
+    source_kind: runtime_handler
+  - source_path: tests/test_operation_normalizers.py
+    source_kind: test

@@ -1,0 +1,61 @@
+skill_id: localized_style_reverb_edit
+description: Localize a speech span, change supported emotion/tone, add room reverb, then reconstruct the original timeline.
+priority: 96
+selected_tools:
+  - artifact_ops.extract_spans
+  - edit_data_pipeline.emotion_style_edit
+  - spatial_reverb
+  - artifact_ops.reconstruct
+runtime_operations:
+  - artifact_ops.extract_spans
+  - edit_data_pipeline.emotion_style_edit
+  - spatial_reverb
+  - artifact_ops.reconstruct
+negative_signals:
+  - sing
+  - singing
+  - song
+  - rap
+  - rapping
+  - accent
+  - dialect
+  - telephone
+  - radio
+  - underwater
+  - wind
+  - muffled
+  - 唱歌
+  - 歌唱
+  - 说唱
+  - 口音
+  - 方言
+positive_signals:
+  - internal monologue
+  - inner monologue
+  - internal thought
+  - hushed
+  - reflective
+  - introspective
+  - soft reverb
+  - reverb
+  - echo
+  - tone
+  - style
+  - final speaker
+  - final question
+  - 内心独白
+  - 混响
+  - 语气
+required_evidence: [target_span, local_source_text]
+workflow:
+  - artifact_ops.extract_spans selects only the target utterance or speaker span.
+  - edit_data_pipeline.emotion_style_edit edits the extracted clip with a supported emotion tag such as calm or melancholic.
+  - spatial_reverb applies only the requested room/reverb acoustic effect to the local edited clip.
+  - artifact_ops.reconstruct replaces the original target span with the edited local clip.
+rationale: Tone/reverb requests keep words unchanged, so they should not be routed through text_edit.
+guardrails:
+  - Do not use edit_data_pipeline.text_edit unless spoken words change and a valid <sub>/<ins>/<del> contract can be produced.
+  - emotion_style_edit supports only the configured emotion tags; map hushed/reflective/internal-monologue tone to melancholic or calm rather than literal whispering.
+  - spatial_reverb adds room impulse response or echo-like space only; telephone/radio/underwater/channel effects belong to audio_effects, and dereverb belongs to speech_enhancement.
+  - extract_spans only localizes and exports timeline regions; it does not change speech content, emotion, or acoustic scene.
+  - artifact_ops.reconstruct must receive the original/base audio plus explicit replacement start/end spans and the edited local clip.

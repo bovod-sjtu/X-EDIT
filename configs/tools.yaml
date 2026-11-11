@@ -1,0 +1,8 @@
+schema_version: x-edit.tools/v1
+edit_backend: dots_tts_edit
+enabled_tools:
+  - artifact_ops
+  - edit_data_pipeline
+  - asr
+  - aligner
+  - omni

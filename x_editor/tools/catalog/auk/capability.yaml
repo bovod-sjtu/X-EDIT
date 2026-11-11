@@ -1,0 +1,53 @@
+tool_id: auk
+display_name: AuK
+backend: Tencent-Hunyuan/AuK Base
+category: audio_editing
+purpose: General instruction-conditioned regeneration of one bound speech source,
+  with native prompt enhancement and declared mono model conditioning.
+when_to_use:
+- Change vocal delivery, remove an accent or change voice characteristics using a
+  natural-language description.
+- Prefer AuK with native PE for perceptual age changes and whisper/normal-voice
+  conversion when compatible with the requested preservation requirements.
+  Development listening supports this preference; it is not a forced route.
+- Consider early for natural whisper/normal-voice conversion, de-accenting and
+  nonverbal vocal edits when existing tools do not express the requested effect.
+- Also supports content, emotion, acoustic restoration and source-isolation intents;
+  actual quality depends on the requested effect and must be checked.
+- Emotion conversion remains an optional alternative, not a generally preferred
+  backend. After audio feedback identifies an unmet emotion requirement, a Guider
+  may propose trying AuK within the same request and preservation constraints.
+do_not_use_when:
+- Exact waveform preservation is required.
+- The instruction explicitly requires spatial positioning, independent channel
+  content or the stereo image to be preserved; model output is mono.
+- Several independent sources or session history would need to be interpreted inside
+  this single-source tool.
+- The required operation is music composition/rearrangement or translation into a
+  new language/dialect; the current source-bound PE contract does not expose those operations.
+inputs:
+- input_audio
+- instruction
+outputs:
+- edited_audio
+constraints:
+- Mono and multichannel files are accepted. Multichannel input is explicitly averaged
+  to mono without changing the original; preprocessing is recorded in the response.
+- Native PE is enabled in the standard deployment, advertised by health and recorded per request.
+  It formats a single edit, retains the bound timeline, and revises native parameters
+  against the original requirements before rendering the model's native template.
+- Stereo input alone is not a reason to reject or deprioritize AuK. When the request
+  has no spatial or channel-specific requirement, declared mono conditioning is
+  compatible with the edit; judge the requested acoustic effect and content preservation.
+- No source fallback or session history. No automatic replacement of existing tools.
+- Prefer exact gain, pitch/rate, crop and assembly tools for exact numerical or waveform
+  constraints. Availability is not measured superiority over those tools.
+- Local edits require explicitly extracted input and framework reconstruction.
+- De-accenting standardizes pronunciation toward Mandarin; it is not arbitrary
+  accent transfer. Emotion preparation supports happy, angry, sad, fearful,
+  surprised, disgusted, calm and excited; do not silently replace another requested
+  emotion with a nearby label. Separate independently requested edits into an explicit plan.
+- Semantic quality and preservation are unqualified until assessed on actual artifacts.
+cost:
+  gpu_required: true
+  expected_latency: high

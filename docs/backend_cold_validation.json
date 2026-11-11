@@ -1,0 +1,219 @@
+{
+  "schema_version": "x-edit.backend-cold-validation/v1",
+  "date": "2026-10-01",
+  "scope": "Changed IndexTTS and Seed-VC backends, installed from a source archive on a fresh base-image GPU container.",
+  "passed": true,
+  "image": "nvidia/cuda:12.8.1-cudnn-devel-ubuntu22.04",
+  "gpus": [
+    {
+      "name": "NVIDIA L20Z",
+      "memory_mib": 81559,
+      "driver": "535.161.08"
+    },
+    {
+      "name": "NVIDIA L20Z",
+      "memory_mib": 81559,
+      "driver": "535.161.08"
+    }
+  ],
+  "tested_archive_sha256": "915c7296ab9558d62a06ed4fd16a9d90113bf7f607ae901c7b8520571f4091ae",
+  "fresh_environments": true,
+  "fresh_model_downloads": true,
+  "environments": [
+    {
+      "name": "indextts",
+      "packages": 164,
+      "package_inventory_unchanged": true,
+      "package_inventory_sha256": "77bf1c846658867715b9e6a2820fc34aa4458727e49aae00a8606295f704c258",
+      "lock_sha256": "cc92dcef9efdd44401f1e16f84d92764005455c1979a34b4e1c63a80982721c2"
+    },
+    {
+      "name": "edit_gpu",
+      "packages": 261,
+      "package_inventory_unchanged": true,
+      "package_inventory_sha256": "1c35ef54ab0f9559849969e73a99090f4ccc935fd7e45a7d65c922d2de7f647d",
+      "lock_sha256": "391145aa70f475707c654c8bf0267ba8b180918dcb1fb04695b36a68e1d39eb0"
+    }
+  ],
+  "models": [
+    {
+      "repo_id": "IndexTeam/IndexTTS-2",
+      "revision": "740dcaff396282ffb241903d150ac011cd4b1ede"
+    },
+    {
+      "repo_id": "Plachta/Seed-VC",
+      "revision": "257283f9f41585055e8f858fba4fd044e5caed6e"
+    },
+    {
+      "repo_id": "amphion/MaskGCT",
+      "revision": "265c6cef07625665d0c28d2faafb1415562379dc"
+    },
+    {
+      "repo_id": "facebook/w2v-bert-2.0",
+      "revision": "da985ba0987f70aaeb84a80f2851cfac8c697a7b"
+    },
+    {
+      "repo_id": "funasr/campplus",
+      "revision": "e4b6ede7ce16997aff4ae69fbca1f0175e2afede"
+    },
+    {
+      "repo_id": "nvidia/bigvgan_v2_22khz_80band_256x",
+      "revision": "633ff708ed5b74903e86ff1298cf4a98e921c513"
+    },
+    {
+      "repo_id": "openai/whisper-small",
+      "revision": "973afd24965f72e36ca33b3055d56a652f456b4d"
+    }
+  ],
+  "sources": [
+    {
+      "backend": "index_tts",
+      "commit": "1eafa935e8887f9ba877f82cf7319fceddfc86cb",
+      "upstream_clean": true
+    },
+    {
+      "backend": "seed_vc",
+      "commit": "51383efd921027683c89e5348211d93ff12ac2a8",
+      "upstream_clean": true
+    }
+  ],
+  "stages": [
+    {
+      "stage": "01-os",
+      "passed": true,
+      "seconds": 51.0
+    },
+    {
+      "stage": "01-media",
+      "passed": true,
+      "seconds": 0.0
+    },
+    {
+      "stage": "02-controller",
+      "passed": true,
+      "seconds": 3.0
+    },
+    {
+      "stage": "03-fetch",
+      "passed": true,
+      "seconds": 131.0
+    },
+    {
+      "stage": "04-sources",
+      "passed": true,
+      "seconds": 0.0
+    },
+    {
+      "stage": "05-install",
+      "passed": true,
+      "seconds": 185.0
+    },
+    {
+      "stage": "06-cuda",
+      "passed": true,
+      "seconds": 9.0
+    },
+    {
+      "stage": "07-start",
+      "passed": true,
+      "seconds": 147.0
+    },
+    {
+      "stage": "08-index",
+      "passed": true,
+      "seconds": 9.0
+    },
+    {
+      "stage": "09-seed",
+      "passed": true,
+      "seconds": 5.0
+    },
+    {
+      "stage": "10-sources",
+      "passed": true,
+      "seconds": 0.0
+    },
+    {
+      "stage": "11-summary",
+      "passed": true,
+      "seconds": 0.0
+    }
+  ],
+  "operations": [
+    {
+      "case": "emotion_and_tokens",
+      "passed": true,
+      "seconds": 4.651987484000074,
+      "frames": 44288,
+      "sample_rate": 22050,
+      "samples_sha256": "fa9fcee3a83d1cebe8bc58cc19c7226b109163eadc4fc3665fca2c544d8e0e90",
+      "has_cache": true,
+      "has_tokens": true
+    },
+    {
+      "case": "cached_continuation",
+      "passed": true,
+      "seconds": 1.4242603879999933,
+      "frames": 65024,
+      "sample_rate": 22050,
+      "samples_sha256": "44a3a51575b07c404715267972fda94e807ea2862fc81637bc15b23d8ff196d5",
+      "has_cache": true,
+      "has_tokens": true
+    },
+    {
+      "case": "segmented_emotion",
+      "passed": true,
+      "seconds": 2.2706850230000555,
+      "frames": 49978,
+      "sample_rate": 22050,
+      "samples_sha256": "f606182f293842a138db1f5adfdd945f4e473952ad6448ef038827569fe93dd3",
+      "has_cache": false,
+      "has_tokens": false
+    },
+    {
+      "case": "explicit_seed",
+      "passed": true,
+      "seconds": 3.2562784099999362,
+      "frames": 45056,
+      "sample_rate": 22050,
+      "samples_sha256": "e13b1df7de2fbc5aa9fef722a59b45182e9e2601bf7e17497d054edf555616bd"
+    },
+    {
+      "case": "default_seed",
+      "passed": true,
+      "seconds": 0.503484333000074,
+      "frames": 45056,
+      "sample_rate": 22050,
+      "samples_sha256": "e13b1df7de2fbc5aa9fef722a59b45182e9e2601bf7e17497d054edf555616bd"
+    }
+  ],
+  "comparison_to_local_inference": [
+    {
+      "case": "emotion_and_tokens",
+      "decoded_samples_equal_to_local_test": true
+    },
+    {
+      "case": "cached_continuation",
+      "decoded_samples_equal_to_local_test": true
+    },
+    {
+      "case": "segmented_emotion",
+      "decoded_samples_equal_to_local_test": true
+    },
+    {
+      "case": "explicit_seed",
+      "decoded_samples_equal_to_local_test": true
+    },
+    {
+      "case": "default_seed",
+      "decoded_samples_equal_to_local_test": true
+    }
+  ],
+  "deployment_repair": "Prefer PyPI for equal-version wheels while retaining best-match CUDA builds. Qualified torchao and torchcodec CUDA build suffixes are explicitly pinned. Package inventories did not change.",
+  "limitations": [
+    "Only these two changed backends were cold-tested in this follow-up.",
+    "No complete-framework, benchmark, long-input, concurrency or subjective audio-quality certification.",
+    "Optional CUDA acceleration, pitch-conditioned Seed-VC and aligner-mediated tagged continuation were not exercised.",
+    "External source layout does not remove upstream license obligations."
+  ]
+}

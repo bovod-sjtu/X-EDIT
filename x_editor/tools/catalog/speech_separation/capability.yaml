@@ -1,0 +1,32 @@
+tool_id: speech_separation
+display_name: Vocal and Accompaniment Separation
+backend: audio_separator_roformer
+category: source_separation
+purpose: >
+  Separate a vocal stem from accompaniment using the configured
+  audio-separator BS-RoFormer or MelBand-RoFormer models. The vocal stem may
+  contain several speakers; this is not speaker-conditioned separation.
+when_to_use:
+  - User asks to isolate vocals from accompaniment or retain accompaniment without vocals.
+  - A subsequent foreground/background edit requires both vocal and instrumental stems.
+do_not_use_when:
+  - User asks to isolate one simultaneous speaker; these models cannot establish that capability. Use an independently available target-speaker tool or report unsupported.
+  - Audio contains one speaker and only needs clarity, denoising, or dereverb; use speech_enhancement backed by ClearerVoice.
+  - User asks to edit spoken text, emotion, pitch, rate, volume, or pauses; use edit_data_pipeline.
+  - User asks for exact first/second speaker extraction by dialogue order; use diarization plus timeline extraction when available.
+inputs:
+  - input_audio
+  - model_family
+  - model_filename
+outputs:
+  - separated_stems
+  - selected_stem_audio
+cost:
+  gpu_required: true
+  expected_latency: high
+constraints:
+  - Backend service must be running separately; this wrapper does not import audio-separator.
+  - Supported model families are bs_roformer and melband_roformer, with explicit model_filename override when needed.
+  - Select vocals or instrumental explicitly. A positional first/last choice does not identify the sound type.
+  - Missing or ambiguous stem labels must fail explicitly, not fall back to the first file.
+  - A vocal stem does not establish a speaker identity or remove overlapping voices.

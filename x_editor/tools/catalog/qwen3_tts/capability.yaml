@@ -1,0 +1,32 @@
+tool_id: qwen3_tts
+display_name: Qwen3 TTS
+backend: qwen3_tts_service
+category: text_to_speech
+purpose: Synthesize standalone or explicitly generated speech from text with optional style instruction or voice cloning reference using Qwen3-TTS.
+when_to_use:
+- User wants standalone TTS or asks to generate a new sentence that is not an edit of existing source audio.
+- User explicitly asks to synthesize/regenerate a whole utterance with a provided reference voice and accepts re-synthesis.
+- User asks for a target voice/timbre/persona but does not provide reference audio.
+- A target speaker can be approximated using a reference audio and transcript.
+do_not_use_when:
+- User is editing existing source audio text/content by replacing, deleting, inserting, swapping, correcting, or modifying words/phrases/sentences; use edit_data_pipeline text_edit, never qwen3_tts.
+- User is editing existing source audio emotion/tone/style/rate/pitch/pause/volume through edit-data-pipeline; prefer edit_data_pipeline emotion_style_edit or pitch_rate_edit.
+- User wants to preserve exact original content and provides a concrete reference speaker audio; prefer seed_vc.
+- User asks to edit only one speaker inside a mixed/multi-speaker scene; use diarization/reconstruction first or return unsupported.
+- Reference transcript is unavailable and clone mode cannot be used reliably.
+- edit_data_pipeline text_edit fails due to length/context/runtime limits; report the edit-data-pipeline failure or split/retry the local edit instead of falling back to qwen3_tts.
+inputs:
+- text
+- optional_style_instruction
+- optional_reference_audio
+- optional_reference_text
+outputs:
+- synthesized_audio
+cost:
+  gpu_required: true
+  expected_latency: high
+constraints:
+- For voice clone mode, reference transcript is required unless x_vector_only mode is explicitly selected.
+- Must not be selected for existing-audio lexical replacement. Lexical replacements are a hard edit_data_pipeline.text_edit boundary.
+- 'For no-reference timbre design, use custom_voice mode and write `instruct` as an explicit voice prompt: gender/age, pitch range, timbre texture, emotion/intensity, speaking rate, and "do not add or omit words".'
+- Generated segment may need alignment and reconstruction before final output.

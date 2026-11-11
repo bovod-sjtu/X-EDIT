@@ -1,0 +1,91 @@
+schema_version: x-editor.operation-capability-card/v1
+operation: edit_data_pipeline.boundary_smooth
+semantic_effects:
+  - smooth_timeline_boundary
+  - adjust_pause_interval
+supported_scopes:
+  - lexical_boundary
+  - timeline
+requirements:
+  inputs:
+    - inputs.input_audio
+  evidence:
+    - source_text
+    - timeline_boundary_points
+preservation:
+  - dimension: source_wording
+    level: strong
+    evidence_kind: declared_design_fact
+    rationale: The operation consumes explicit boundary points and does not accept lexical edit tags.
+  - dimension: non_target_timeline
+    level: moderate
+    evidence_kind: declared_design_fact
+    rationale: Work is scoped by explicit points, while achieved locality still depends on the service implementation.
+quality_characteristics:
+  - dimension: boundary_naturalness
+    level: unknown
+    evidence_kind: unknown
+    rationale: A legal point contract does not establish perceptual boundary quality.
+artifact_risks:
+  - risk: boundary_regeneration_artifact
+    level: unknown
+    evidence_kind: unknown
+    rationale: Real service outputs require listening review.
+composition:
+  supports_batch_targets: true
+  cumulative_degradation_risk: unknown
+parameter_contract:
+  additional_parameters: reject
+  planner_selectable:
+    - path: inputs.input_audio
+      value_type: string
+      required: true
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: source_audio_ref
+    - path: params.source_text
+      value_type: string
+      required: true
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: reviewed_source_transcript
+    - path: params.points
+      value_type: array
+      required: true
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: grounded_boundary_adjustments
+    - path: params.language
+      value_type: string
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: source_language
+  framework_owned:
+    - params.output_path
+    - params.service_url
+    - params.aligner_backend
+    - params.debug
+    - params.debug_dir
+    - params.trace_id
+  conditional_rules: []
+limitations:
+  - This operation is for explicit low-level boundary points, not natural-language lexical pause insertion.
+  - Point item shape, non-empty arrays, audio insertion references, and boundary geometry remain operation-verifier responsibilities.
+provenance:
+  - source_path: x_editor/tools/catalog/edit_data_pipeline/manual.yaml
+    source_kind: service_schema
+  - source_path: x_editor/tools/catalog/edit_data_pipeline/client.py
+    source_kind: runtime_handler
+  - source_path: x_editor/runtime/operation_normalizers.py
+    source_kind: runtime_handler
+  - source_path: tests/test_edit_data_pipeline_client.py
+    source_kind: test

@@ -1,0 +1,77 @@
+skill_id: spatial_reverb
+display_name: 空间混响 / 房间声学工具
+tool_names: [spatial_reverb, spatial_reverb.apply]
+
+description: |
+  给已有音频添加静态房间混响，使其听起来处于某种空间，例如小房间、
+  大而空荡的房间、大厅、教堂、浴室等。底层优先使用 gpuRIR 生成 RIR；
+  如果当前环境没有 CUDA/gpuRIR，则使用 deterministic synthetic RIR 保底。
+
+detailed_capability: |
+  spatial_reverb 只改变整体声学空间感，不改变文字、说话人身份、情绪、音高或语速。
+  Planner 应把自然语言空间描述映射到 room_preset、T60、dry_wet、source_distance_m 等参数。
+
+  推荐参数映射：
+  - “轻微空间感/一点房间感”：room_preset=medium_room, t60≈0.55, dry_wet≈0.16
+  - “小房间/卧室”：room_preset=small_room, t60≈0.35, dry_wet≈0.18
+  - “很大的空荡房间/空旷空间”：room_preset=large_empty_room, t60≈1.8, dry_wet≈0.42
+  - “大厅/礼堂”：room_preset=hall, t60≈2.4, dry_wet≈0.48
+  - “教堂/大教堂”：room_preset=cathedral, t60≈4.2, dry_wet≈0.56
+  - “浴室/瓷砖房间”：room_preset=bathroom, t60≈1.05, dry_wet≈0.36
+
+  使用边界：
+  - “添加混响/回声/空间感/在某个房间里”使用 spatial_reverb。
+  - “去混响/让声音更干净/更清晰”不要用 spatial_reverb，应使用 speech_enhancement 的 dereverb/clarity。
+  - “前景说话人变速但背景音乐保持原速”不是 spatial_reverb 能力，仍需要 foreground/background 分离和重混。
+  - “声音从左到右移动/空间轨迹”不是当前能力；spatial_reverb 只支持静态 source/receiver RIR。
+  - 如果同一句还有改字/情感/VC，先执行内容或音色编辑，最后再执行 spatial_reverb，避免后续增强把混响抹掉。
+
+parameters:
+  - name: input_audio_path
+    type: string
+    required: true
+  - name: output_path
+    type: string
+    required: true
+  - name: instruction
+    type: string
+    required: false
+    description: 自然语言空间目标；显式参数缺省时用于推断 preset。
+  - name: room_preset
+    type: enum
+    required: false
+    enum_values: [dry_studio, small_room, medium_room, large_empty_room, hall, cathedral, bathroom]
+  - name: room_size_m
+    type: array
+    required: false
+    description: 房间三维尺寸，单位米。
+  - name: t60
+    type: number
+    required: false
+    description: 混响时间，单位秒。
+  - name: dry_wet
+    type: number
+    required: false
+    description: wet 混合比例，0.0 到 0.95。
+  - name: source_distance_m
+    type: number
+    required: false
+    description: 声源到接收点距离。
+  - name: preserve_duration
+    type: boolean
+    required: false
+    default: false
+    description: 是否裁掉混响尾巴保持原始时长。
+  - name: backend
+    type: enum
+    required: false
+    default: auto
+    enum_values: [auto, gpuRIR, synthetic]
+
+instruction_mapping:
+  "make it sound like in a large empty room": "spatial_reverb(room_preset=large_empty_room, t60=1.8, dry_wet=0.42)"
+  "inside a hall / 大厅 / 礼堂": "spatial_reverb(room_preset=hall, t60=2.4, dry_wet=0.48)"
+  "cathedral / church / 教堂": "spatial_reverb(room_preset=cathedral, t60=4.2, dry_wet=0.56)"
+  "bathroom / tiled room / 浴室 / 瓷砖": "spatial_reverb(room_preset=bathroom, t60=1.05, dry_wet=0.36)"
+  "remove reverb / 去混响": "不要用 spatial_reverb；使用 speech_enhancement"
+  "moving spatial trajectory": "unsupported；当前只支持静态空间混响"

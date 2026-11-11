@@ -1,0 +1,26 @@
+skill_id: speech_region_extraction
+description: Extract plain speech regions from an audio file when the target is speech versus non-speech rather than a specific speaker, phrase, accent, or style.
+priority: 98
+selected_tools: [artifact_ops]
+runtime_operations: [artifact_ops.extract_spans]
+positive_signals:
+  - speech portions
+  - speech portion
+  - pure speech content
+  - speech content
+  - spoken portions
+  - spoken content
+  - speech segments
+  - extract speech
+  - isolate speech
+required_evidence: [source_audio, optional_word_timestamps_or_speaker_segments]
+workflow:
+  - use_artifact_ops_extract_spans_for_plain_speech_region_selection
+  - reuse_perception_word_timestamps_or_speaker_segments_when_available
+  - fall_back_to_word_group_speech_spans_when_no_explicit_target_property_is_requested
+  - keep_selected_spans_and_selected_spans_source_in_evidence
+rationale: Plain requests such as "Extract the speech portions" do not require a large planner decision when artifact_ops can deterministically select speech regions from existing perception/alignment evidence. This skill also gives the planner a safe fallback path when the LLM planner API is temporarily unavailable.
+guardrails:
+  - Use this only when the user asks for speech versus silence or non-speech regions.
+  - Do not use this for speaker-scoped, phrase-scoped, accent/style-scoped, singing/rap, translation, or voice-conversion edits; those require the more specific grounding or generative skills.
+  - If no speech evidence can be produced by perception or artifact_ops, fail with the missing evidence reason instead of copying the whole audio as success.

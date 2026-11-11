@@ -1,0 +1,33 @@
+skill_id: foreground_background_remix
+description: Edit or remove foreground speech while preserving background timing.
+priority: 100
+selected_tools: [foreground_background_remix]
+runtime_operations: [foreground_background_remix]
+positive_signals:
+  - background music
+  - background sound
+  - background unchanged
+  - keep background
+  - preserving background
+  - only keep background
+  - delete all voice
+  - remove voice
+  - foreground voice
+  - a cappella
+  - clean vocals
+  - unaccompanied singing
+  - instrumental tracks
+  - suppress instrumental
+  - remove accompaniment
+required_evidence: [foreground_background_stems]
+workflow:
+  - speech_separation
+  - edit_or_remove_foreground
+  - remix_preserved_background
+rationale: Edit, remove, or isolate foreground speech/singing vocals while preserving or suppressing accompaniment/background stems.
+guardrails:
+  - Do not send mixed audio directly to edit_data_pipeline when background must stay unchanged.
+  - Do not assume separation stems contain stable speaker labels.
+  - The configured separator produces vocals and accompaniment, not individual simultaneous speakers.
+  - Use semantic stem labels; first/last file order is not evidence of vocal or background content.
+  - Use this instead of TSE for a cappella / clean vocal extraction from music or instrumental accompaniment.

@@ -1,0 +1,45 @@
+name: qwen3_tts
+server:
+  command: ["uv", "run", "--frozen", "--project", ".", "python", "mcp_server.py"]
+  working_dir: "."
+  env:
+    UV_PROJECT_ENVIRONMENT: ".venv"
+    UV_LINK_MODE: "copy"
+    RUST_LOG: "warn"
+    PYTHONNOUSERSITE: "1"
+    HF_HOME: "./.cache/huggingface"
+    HF_HUB_CACHE: "./.cache/huggingface/hub"
+    QWEN3_TTS_SERVICE_URL: "http://127.0.0.1:8017"
+    QWEN3_TTS_CUSTOM_SERVICE_URL: "http://127.0.0.1:8017"
+    QWEN3_TTS_CLONE_SERVICE_URL: "http://127.0.0.1:8019"
+    QWEN3_TTS_VOICE_DESIGN_BACKEND: "qwen3_tts"
+  resources:
+    gpu: true
+    memory_gb: 20
+  lifecycle: session
+  startup_timeout_sec: 240
+managed_services:
+  - name: qwen3_tts
+    when:
+      argument: voice_design_backend
+      missing_value: qwen3_tts
+      values: ["qwen3_tts", "auto"]
+    url_env: QWEN3_TTS_SERVICE_URL
+    default_url: "http://127.0.0.1:8017"
+    command_env: QWEN3_TTS_SERVICE_COMMAND
+    health_path: "/health"
+    smoke:
+      - {method: "OPTIONS", path: "/synthesize_custom"}
+      - {method: "OPTIONS", path: "/synthesize_clone"}
+    startup_timeout_sec: 300
+    setup_hint: "start the Qwen3-TTS service or set QWEN3_TTS_SERVICE_COMMAND to a launch command"
+  - name: qwen3_tts_clone
+    when: {argument: mode, values: ["voice_clone"]}
+    url_env: QWEN3_TTS_CLONE_SERVICE_URL
+    default_url: "http://127.0.0.1:8019"
+    command_env: QWEN3_TTS_CLONE_SERVICE_COMMAND
+    health_path: "/health"
+    smoke:
+      - {method: "OPTIONS", path: "/synthesize_clone"}
+    startup_timeout_sec: 300
+    setup_hint: "start the Qwen3-TTS voice-clone service or set QWEN3_TTS_CLONE_SERVICE_COMMAND to a launch command"

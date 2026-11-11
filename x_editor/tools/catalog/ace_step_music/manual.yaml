@@ -1,0 +1,155 @@
+tool_id: ace_step_music
+mcp_tool_name: ace_step_music.generate_or_edit
+input_schema:
+  type: object
+  required:
+    - instruction
+    - output_path
+  properties:
+    instruction:
+      type: string
+      description: Natural-language edit intent, e.g. "make this speaker rap the line".
+    output_path:
+      type: string
+      description: Local output audio path. The wrapper writes downloaded ACE-Step audio here.
+    lyrics:
+      type: string
+      description: Lyrics or spoken text to turn into singing/rap. Empty lets ACE-Step infer or generate.
+    music_prompt:
+      type: string
+      description: Music caption/prompt describing genre, vocal style, mood, arrangement, and target delivery.
+    source_audio_path:
+      type: string
+      description: Existing source audio for cover/repaint tasks.
+    reference_audio_path:
+      type: string
+      description: Optional reference audio for style guidance.
+    mode:
+      type: string
+      enum: [text2music, cover, repaint]
+      default: text2music
+    vocal_style:
+      type: string
+      enum: [singing, rap, music_vocal]
+      default: singing
+    vocal_language:
+      type: string
+      default: unknown
+      description: ISO-639-1-ish vocal language hint accepted by ACE-Step, e.g. en, zh, ja, es, fr, unknown.
+    duration_seconds:
+      type: number
+      default: 10.0
+      description: Target generation duration; ACE-Step documents a 10-600 second range.
+    audio_format:
+      type: string
+      enum: [wav, wav32, mp3, flac, opus, aac]
+      default: wav
+    repainting_start:
+      type: number
+      default: 0.0
+    repainting_end:
+      type: number
+      default: -1.0
+    audio_cover_strength:
+      type: number
+      default: 0.8
+    inference_steps:
+      type: integer
+      default: 8
+    guidance_scale:
+      type: number
+      default: 7.0
+    seed:
+      type: integer
+      default: -1
+    use_random_seed:
+      type: boolean
+      default: true
+    thinking:
+      type: boolean
+      default: true
+    use_format:
+      type: boolean
+      default: true
+    bpm:
+      type: integer
+    key_scale:
+      type: string
+    time_signature:
+      type: string
+    model:
+      type: string
+      description: Optional ACE-Step DiT model id exposed by the running service.
+    poll_interval_seconds:
+      type: number
+      default: 2.0
+    timeout_seconds:
+      type: number
+      default: 1800.0
+output_schema:
+  type: object
+  required:
+    - output_audio_path
+  properties:
+    output_audio_path:
+      type: string
+    backend_used:
+      type: string
+    task_id:
+      type: string
+    task_type:
+      type: string
+    mode:
+      type: string
+    vocal_style:
+      type: string
+    result_file:
+      type: string
+    service_url:
+      type: string
+    warning:
+      type: string
+defaults:
+  mode: text2music
+  vocal_style: singing
+  vocal_language: unknown
+  duration_seconds: 10.0
+  audio_format: wav
+  audio_cover_strength: 0.8
+  inference_steps: 8
+  thinking: true
+  use_format: true
+  poll_interval_seconds: 2.0
+  timeout_seconds: 1800.0
+validation:
+  frontend_check:
+    - Output file exists and is playable.
+    - Result should be singing or rap/music-vocal audio matching the user's prompt and lyrics.
+    - Check lyrics intelligibility manually or with ASR.
+    - Check speaker/style similarity only as best-effort; the tool does not guarantee identity preservation.
+    - For cover/repaint, check source/reference influence and timing before reconstructing into a larger scene.
+    - X-Editor timeline cover/repaint calls default use_format=false unless explicitly requested, so they can run without ACE-Step's 5Hz LM on crowded GPUs.
+    - For X-Editor timeline edits, executor should first cut target speech spans, pass each span as source/reference audio, then fit the generated result back into the selected span before final scene reconstruction.
+examples:
+  - scenario: Generate a sung version of a spoken sentence.
+    arguments:
+      instruction: Make the speaker sing this sentence as a short pop hook.
+      lyrics: Today we launch the new editor.
+      music_prompt: upbeat pop song with clear lead vocal, natural phrasing
+      output_path: /data/xedit/runs/s1_ace_step_music.wav
+      mode: text2music
+      vocal_style: singing
+      vocal_language: en
+      duration_seconds: 10
+      audio_format: wav
+  - scenario: Turn an existing segment into rap using source audio guidance.
+    arguments:
+      instruction: Transform the source segment into rap vocals while keeping the main phrase.
+      lyrics: 这个产品今天正式上线
+      music_prompt: hip hop beat with confident rap vocals, clear rhythm
+      source_audio_path: /tmp/input.wav
+      output_path: /data/xedit/runs/s1_ace_step_music.wav
+      mode: cover
+      vocal_style: rap
+      vocal_language: zh
+      audio_cover_strength: 0.7

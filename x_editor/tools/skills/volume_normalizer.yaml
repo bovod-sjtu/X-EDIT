@@ -1,0 +1,75 @@
+skill_id: volume_normalizer
+display_name: 音量标准化 (RMS/Peak)
+source_mcp: volume-normalizer
+tool_names: [volume_normalize]
+
+description: 将音频音量标准化到目标电平，支持 RMS 和 Peak 两种模式，防止削波。
+detailed_capability: |
+  与 ffmpeg loudnorm 的区别：
+  - loudnorm：基于 EBU R128 响度标准（LUFS），更贴合人耳感知，但计算较重
+  - volume_normalizer：基于 RMS 或 Peak，计算轻量，参数直观，适合快速标准化
+
+  两种 method 的适用场景：
+  - rms：基于平均能量，适合音乐/混音场景
+  - peak：基于峰值电平，适合语音/播客，确保最大电平不超过 headroom
+
+  headroom_db 参数用于防止削波：最终峰值不会超过 target_db + headroom_db。
+
+dimensions: [dynamics]
+
+parameters:
+  - name: audio_path
+    type: string
+    required: true
+    description: 输入音频文件路径
+  - name: target_db
+    type: number
+    required: false
+    default: -20.0
+    description: 目标音量电平 (dB)
+    constraints: "-60.0 ~ 0.0"
+  - name: method
+    type: string
+    required: false
+    default: rms
+    description: 标准化方法
+    enum_values: [rms, peak]
+  - name: headroom_db
+    type: number
+    required: false
+    default: -1.0
+    description: 峰值余量 (dB)，防止削波
+    constraints: "-6.0 ~ 0.0"
+  - name: output_path
+    type: string
+    required: false
+    default: auto
+    description: 输出文件路径
+
+output:
+  type: audio_file
+  description: 音量标准化后的音频文件
+
+execution_constraints:
+  should_run_before: []
+  should_run_after: [acompressor, equalizer, bass_boost, deesser, seed_vc, pitch_shift_rubberband]
+  mutually_exclusive_with: [loudnorm]
+  can_repeat: false
+
+examples:
+  - scenario: "语音标准化到播客标准"
+    parameters:
+      target_db: -16.0
+      method: peak
+      headroom_db: -1.5
+    expected_outcome: "峰值约 -17.5dB，无削波，适合播客发布"
+  - scenario: "音乐片段 RMS 平衡"
+    parameters:
+      target_db: -14.0
+      method: rms
+    expected_outcome: "平均响度一致，不同片段音量平衡"
+
+instruction_mapping:
+  "dynamics.target:normalized": "推荐 tool。method=peak, target_db=-16~-20"
+  "dynamics.target:louder": "target_db 比之前更高（如从 -20 改为 -14），注意检查 headroom"
+  "dynamics.target:quieter": "target_db 比之前更低（如从 -14 改为 -24）"

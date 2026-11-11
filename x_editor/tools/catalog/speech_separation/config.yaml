@@ -1,0 +1,26 @@
+name: speech_separation
+server:
+  command: ["uv", "run", "--frozen", "--project", ".", "python", "mcp_server.py"]
+  working_dir: "."
+  env:
+    UV_PROJECT_ENVIRONMENT: ".venv"
+    UV_LINK_MODE: "copy"
+    RUST_LOG: "warn"
+    PYTHONNOUSERSITE: "1"
+    AUDIO_SEPARATOR_ROFORMER_SERVICE_URL: "http://127.0.0.1:8042"
+  resources:
+    gpu: true
+    memory_gb: 16
+  lifecycle: session
+  startup_timeout_sec: 180
+managed_services:
+  - name: audio_separator_roformer
+    url_env: AUDIO_SEPARATOR_ROFORMER_SERVICE_URL
+    default_url: "http://127.0.0.1:8042"
+    working_dir: "../audio_separator_roformer"
+    command: [".venv/bin/python", "service.py", "--host", "127.0.0.1", "--port", "8042"]
+    health_path: "/health"
+    smoke:
+      - {method: "OPTIONS", path: "/separate"}
+    startup_timeout_sec: 240
+    setup_hint: "cd x_editor/tools/catalog/audio_separator_roformer && ./setup.sh"

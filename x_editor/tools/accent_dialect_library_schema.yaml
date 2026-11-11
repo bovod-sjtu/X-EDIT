@@ -1,0 +1,39 @@
+schema_version: '1.0'
+description: 'Runtime AccentLibraryEntry: one flat object per JSONL line, not a nested
+  catalog. See x_editor/accent_library/README.md.'
+storage:
+  format: jsonl
+  reference_audio_path: Relative to the containing manifest, or an explicit absolute
+    local path; never resolved by basename search.
+  bundled_records: false
+required_runtime_fields:
+- id
+- canonical_accent
+- reference_audio_path
+additional_builder_requirements:
+- transcript
+- provenance.source_uri
+- provenance.license
+fields:
+  id: Nonempty stable unique string
+  canonical_accent: Specific label from python -m x_editor.accent_library labels
+  reference_audio_path: Local readable mono reference audio
+  transcript: Verbatim speech in the reference clip; required for TTS
+  gender: Optional preference; unknown if not known
+  age_group: Optional preference; unknown if not known
+  speaker_id: Optional pseudonymous source speaker identifier
+  duration: Seconds; measured from file by builder
+  sample_rate: Hz; measured from file by builder
+  language: Language code; defaults from canonical label
+  locale: Optional locale
+  region: Optional region
+  family: Optional linguistic family
+  label_type: accent or dialect, derived from canonical definition
+  aliases: Optional string array
+  quality: Optional object; usable_for_vc_reference and usable_for_zeroshot_tts_reference
+    must not be false for builder import
+  provenance: Object with source_uri and license documenting intended use
+  metadata: Optional object; builder records library_audio_sha256
+compatibility: Runtime also reads legacy flat Parquet rows and *_json encoded metadata
+  columns; Parquet needs an optional engine. Candidate-miner outputs need review and
+  explicit conversion to this schema.

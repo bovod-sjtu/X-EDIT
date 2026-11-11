@@ -1,0 +1,115 @@
+schema_version: x-editor.operation-capability-card/v1
+operation: edit_data_pipeline.audio_assembly
+semantic_effects:
+  - splice_generated_content_into_source_timeline
+  - assemble_local_replacement_audio
+supported_scopes:
+  - segment
+  - timeline
+requirements:
+  inputs:
+    - inputs.input_audio
+    - inputs.target_audio_path
+  evidence:
+    - speech.source_text
+    - speech.word_timestamps
+preservation:
+  - dimension: non_target_audio
+    level: strong
+    evidence_kind: declared_design_fact
+    rationale: The assembly contract marks target spans and preserves source audio outside those spans.
+  - dimension: outer_boundaries
+    level: unknown
+    evidence_kind: unknown
+    rationale: Boundary naturalness is a listening-review target rather than an established prior.
+quality_characteristics:
+  - dimension: splice_boundary_naturalness
+    level: unknown
+    evidence_kind: unknown
+    rationale: Listening comparison is required for each donor and source pairing.
+artifact_risks:
+  - risk: donor_source_boundary_mismatch
+    level: unknown
+    evidence_kind: unknown
+    rationale: Acoustic mismatch and splice artifacts require direct review.
+composition:
+  supports_batch_targets: true
+  cumulative_degradation_risk: unknown
+parameter_contract:
+  additional_parameters: reject
+  planner_selectable:
+    - path: inputs.input_audio
+      value_type: string
+      required: true
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: source_timeline_audio
+    - path: inputs.target_audio_path
+      value_type: string
+      required: true
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: donor_replacement_audio
+    - path: params.edit_tagged_text
+      value_type: string
+      required: true
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: target_span_transcript_tags
+    - path: params.time_spans_from_source
+      value_type: array
+      required: true
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: source_replacement_spans
+    - path: params.time_spans_from_target
+      value_type: array
+      required: true
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: donor_replacement_spans
+    - path: params.preserve_outer_boundaries
+      value_type: boolean
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: true
+      semantic_role: outer_boundary_preservation
+    - path: params.language
+      value_type: string
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: speech_language
+  framework_owned:
+    - params.output_path
+    - params.service_url
+    - params.smoothing
+    - params.debug
+    - params.debug_dir
+    - params.trace_id
+  conditional_rules: []
+limitations:
+  - This operation requires both source and donor audio with explicit aligned spans.
+  - It is an assembly operation, not a text generator or voice converter.
+  - Target-label syntax and correspondence between audio artifacts and span arrays require operation-specific validation beyond the parameter condition DSL.
+provenance:
+  - source_path: x_editor/tools/catalog/edit_data_pipeline/manual.yaml
+    source_kind: manual
+  - source_path: x_editor/runtime/operation_normalizers.py
+    source_kind: runtime_handler
+  - source_path: x_editor/runtime/audio_plan_executor.py
+    source_kind: runtime_handler

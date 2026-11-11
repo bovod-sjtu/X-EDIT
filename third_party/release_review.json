@@ -1,0 +1,140 @@
+{
+  "schema_version": "x-edit.release-review/v1",
+  "review_date": "2026-10-26",
+  "application": {
+    "scope": "original_framework_source_configurations_and_documentation",
+    "scope_document": "docs/RELEASE_SCOPE.md",
+    "external_model_stack_included_in_apache_grant": false,
+    "model_weights_datasets_and_media_binaries_distributed": false,
+    "model_backends_replaced": false,
+    "approval_granted": false,
+    "request": "Publish original framework source and interfaces. F5 requires independent installation and explicit opt-in. SAM and VoiceSculptor are documentation-only extension candidates with no shipped tool integrations. Upstream usage restrictions remain applicable.",
+    "operator_installed_only": [
+      "f5"
+    ],
+    "runtime_opt_in_required": true,
+    "documentation_only_extensions": [
+      "SAM-Audio",
+      "VoiceSculptor-VD"
+    ]
+  },
+  "requirement": "Retain the F5 external editing interface, remove SAM/VoiceSculptor code and built-in tools at user request, preserve native Qwen behavior, and do not claim unverified replacements.",
+  "permissive_declarations": [
+    "Apache-2.0",
+    "MIT",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "CC0-1.0"
+  ],
+  "pipeline_sdk_declarations": {
+    "f5-tts": {
+      "revision": "27e20fcf39fbce3f187a61d4a3e92065d2d9b947",
+      "license": "MIT",
+      "evidence_url": "https://github.com/SWivid/F5-TTS/tree/27e20fcf39fbce3f187a61d4a3e92065d2d9b947"
+    },
+    "index-tts": {
+      "revision": "1eafa935e8887f9ba877f82cf7319fceddfc86cb",
+      "license": "LicenseRef-bilibili-Model-Use",
+      "evidence_url": "https://github.com/index-tts/index-tts/tree/1eafa935e8887f9ba877f82cf7319fceddfc86cb"
+    },
+    "qwen3-asr": {
+      "revision": "c17a131fe028b2e428b6e80a33d30bb4fa57b8df",
+      "license": "Apache-2.0",
+      "evidence_url": "https://github.com/QwenLM/Qwen3-ASR/tree/c17a131fe028b2e428b6e80a33d30bb4fa57b8df"
+    },
+    "qwen3-tts": {
+      "revision": "1ab0dd75353392f28a0d05d9ca960c9954b13c83",
+      "license": "Apache-2.0",
+      "evidence_url": "https://github.com/QwenLM/Qwen3-TTS/tree/1ab0dd75353392f28a0d05d9ca960c9954b13c83"
+    },
+    "seed-vc": {
+      "revision": "51383efd921027683c89e5348211d93ff12ac2a8",
+      "license": "GPL-3.0",
+      "evidence_url": "https://github.com/Plachtaa/seed-vc/tree/51383efd921027683c89e5348211d93ff12ac2a8"
+    },
+    "ted-tts": {
+      "revision": "36ffc3e2de346156baa7d60a1749ca4a9365625b",
+      "license": "Apache-2.0; LicenseRef-bilibili-Model-Use",
+      "evidence_url": "https://github.com/Simon-leong/TED-TTS/tree/36ffc3e2de346156baa7d60a1749ca4a9365625b"
+    }
+  },
+  "review_overrides": [
+    {
+      "kind": "model",
+      "name": "ASLP-lab/VoiceSculptor-VD",
+      "reason": "Historical/documentation-only extension evidence, not an active dependency. The historically selected xcodec2 weights have noncommercial terms; the top-level Apache model card does not clear that dependency."
+    },
+    {
+      "kind": "model",
+      "name": "mrfakename/sam-audio-large",
+      "reason": "Historical/documentation-only extension evidence, not an active dependency. The SAM agreement and historically selected ImageBind dependency need separate component review."
+    },
+    {
+      "kind": "source",
+      "name": "SAM-Audio",
+      "reason": "Historical/documentation-only extension evidence, not an active dependency. The SAM agreement and historically selected ImageBind dependency need separate component review."
+    },
+    {
+      "kind": "model",
+      "name": "Politrees/UVR_resources",
+      "reason": "The collection card is not evidence of rights for each selected RoFormer checkpoint. Existing inventory explicitly records this uncertainty."
+    }
+  ],
+  "replacement_candidates": [
+    {
+      "replaces": "F5-TTS",
+      "candidate": "dots-studio/dots.tts.edit",
+      "source_url": "https://github.com/studio-dots-ai/dots.tts",
+      "source_revision": "b65ca7149fb43b8fb8d52916aa12738deda7b188",
+      "source_license": "Apache-2.0",
+      "model_url": "https://huggingface.co/dots-studio/dots.tts.edit",
+      "model_revision": "e2aea9cab95a802a63f1a491702a1cc8bf796b30",
+      "model_card_license": "other",
+      "status": "not_activated",
+      "remaining": [
+        "Reconcile the model card with the source README's Apache checkpoint statement",
+        "Verify local infilling, timing, boundaries and all F5 service callers",
+        "Run real inference against the same requests"
+      ]
+    },
+    {
+      "replaces": "SAM-Audio",
+      "candidate": "AudioSep",
+      "source_url": "https://github.com/Audio-AGI/AudioSep",
+      "source_license": "MIT",
+      "model_url": "https://huggingface.co/spaces/Audio-AGI/AudioSep/tree/main/checkpoint",
+      "space_revision": "0807a713283035d8b0d0628f1b8e3d6580459f7b",
+      "space_card_license": "mit",
+      "status": "not_activated",
+      "remaining": [
+        "Confirm the MIT Space declaration covers the selected separation and CLAP weights, including their upstream conditions",
+        "Pin the source and all assets, including the implicit roberta-base tokenizer",
+        "Verify text-guided target/residual separation and temporal-anchor capability"
+      ]
+    },
+    {
+      "replaces": "VoiceSculptor-VD and xcodec2",
+      "candidate": "Qwen3-TTS VoiceDesign",
+      "source_url": "https://github.com/QwenLM/Qwen3-TTS",
+      "source_revision": "1ab0dd75353392f28a0d05d9ca960c9954b13c83",
+      "source_license": "Apache-2.0",
+      "model_url": "https://huggingface.co/Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign",
+      "model_revision": "5ecdb67327fd37bb2e042aab12ff7391903235d3",
+      "model_card_license": "apache-2.0",
+      "status": "not_activated",
+      "remaining": [
+        "Use actual generate_voice_design, not CustomVoice preset selection",
+        "Validate age, gender, pitch, pitch variation, loudness, rate and emotion controls",
+        "Verify replacement across no-reference conversion and reference synthesis callers"
+      ]
+    }
+  ],
+  "unreviewed_scope": [
+    "Operator-selected ACE-Step, Seamless and QuarkAudio integrations outside the managed stack, including their auxiliary models",
+    "Transitive Python and native package licenses",
+    "Capability and acoustic-quality acceptance of replacement models",
+    "The full distributed container image and any additional installed media binaries"
+  ],
+  "full_stack_approved": false
+}

@@ -1,0 +1,36 @@
+skill_id: internal_voice_transfer
+description: Transfer timbre between speakers already present in the same audio.
+priority: 78
+selected_tools: [intra_audio_voice_transfer]
+runtime_operations: [intra_audio_voice_transfer]
+positive_signals:
+  - swap voices
+  - same audio
+  - adult speaker
+  - child speaker
+  - first speaker to match second
+  - second speaker to match first
+  - first speaking man
+  - second speaking man
+  - swap timbres
+  - swap voices of men and women
+  - men and women timbre swap
+required_evidence: [speaker_segments, speaker_profiles]
+workflow:
+  - diarization
+  - resolve_gender_or_attribute_speaker_profiles
+  - for_male_female_swap_create_bidirectional_internal_reference_mappings
+  - derive_internal_reference
+  - seed_vc_by_segments
+  - reconstruct_timeline
+rationale: >-
+  Transfer timbre between speakers already present in the same audio. Preserve
+  the word order and timeline, but convert male-speaker spans to the female
+  in-audio reference timbre and female-speaker spans to the male in-audio
+  reference timbre when the request explicitly asks for a voice/timbre swap.
+guardrails:
+  - Resolve source and target speaker mapping before execution.
+  - When both male and female speaker profiles are already in perception evidence, planner timeout should not fail the task; use intra_audio_voice_transfer with bidirectional gender mappings.
+  - Preserve transcript/order/timing; do not reorder number or phrase audio for gender/timbre swap requests.
+  - Do not treat content/words swaps as timbre swaps unless the request also explicitly asks for voice, speaker identity, or timbre transfer.
+  - Do not use this for cross-file requests such as "replace speech in audio2 with the voice from audio1"; route those to reference_voice_conversion / SeedVC, optionally inside artifact_ops.speaker_scoped_edit for local target spans.

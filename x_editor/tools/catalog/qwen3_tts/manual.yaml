@@ -1,0 +1,81 @@
+tool_id: qwen3_tts
+mcp_tool_name: qwen3_tts.synthesize
+input_schema:
+  type: object
+  required:
+  - text
+  - output_path
+  properties:
+    text:
+      type: string
+    output_path:
+      type: string
+    mode:
+      type: string
+      enum:
+      - custom_voice
+      - voice_clone
+      default: custom_voice
+    voice_design_backend:
+      type: string
+      enum:
+      - qwen3_tts
+      - auto
+      default: qwen3_tts
+      description: Use the native Qwen3-TTS service. Other backend identifiers are rejected, not redirected.
+    speaker:
+      type: string
+      description: Preset speaker name for custom_voice mode.
+    instruct:
+      type: string
+      description: Optional style/emotion/voice-design instruction. For no-reference timbre requests, include gender/age, pitch range, timbre texture, emotion/intensity, speaking rate, and exact-word preservation.
+    language:
+      type: string
+      default: Auto
+    ref_audio_path:
+      type: string
+    ref_text:
+      type: string
+    x_vector_only_mode:
+      type: boolean
+      default: false
+    timeout_seconds:
+      type: number
+      description: Optional per-request HTTP timeout for long-running synthesis calls.
+output_schema:
+  type: object
+  required:
+  - output_audio_path
+  properties:
+    output_audio_path:
+      type: string
+    sample_rate:
+      type: integer
+    duration_seconds:
+      type: number
+    voice_design_backend:
+      type: string
+defaults:
+  mode: custom_voice
+  speaker: vivian
+  language: Auto
+  voice_design_backend: qwen3_tts
+  x_vector_only_mode: false
+validation:
+  frontend_check:
+  - Generated speech should say the requested target text.
+  - Style or emotion should match instruct when provided.
+  - Voice clone mode should resemble the reference speaker.
+  - For no-reference timbre design, instruct should be explicit enough for Qwen3-TTS to synthesize the requested voice without a reference.
+examples:
+- scenario: Regenerate a modified sentence in an surprised tone.
+  arguments:
+    mode: custom_voice
+    text: 今天天气有雨。
+    instruct: sound surprised and natural
+- scenario: Re-speak source text as a no-reference deep male voice.
+  arguments:
+    mode: custom_voice
+    speaker: ryan
+    text: Keep the original transcript here.
+    instruct: 'Voice design for Qwen3-TTS custom_voice. Gender/age: adult male speaker. Pitch/range: low pitch range with natural variation. Timbre texture: warm, resonant, full-bodied timbre, not muffled. Emotion/intensity: neutral and natural emotion. Speaking rate: natural speaking rate. Delivery: fluent, stable delivery with clear pronunciation. Content constraint: speak exactly the words provided in the text field; do not add, omit, translate, or paraphrase any words.'

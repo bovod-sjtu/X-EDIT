@@ -1,0 +1,98 @@
+tool_id: audio_effects
+mcp_tool_name: audio_effects.apply
+input_schema:
+  type: object
+  required:
+    - input_audio_path
+    - output_path
+  properties:
+    input_audio_path:
+      type: string
+    output_path:
+      type: string
+    instruction:
+      type: string
+      description: Natural-language request used to infer preset and span when explicit params are omitted.
+    preset:
+      type: string
+      enum: [telephone, old_radio, underwater, strong_wind, crowd_noise, background_music, muffled_wall, whisper_style, shouting_style, animal_vocal_style, match_channel_reference]
+    effect:
+      type: string
+      description: Alias for preset.
+    strength:
+      type: number
+      default: 0.75
+      description: Effect intensity from 0.0 to 1.0.
+    reference_audio_path:
+      type: string
+      description: Required for match_channel_reference.
+    preserve_duration:
+      type: boolean
+      default: true
+    output_dir:
+      type: string
+      description: Directory for manifest/debug artifacts.
+output_schema:
+  type: object
+  required:
+    - output_audio_path
+  properties:
+    output_audio_path:
+      type: string
+    manifest_path:
+      type: string
+    preset:
+      type: string
+    backend:
+      type: string
+    span:
+      type: object
+    reference_channel_analysis:
+      type: object
+      description: For match_channel_reference, source/reference DSP features plus estimated filter, distortion, echo, and noise-bed parameters.
+defaults:
+  strength: 0.75
+  preserve_duration: true
+validation:
+  frontend_check:
+    - Speech words and speaker identity should remain recognizable.
+    - Requested acoustic effect should be audible.
+    - Output duration should match input duration unless preserve_duration=false.
+examples:
+  - scenario: Make speech sound like a phone call.
+    arguments:
+      input_audio_path: /path/to/source.wav
+      output_path: /data/xedit/runs/phone.wav
+      preset: telephone
+      strength: 0.8
+  - scenario: Approximate a whispering vocal-effort style while preserving words and timing.
+    arguments:
+      input_audio_path: /path/to/source.wav
+      output_path: /tmp/x_editor/whisper.wav
+      preset: whisper_style
+      strength: 0.72
+  - scenario: Add crowd or audience background noise while preserving speech timing.
+    arguments:
+      input_audio_path: /path/to/source.wav
+      output_path: /tmp/x_editor/crowd_noise.wav
+      preset: crowd_noise
+      strength: 0.65
+  - scenario: Add a generic background music bed behind speech.
+    arguments:
+      input_audio_path: /path/to/source.wav
+      output_path: /tmp/x_editor/background_music.wav
+      preset: background_music
+      strength: 0.55
+  - scenario: Best-effort non-human or animal-like vocal coloration while preserving timing.
+    arguments:
+      input_audio_path: /path/to/source.wav
+      output_path: /tmp/x_editor/animal_like.wav
+      preset: animal_vocal_style
+      strength: 0.78
+  - scenario: Match a reference recording channel.
+    arguments:
+      input_audio_path: /path/to/audio1.wav
+      reference_audio_path: /path/to/audio2.wav
+      output_path: /data/xedit/runs/channel_match.wav
+      preset: match_channel_reference
+      strength: 0.88

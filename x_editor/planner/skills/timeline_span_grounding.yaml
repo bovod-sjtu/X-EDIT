@@ -1,0 +1,48 @@
+skill_id: timeline_span_grounding
+description: Ground speaker, role, phrase, or timeline spans before deterministic artifact operations.
+priority: 95
+selected_tools: [perception.speech_context, perception.speaker_attributed_review, perception.semantic_span_review, perception.audio_fallback, artifact_ops]
+runtime_operations: [perception.speech_context, perception.speaker_attributed_review, perception.semantic_span_review, perception.audio_fallback, artifact_ops]
+positive_signals:
+  - extract
+  - remove
+  - mute
+  - only
+  - first speaker
+  - second speaker
+  - child speaker
+  - female speaker
+  - male speaker
+  - age or gender scoped speaker
+  - woman
+  - phrase
+  - entity
+  - proper noun
+  - name mention
+  - respondent
+  - interviewer
+  - answer to a question
+  - correctly answered question
+  - accent
+  - dialect
+  - speech with an audio property
+  - segments with a perceptual property
+  - speaker or segment should sing
+  - speaker or segment should rap
+  - source-accented segment should be converted
+  - filler words
+  - concatenate
+  - append
+required_evidence: [source_text, word_timestamps, speaker_segments]
+workflow:
+  - choose_transcript_speaker_or_semantic_evidence_contract
+  - use_ts_asr_for_words_speaker_review_for_speaker_scope_or_omni_rubric_for_perceptual_properties
+  - artifact_ops.extract_remove_mute_concat_or_reconstruct
+rationale: Ground speaker, role, phrase, perceptual-property, or timeline spans before deterministic artifact operations.
+guardrails:
+  - Use TS-ASR and alignment for phrase or word grounding before general audio fallback.
+  - Use speaker-attributed review for speaker, role, order, or overlap grounding.
+  - Use semantic_span_review when aligned candidates need an Omni yes/no property rubric.
+  - For property-scoped requests such as accented speech, whispered speech, noisy speech, or emotional speech, let artifact_ops score aligned candidate segments with the perception model instead of selecting the whole transcript.
+  - For generative local edits such as singing, rap, or accent conversion, preserve the same grounding contract: split into aligned candidates, confirm the target spans with perception when deterministic evidence is missing, then let the runtime handler edit and stitch only those spans.
+  - Do not call TSE without reference audio.

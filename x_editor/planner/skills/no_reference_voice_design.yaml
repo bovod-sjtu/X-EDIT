@@ -1,0 +1,76 @@
+skill_id: no_reference_voice_design
+description: Use independent target-voice synthesis plus SeedVC when an existing/source audio must be converted to a described voice without a provided reference.
+priority: 80
+selected_tools: [perception.audio_fallback, no_reference_voice_conversion]
+runtime_operations: [no_reference_voice_conversion]
+positive_signals:
+  - old voice
+  - aged voice
+  - Speak this in an old voice
+  - younger voice
+  - older voice
+  - younger speaker
+  - older speaker
+  - sounds younger
+  - sounds older
+  - sound younger
+  - sound older
+  - sound much younger
+  - sound much older
+  - much younger
+  - much older
+  - elderly
+  - elderly voice
+  - male voice
+  - female voice
+  - bright voice
+  - deep voice
+  - no reference
+  - child voice
+  - kid voice
+  - children voice
+  - boy voice
+  - girl voice
+  - 小孩音色
+  - 儿童音色
+  - 童声音色
+  - 小孩声音
+  - 儿童声音
+  - 童声
+  - 男声
+  - 女声
+  - 年轻声音
+  - 年老声音
+  - 老声音
+  - 苍老音色
+  - 老人音色
+  - 老人声音
+  - 老年音色
+  - 苍老声音
+  - 青年音色
+  - 中年音色
+  - 改变音色
+  - 改为小孩
+  - 改为老人
+required_evidence: [user_instruction, source_audio]
+workflow:
+  - if_no_reference_audio_is_provided_treat_as_composite_no_reference_voice_conversion_not_bare_seed_vc
+  - perception_to_source_text_when_missing
+  - load_runtime_voice_design_memory_for_target_voice_class
+  - synthesize_target_voice_reference_with_qwen3_tts_without_using_source_audio
+  - preserve_source_perceived_gender_for_age_or_timbre_class_requests_unless_target_gender_is_explicit
+  - apply_voice_class_dsp_then_optional_neural_reference_resynthesis_when_needed
+  - seed_vc_source_audio_to_synthetic_reference
+rationale: Existing/source audio timbre conversion should preserve the source waveform content/prosody through VC. The target voice reference is synthesized from the requested voice description only, then SeedVC converts the source audio to that reference.
+guardrails:
+  - Use only when no concrete reference speaker audio is provided and existing source audio must be converted to a described voice.
+  - Preserve exact words unless the request asks to rewrite content.
+  - Do not ask SeedVC for reference_audio directly when the user only provides a natural-language voice class such as old voice, elderly voice, child voice, or male/female voice; first synthesize an independent target reference.
+  - Do not use no-reference voice design for cleanup requests such as electronic/robotic/processed voice to natural or normal voice; route those to speech_enhancement, scoped by artifact_ops.speaker_scoped_edit when needed.
+  - Do not use source transcript, source speaker traits, or source audio as the target voice reference prompt; the synthetic reference voice must be independent of the source audio.
+  - For broad age or timbre class conversions such as child, elderly, young, or middle-aged voice, preserve the source speaker's perceived gender unless the user explicitly asks for male/female, boy/girl, grandpa/grandma, or equivalent target gender.
+  - Child/elderly DSP postprocess is allowed as a target-reference correction step; when available, a neural or speech-token resynthesis pass should follow it to reduce signal-processing artifacts before SeedVC.
+  - Qwen3-TTS is only used to synthesize the target reference voice; SeedVC performs the final source-audio conversion.
+  - Reject unavailable voice-design backends rather than silently substituting another model.
+  - Do not route whole-utterance age/gender/timbre design to pitch_rate_edit; pitch/rate tags need source_text and only express mechanical prosody changes.
+  - If target voice design or SeedVC is unavailable, report unavailable instead of copying input as success.

@@ -1,0 +1,32 @@
+skill_id: timeline_segment_reorder
+description: Reorder, swap, or duplicate repeated speech segments by grounding all source spans on the original timeline before reconstruction.
+priority: 96
+selected_tools: [artifact_ops]
+runtime_operations: [artifact_ops.extract_spans, artifact_ops.reconstruct]
+positive_signals:
+  - swap the first and second speech segments
+  - swap speech segments
+  - switch speech segments
+  - reorder speech segments
+  - swap pronunciations
+  - swap the Chinese pronunciations
+  - switch pronunciations
+  - first and second speech segments
+  - repeated speech
+  - instances of the speech
+  - three instances
+required_evidence: [source_audio, repeated_phrase_or_segment_spans]
+workflow:
+  - locate_all_requested_segment_instances_on_the_original_audio_timeline
+  - treat_explicit_time_spans_as_original_timeline_coordinates
+  - accept_open_ended_spans_such_as_start_sec_only_as_from_start_to_audio_end
+  - extract_or_reference_each_segment_from_the_base_audio_not_from_prior_segment_outputs
+  - mark_original_coordinate_steps_with_timeline_reference_base_when_the_schema_allows_it
+  - reconstruct_the_timeline_with_the_requested_segment_order
+rationale: Segment swap/reorder plans can accidentally chain extractions through the current intermediate audio, making later original-timeline spans invalid. All explicit spans for repeated segment operations should remain grounded to the base audio unless the step explicitly declares a relative intermediate input.
+guardrails:
+  - Do not use this for word-level transcript substitutions; use edit_data_pipeline.text_edit for lexical swaps.
+  - Do not reinterpret explicit spans relative to an extracted intermediate when the spans fit the base audio timeline.
+  - Use params.timeline_reference=base for original-coordinate spans and params.timeline_reference=current only when timestamps were deliberately measured on the current intermediate artifact.
+  - If a remainder/tail segment is represented as only start_sec, clip its end to the original audio duration.
+  - Keep extracted intermediate segment artifacts in evidence so the frontend can inspect each reorder source.

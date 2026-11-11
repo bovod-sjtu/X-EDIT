@@ -1,0 +1,29 @@
+tool_id: paralinguistic_event_bank
+display_name: Paralinguistic Event Asset Bank
+backend: local_event_asset_materializer
+category: audio_asset_bank
+purpose: >
+  Materialize short breath, laugh, cough, or sigh event assets for local
+  paralinguistic add/edit workflows without rewriting speech.
+when_to_use:
+  - Runtime needs an offline nonverbal event asset for paralinguistic_event_add.
+  - Debugging or frontend views need to inspect the exact event asset inserted into speech.
+  - A caller provides an explicit event bank directory or event asset path.
+do_not_use_when:
+  - User asks to change spoken words, emotion, accent, or speaker identity.
+  - User asks to remove an event from existing audio; use paralinguistic_event_remove.
+  - User needs arbitrary environmental sound effects outside breath/laugh/cough/sigh.
+inputs:
+  - event
+  - output_path
+  - optional_source_audio_for_format
+  - optional_event_asset_path_or_event_bank_dir
+outputs:
+  - event_asset_audio
+cost:
+  gpu_required: false
+  expected_latency: low
+constraints:
+  - Supported event classes are breath, laugh, cough, and sigh.
+  - If no explicit asset is found, the wrapper creates a deterministic synthetic fallback asset and reports that fallback in metadata.
+  - This tool materializes assets only; timeline insertion is owned by paralinguistic_event_add.

@@ -1,0 +1,46 @@
+tool_id: speech_enhancement
+mcp_tool_name: speech_enhancement.enhance
+input_schema:
+  type: object
+  required:
+    - input_audio_path
+    - output_path
+  properties:
+    input_audio_path:
+      type: string
+    output_path:
+      type: string
+    mode:
+      type: string
+      enum: [general, denoise, dereverb, clarity]
+      default: general
+    preserve_background:
+      type: boolean
+      default: false
+    enhancement_goal:
+      type: string
+      description: Natural language quality target.
+output_schema:
+  type: object
+  required:
+    - output_audio_path
+  properties:
+    output_audio_path:
+      type: string
+    sample_rate:
+      type: integer
+    duration_seconds:
+      type: number
+defaults:
+  mode: general
+  preserve_background: false
+validation:
+  frontend_check:
+    - Speech should be clearer and more intelligible than input.
+    - No obvious musical noise, clipping, or speech distortion should be introduced.
+    - Important background ambience should be preserved if preserve_background is true.
+examples:
+  - scenario: Clean up final edited dialogue.
+    arguments:
+      mode: clarity
+      enhancement_goal: make dialogue clearer without changing the voice identity

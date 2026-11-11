@@ -1,0 +1,82 @@
+{
+  "schema_version": "x-edit.dependency-remediation-validation/v1",
+  "date": "2026-10-21",
+  "reference": {
+    "repository": "https://github.com/studio-dots-ai/dots.tts.edit-data-pipeline",
+    "revision": "ba955475a455a1e9e03a8da3f6b3e668130aa83f",
+    "root_license_present": false,
+    "f5_still_required": true,
+    "observation_date": "2026-10-21"
+  },
+  "ffmpeg": {
+    "version": "8.1.2",
+    "source_url": "https://ffmpeg.org/releases/ffmpeg-8.1.2.tar.xz",
+    "source_sha256": "464beb5e7bf0c311e68b45ae2f04e9cc2af88851abb4082231742a74d97b524c",
+    "distribution_check_passed": true,
+    "corresponding_source_and_notices_retained": true,
+    "build_flags": [
+      "--disable-autodetect",
+      "--disable-gpl",
+      "--disable-nonfree",
+      "--disable-version3",
+      "--enable-shared",
+      "--disable-static"
+    ],
+    "validation_prefix_was_temporary": true,
+    "binaries": [
+      {
+        "sha256": "69044d2adbf79db8efc8ce6dc28edc14366ac1e82b2f9f5364e8ce8e141e6eb8",
+        "passed": true,
+        "forbidden_flags": [],
+        "name": "ffmpeg"
+      },
+      {
+        "sha256": "372e6d2f1078242418a594effc9ec178cd3f379495851add9e4238fac7d66c24",
+        "passed": true,
+        "forbidden_flags": [],
+        "name": "ffprobe"
+      }
+    ],
+    "host_gpl_binary_rejected": true,
+    "wav_generation_flac_conversion_and_probe_passed": true,
+    "native_mpeg4_video_generation_and_probe_passed": true,
+    "resampling_tempo_and_volume_chain_passed": true,
+    "full_decord_runtime_probe_rerun": false,
+    "docker_image_built": false
+  },
+  "dependency_audit": {
+    "scope": "Historical full-model-stack review on 2026-10-21; not the original-source distribution assessment.",
+    "ready_for_resubmission": false,
+    "transitive_f5_blockers_verified": true,
+    "voice_codec_blocker_verified": true,
+    "imagebind_blocker_verified": true,
+    "stale_model_pin_rejected": true,
+    "service_cycle_rejected": true,
+    "gpl_distinguished_from_noncommercial": true,
+    "mixed_license_scope_preserved": true
+  },
+  "source_distribution": {
+    "source_archive_and_wheel_build_passed": true,
+    "external_sdk_weights_audio_and_ffmpeg_binaries_excluded": true,
+    "deployment_scripts_and_review_policy_in_sdist": true
+  },
+  "capability_boundary": {
+    "active_stack_sha256": "27cea4d51bebbcf9bbfa17ef69ea50408191a7fbd1abd48ac79888e7174b5c4c",
+    "external_pipeline_manifest_sha256": "f5ab0821d716e0ec8f46e205c4a5e362cb2079a78509047ab9194e695caa36e3",
+    "active_backends_changed": false,
+    "controller_algorithms_changed": false,
+    "replacement_candidates_activated": false,
+    "replacement_model_inference_verified": false,
+    "full_stack_approved": false,
+    "published": false
+  },
+  "reference_followup": {
+    "date": "2026-10-22",
+    "revision": "85bd4c40a92c80154df965840e1e4276e6c71b24",
+    "root_license_present": true,
+    "root_license": "Apache-2.0",
+    "repository_access_restricted": true,
+    "active_runtime_pin_available_at_github_mirror": false,
+    "runtime_pin_changed": false
+  }
+}

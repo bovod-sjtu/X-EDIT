@@ -1,0 +1,80 @@
+skill_id: index_tts
+display_name: IndexTTS 语音合成（零样本音色克隆）
+source_mcp: index-tts
+tool_names: [index_tts_synthesize]
+
+description: |
+  零样本 TTS（文本转语音），支持音色克隆和情感控制。
+  给定一段文本和一个参考音频，生成用参考音色的语音。
+detailed_capability: |
+  IndexTTS 的核心能力是：用参考音频的音色，说出你输入的文本。
+
+  与 VC（seed_vc）的本质区别：
+  - VC：音频 → 音频，保留源音频的**文本内容**，只换音色
+  - TTS：文本 → 音频，**文本内容完全由你指定**，用参考音频的音色生成
+
+  编辑任务中 TTS 的典型场景：
+  1. **修改文本内容**：用户说"把'你好'改成'您好'" → 必须用 TTS 重新生成
+  2. **强调/重录某句话**：对原音频不满意，用相同音色重新生成
+  3. **补充缺失片段**：原音频有缺失，用 TTS 补全
+  4. **情感调整**：通过 emo_vector 控制情感（happy, angry, sad 等）
+
+  注意：TTS 不保留源音频的韵律/语调，是全新的生成。
+  如果需要保留原韵律只换音色，应该用 seed_vc（VC）。
+
+dimensions: [pitch, timbre, dynamics, effects]
+
+parameters:
+  - name: text
+    type: string
+    required: true
+    description: 要合成的文本内容
+  - name: spk_audio_prompt
+    type: string
+    required: true
+    description: 参考音频路径（用于克隆音色）
+  - name: emo_vector
+    type: array
+    required: false
+    description: 情感向量 [happy, angry, sad, afraid, disgusted, melancholic, surprised, calm]，每项 0.0~1.0
+  - name: emo_alpha
+    type: number
+    required: false
+    default: 0.8
+    description: 情感混合强度
+    constraints: "0.0 ~ 1.0"
+  - name: output_path
+    type: string
+    required: false
+    default: auto
+    description: 输出文件路径
+
+output:
+  type: audio_file
+  description: 合成的音频文件，音色匹配参考音频，内容匹配输入文本
+
+execution_constraints:
+  should_run_before: [volume_normalizer, acompressor]
+  should_run_after: []
+  mutually_exclusive_with: [seed_vc, pitch_shift_rubberband]
+  can_repeat: true
+
+examples:
+  - scenario: "用原说话人的声音，把'你好'改成'您好'"
+    parameters:
+      text: "您好"
+      spk_audio_prompt: "original_speaker.wav"
+    expected_outcome: "生成的新音频说'您好'，音色与原说话人一致"
+  - scenario: "用更欢快的情感重录"
+    parameters:
+      text: "今天天气真好"
+      spk_audio_prompt: "reference.wav"
+      emo_vector: [0.9, 0.0, 0.0, 0.0, 0.0, 0.0, 0.2, 0.1]
+    expected_outcome: "生成欢快的语音，音色匹配参考"
+
+instruction_mapping:
+  "user_prompt 包含 '改成' / '改为' / '替换成' 等修改文本的意图": "首选工具。提取新文本，用 spk_audio_prompt=原音频或参考音频"
+  "user_prompt 包含 '重新说' / '重录'": "首选工具"
+  "user_prompt 包含 '强调' && 涉及文本修改": "TTS 重新生成，可通过 emo_vector 加强情感"
+  "gender/pitch/timbre 变化 && 文本也变化": "先用 TTS 生成新文本内容，再用 seed_vc 转换音色（如需）"
+  "纯音色转换 && 文本不变": "不要用 TTS，用 seed_vc"

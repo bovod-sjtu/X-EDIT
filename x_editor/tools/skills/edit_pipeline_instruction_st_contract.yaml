@@ -1,0 +1,106 @@
+skill_id: edit_pipeline_instruction_st_contract
+display_name: Edit Pipeline Tagged Instruction 契约检查
+source_mcp: edit-data-pipeline
+tool_names:
+  - edit_data_pipeline
+  - edit_data_pipeline.apply
+  - AudioEditExecutor
+
+description: |
+  调用 edit_data_pipeline 的 text/pitch-rate/emotion/pause 服务前，必须把自然语言需求转换为
+  instruction_st，并进行格式和语义一致性 double check。
+
+detailed_capability: |
+  适用范围：
+  - edit_data_pipeline.text_edit
+  - edit_data_pipeline.pitch_rate_edit
+  - edit_data_pipeline.emotion_style_edit
+  - edit_data_pipeline.pause_edit
+  - foreground_background_remix 内部调用上述 tagged edit 时同样适用。
+
+  必须执行的转换：
+  1. text_edit:
+     - 使用 <sub targ="new">old</sub>。
+     - stripped instruction_st 必须等于 source_text。
+     - 渲染后的 target_text 必须和用户替换/删除需求一致。
+     - input_audio_path 必须是前端已切好的 <30s 单说话人片段，切分点在词边界。
+
+  2. pitch_rate_edit:
+     - 音高使用 <pitch, semitones=...>...</pitch>。
+     - 语速使用 <rate, factor=...>...</rate>。
+     - pitch-only 必须 smooth_policy=never，不能夹带 rate/factor/speed 参数，避免改动音频时长。
+     - 泛化“提升音高/降低音高”默认用 +/-8 semitones；“半个八度”用 +/-6 semitones。
+     - 默认 pitch_method=psola+indextts2_cco。
+
+  3. emotion_style_edit:
+     - 只允许 happy、angry、sad、afraid、disgusted、melancholic、surprised、calm、none。
+     - angry/surprised 默认 level=3，其它默认 level=2，除非用户明确指定。
+     - rap、whisper、shout、accent、dialect 等不是 emotion tag；不要强行映射，应暴露工具缺失。
+
+  4. pause_edit:
+     - 只支持插入停顿，使用 <pause act="ins" level="1|2|3"/>。
+     - 删除停顿、去静音、重排时间线不是 pause_edit，应该走 artifact/timeline 或新增工具。
+
+  Double check:
+  - 格式检查：tag 必须在白名单内，关键参数必须存在，开闭标签必须匹配。
+  - 源文本检查：去除 tag 后必须和 source_text 一致。
+  - 目标语义检查：text_edit 的 rendered target 必须符合用户需求；pitch/rate/emotion/pause 参数必须和需求方向一致。
+  - 工具边界检查：无法转换 instruction_st 或目标不在当前工具能力内时，返回 unsupported/boundary error，不要拼凑低质量参数。
+
+dimensions: [text, pitch, tempo, emotion, analysis]
+
+parameters:
+  - name: source_text
+    type: string
+    required: true
+    description: 与待编辑音频片段精确对齐的转写文本。
+  - name: instruction_st
+    type: string
+    required: true
+    description: 传给 tagged edit service 的结构化指令。
+  - name: operation
+    type: enum
+    required: true
+    enum_values: [text_edit, pitch_rate_edit, emotion_style_edit, pause_edit]
+    description: 目标 edit_data_pipeline operation。
+  - name: input_audio_path
+    type: string
+    required: true
+    description: <30s、单说话人、词边界切分后的音频片段。
+
+output:
+  type: data
+  description: 通过检查的 edit_data_pipeline 参数，或明确的 boundary/unsupported 错误。
+
+execution_constraints:
+  should_run_before: [edit_data_pipeline]
+  should_run_after: [tool_aware_planner]
+  mutually_exclusive_with: []
+  can_repeat: true
+
+examples:
+  - scenario: "把 hello world 中 hello 改成 hi"
+    parameters:
+      operation: text_edit
+      source_text: hello world
+      instruction_st: '<sub targ="hi">hello</sub> world'
+    expected_outcome: "stripped text=hello world，rendered target=hi world，可以调用 text_edit"
+  - scenario: "提升音高但不改变语速"
+    parameters:
+      operation: pitch_rate_edit
+      source_text: welcome everyone
+      instruction_st: '<pitch, semitones=8>welcome everyone</pitch>'
+      smooth_policy: never
+    expected_outcome: "只改 pitch，不传 rate/factor/speed，时长应保持"
+  - scenario: "改成 rap style"
+    parameters:
+      operation: emotion_style_edit
+      source_text: welcome everyone
+      instruction_st: ""
+    expected_outcome: "拒绝映射到 happy/angry 等 emotion tag，暴露需要 rap/prosody 工具"
+
+instruction_mapping:
+  "edit_data_pipeline tagged operation": "必须先生成 instruction_st 并 double check"
+  "instruction_st stripped text != source_text": "阻断执行，返回工具参数契约错误"
+  "requested style not in supported emotion tags": "阻断执行，暴露能力边界"
+  "Gemini executor arguments include low-level payload": "只作为语义参考，不允许绕过 deterministic normalizer"

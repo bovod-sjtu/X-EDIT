@@ -1,0 +1,110 @@
+schema_version: x-editor.operation-capability-card/v1
+operation: edit_data_pipeline.emotion_style_edit
+semantic_effects:
+  - change_speech_emotion
+  - change_speaking_style
+supported_scopes:
+  - global
+  - segment
+requirements:
+  inputs:
+    - inputs.input_audio
+  evidence:
+    - source_text
+preservation:
+  - dimension: source_wording
+    level: strong
+    evidence_kind: declared_design_fact
+    rationale: Removing supported emotion tags must reproduce the exact source transcript.
+  - dimension: non_target_speech
+    level: moderate
+    evidence_kind: declared_design_fact
+    rationale: Tagged spans identify local targets, while perceptual preservation remains unmeasured.
+quality_characteristics:
+  - dimension: emotion_or_style_adherence
+    level: unknown
+    evidence_kind: unknown
+    rationale: Legal labels do not establish achieved emotion or style strength.
+  - dimension: speech_naturalness
+    level: unknown
+    evidence_kind: unknown
+    rationale: Naturalness requires real-output review.
+artifact_risks:
+  - risk: local_resynthesis_artifact
+    level: unknown
+    evidence_kind: unknown
+    rationale: No reviewed route prior exists yet.
+composition:
+  supports_batch_targets: true
+  cumulative_degradation_risk: unknown
+parameter_contract:
+  additional_parameters: reject
+  planner_selectable:
+    - path: inputs.input_audio
+      value_type: string
+      required: true
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: source_audio_ref
+    - path: params.source_text
+      value_type: string
+      required: true
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: reviewed_source_transcript
+    - path: params.instruction_st
+      value_type: string
+      required: true
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: tagged_emotion_or_style_edit
+      value_guidance:
+        - This field is executable tagged text, not a natural-language instruction. Copy the complete params.source_text and wrap only the intended span.
+        - For a categorical emotion use exactly '<emo type="EMOTION" level="LEVEL">source words</emo>', where EMOTION is afraid, angry, calm, disgusted, happy, melancholic, sad, or surprised and LEVEL is 1, 2, or 3.
+        - The service has only the listed categorical controls. A descriptive request requires a semantic choice of a supported category and intensity; do not send a bare desc tag or silently substitute an unrelated emotion. If no supported category meets the request, report that limitation.
+        - Removing all emo tags must reproduce params.source_text exactly, including punctuation, spaces, and all unedited words.
+      value_examples:
+        - '<emo type="disgusted" level="2">The complete utterance.</emo>'
+        - 'Keep this part, then <emo type="happy" level="1">change this part</emo>, and keep the ending.'
+    - path: params.language
+      value_type: string
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: source_language
+  framework_owned:
+    - params.output_path
+    - params.service_url
+    - params.aligner_backend
+    - params.persist
+    - params.evaluate
+    - params.return_synthetic_target_audio
+    - params.max_candidates
+    - params.multi_frequent_smoothing_radius_sec
+    - params.synthesis_mode
+    - params.emotion_condition_mode
+  conditional_rules: []
+limitations:
+  - Different observed local emotions can be expressed with separate supported tags over their corresponding source spans. This permits piecewise emotion control, not guaranteed replication of a reference's continuous intensity curve; validate the resulting sound and transitions.
+  - An external aligner failure is reported as alignment_backend_failure; it is not converted into a copied input or successful delivery.
+  - Supported categorical emotions are afraid, angry, calm, disgusted, happy, melancholic, sad, and surprised, with level 1, 2, or 3.
+  - Free-form speaking styles and intonation contours are not independently controllable; do not claim arbitrary style support from a categorical emotion label.
+  - Tag grammar and stripped-source equality remain operation-verifier responsibilities.
+  - Natural-language prose in params.instruction_st is invalid even when it names a supported emotion or style.
+provenance:
+  - source_path: x_editor/runtime/operation_normalizers.py
+    source_kind: runtime_handler
+  - source_path: x_editor/tools/catalog/edit_data_pipeline/manual.yaml
+    source_kind: service_schema
+  - source_path: x_editor/tools/catalog/edit_data_pipeline/client.py
+    source_kind: runtime_handler
+  - source_path: tests/test_operation_normalizers.py
+    source_kind: test

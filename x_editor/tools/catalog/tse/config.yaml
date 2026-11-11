@@ -1,0 +1,28 @@
+name: tse
+server:
+  command: ["uv", "run", "--frozen", "--project", ".", "python", "mcp_server.py"]
+  working_dir: "."
+  env:
+    UV_PROJECT_ENVIRONMENT: ".venv"
+    UV_LINK_MODE: "copy"
+    RUST_LOG: "warn"
+    PYTHONNOUSERSITE: "1"
+    QUARKAUDIO_UNISE_SERVICE_URL: "http://127.0.0.1:8025"
+  resources:
+    gpu: true
+    memory_gb: 16
+  lifecycle: session
+  startup_timeout_sec: 180
+managed_services:
+  - name: quarkaudio_unise
+    url_env: QUARKAUDIO_UNISE_SERVICE_URL
+    default_url: "http://127.0.0.1:8025"
+    working_dir: "../quarkaudio_unise"
+    command: [".venv/bin/python", "service.py", "--host", "127.0.0.1", "--port", "8025"]
+    env:
+      TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD: "1"
+    health_path: "/health"
+    smoke:
+      - {method: "OPTIONS", path: "/tse/extract"}
+    startup_timeout_sec: 240
+    setup_hint: "cd x_editor/tools/catalog/quarkaudio_unise && ./setup.sh"

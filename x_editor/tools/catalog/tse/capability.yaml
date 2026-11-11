@@ -1,0 +1,27 @@
+tool_id: tse
+display_name: Target Speaker Extraction
+backend: quarkaudio_unise
+category: speaker_separation
+purpose: >
+  Extract one target speaker from mixed speech, dialogue, or overlapping speech
+  using QuarkAudio-UniSE with reference enrollment audio so downstream editing can operate on only that speaker.
+when_to_use:
+  - User wants to edit only one speaker in a multi-speaker audio.
+  - User provides or can derive a reference enrollment audio for the target speaker.
+  - Downstream VC, TTS, or enhancement should apply only to a speaker subset.
+do_not_use_when:
+  - Audio contains only one speaker and the edit is global.
+  - No reference enrollment audio is available for the target speaker.
+  - User asks for generic no-reference separation of all overlapping speakers; use speech_separation.
+  - User only asks for global speech enhancement.
+inputs:
+  - mixture_audio
+  - reference_audio
+outputs:
+  - target_speaker_audio
+cost:
+  gpu_required: true
+  expected_latency: high
+constraints:
+  - Requires reference enrollment audio for the target speaker.
+  - Speaker leakage must be validated before downstream voice conversion.

@@ -1,0 +1,138 @@
+schema_version: x-editor.operation-capability-card/v1
+operation: artifact_ops.speaker_scoped_edit
+semantic_effects:
+  - apply_nested_edit_to_selected_speaker
+  - reconstruct_speaker_scoped_timeline
+supported_scopes:
+  - speaker
+  - segment
+  - timeline
+requirements:
+  inputs:
+    - inputs.input_audio
+  evidence:
+    - speech.speaker_segments
+    - speech.word_timestamps
+preservation:
+  - dimension: non_target_speakers
+    level: strong
+    evidence_kind: declared_design_fact
+    rationale: The wrapper edits selected speaker spans and stitches them back into the original audio.
+  - dimension: global_timeline_duration
+    level: strong
+    evidence_kind: declared_design_fact
+    rationale: The current implementation requires preserve_timeline to remain true.
+quality_characteristics:
+  - dimension: scoped_edit_boundary_naturalness
+    level: unknown
+    evidence_kind: unknown
+    rationale: Boundary quality depends on the nested operation and requires listening review.
+artifact_risks:
+  - risk: multi_span_reconstruction_artifact
+    level: unknown
+    evidence_kind: unknown
+    rationale: Repeated local replacements may accumulate boundary artifacts.
+composition:
+  supports_batch_targets: true
+  cumulative_degradation_risk: unknown
+parameter_contract:
+  additional_parameters: reject
+  planner_selectable:
+    - path: inputs.input_audio
+      value_type: string
+      required: true
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: source_timeline_audio
+    - path: params.selector
+      value_type: string
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: target_speaker_selector
+    - path: params.selected_spans
+      value_type: array
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: grounded_target_spans
+    - path: params.target_speaker_ids
+      value_type: array
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: grounded_target_speaker_ids
+    - path: params.edit_op
+      value_type: enum
+      required: true
+      enum_values:
+        - edit_data_pipeline.text_edit
+        - edit_data_pipeline.pitch_rate_edit
+        - edit_data_pipeline.emotion_style_edit
+        - edit_data_pipeline.pause_edit
+        - edit_data_pipeline.volume_normalize
+        - edit_data_pipeline.speech_rate
+        - seed_vc
+        - no_reference_voice_conversion
+        - speech_enhancement
+        - audio_effects
+        - artifact_ops.mute_spans
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: nested_legal_operation_id
+    - path: params.edit_op_params
+      value_type: object
+      required: true
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: nested_operation_parameters
+    - path: params.preserve_timeline
+      value_type: boolean
+      required: true
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: true
+      semantic_role: timeline_preservation
+  framework_owned:
+    - params.output_path
+    - params.perception_report
+    - params.source_text
+    - params.output_dir
+    - params.service_url
+  at_least_one_of:
+    - [params.selector, params.selected_spans, params.target_speaker_ids]
+  conditional_rules:
+    - when:
+        path: params.preserve_timeline
+        operator: equals
+        value: false
+      require: []
+      forbid:
+        - params.preserve_timeline
+limitations:
+  - This is a selector and reconstruction wrapper, not an editing model.
+  - The current implementation rejects preserve_timeline=false.
+  - Nested parameters must be validated against the selected operation's own capability card.
+  - Only the listed nested operations are supported; each also needs its enabled tool and its own valid parameters.
+  - For extraction, removal, concatenation or reordering, use the corresponding standalone artifact operation. Extraction is not a timeline-preserving local edit.
+provenance:
+  - source_path: x_editor/runtime/artifact_ops.py
+    source_kind: runtime_handler
+  - source_path: x_editor/runtime/audio_plan_executor.py
+    source_kind: runtime_handler
+  - source_path: x_editor/runtime/tool_contract_verifier.py
+    source_kind: runtime_handler
+  - source_path: tests/test_artifact_ops.py
+    source_kind: test

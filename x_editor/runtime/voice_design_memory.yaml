@@ -1,0 +1,51 @@
+version: 1
+description: Runtime memory for no-reference voice design and voice-class conversion.
+guardrails:
+  - Preserve the source speaker's perceived gender for broad age/timbre class conversion unless the user explicitly asks for a target gender.
+  - Synthesize an independent target-voice reference first; do not use source audio or source transcript as the reference prompt.
+  - Apply DSP only as a target-reference correction step, then run neural/speech-token resynthesis when available before SeedVC.
+voice_classes:
+  child:
+    summary: Mild child-voice correction tuned for naturalness after neural resynthesis.
+    reference_text: "小朋友们好，今天我们开心地读一段简短的话。"
+    design_defaults:
+      age: child
+      pitch: very_high
+      pitch_variation: very_strong
+      speaking_rate: medium
+      volume: medium
+      max_new_tokens: 1024
+    prompt_constraints:
+      qwen3_tts: "Strong child-voice constraint: sound like a 5- to 8-year-old prepubescent child, not a teenager and not an adult female or adult male. Use a light, small vocal-tract timbre, clearly higher child pitch, bright but gentle head-voice quality, minimal chest resonance, no mature adult resonance, and playful but controlled articulation."
+    postprocess:
+      child_pitch_shift_semitones: 3.5
+      child_highpass_hz: 100
+      child_eq_3300_gain_db: 0.8
+      child_eq_5200_gain_db: 0.4
+      resynthesis_enabled: true
+      resynthesis_backend: edit_data_pipeline_speech_rate
+      resynthesis_method: wsola+indextts2
+  elderly:
+    summary: Extreme elderly-voice correction; neural resynthesis is expected to smooth DSP artifacts.
+    reference_text: "您好，今天我慢慢读一段简短的话。"
+    design_defaults:
+      age: elderly
+      pitch: low
+      pitch_variation: weak
+      speaking_rate: slow
+      volume: quiet
+      max_new_tokens: 1024
+    prompt_constraints:
+      qwen3_tts: "Strong elderly-voice constraint: sound like an 80-years-or-older speaker, not a middle-aged adult. Use weak breath support, noticeable but controlled vocal tremor, thinner low pitch, slower pacing, and mildly leaky or softened dental consonants as if some teeth are missing, while keeping the words intelligible."
+    postprocess:
+      elderly_pitch_shift_semitones: -7.0
+      elderly_vibrato_hz: 4.8
+      elderly_vibrato_depth: 0.24
+      elderly_tremolo_hz: 4.4
+      elderly_tremolo_depth: 0.22
+      elderly_lowpass_hz: 3200
+      elderly_highpass_hz: 60
+      elderly_eq_900_gain_db: -3.0
+      resynthesis_enabled: true
+      resynthesis_backend: edit_data_pipeline_speech_rate
+      resynthesis_method: wsola+indextts2

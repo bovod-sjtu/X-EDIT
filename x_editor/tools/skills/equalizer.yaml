@@ -1,0 +1,73 @@
+skill_id: equalizer
+display_name: 参量均衡器
+source_mcp: ffmpeg
+tool_names: [equalizer]
+
+description: 对指定频率点进行增益或衰减，用于精准调节音色。
+detailed_capability: |
+  通过 frequency（频率点）、gain_db（增益dB）、q（Q值/带宽）三个参数实现参量均衡。
+  常用场景：
+  - 增强低频温暖感：frequency=200~400Hz, gain_db=+2~+4
+  - 削减刺耳高频：frequency=3000~6000Hz, gain_db=-2~-4
+  - 增强临场感：frequency=4000~8000Hz, gain_db=+1~+2
+  - 处理鼻音：frequency=800~1200Hz, gain_db=-2~-3
+
+dimensions: [timbre]
+
+parameters:
+  - name: audio_path
+    type: string
+    required: true
+    description: 输入音频文件路径
+  - name: frequency
+    type: integer
+    required: true
+    description: 中心频率 (Hz)
+    constraints: "20 ~ 20000"
+  - name: gain_db
+    type: number
+    required: true
+    description: 增益量 (dB)，正值增强，负值削减
+    constraints: "-20.0 ~ +20.0"
+  - name: q
+    type: number
+    required: false
+    default: 1.0
+    description: Q值，越大带宽越窄
+    constraints: "0.1 ~ 10.0"
+  - name: output_path
+    type: string
+    required: false
+    default: auto
+    description: 输出文件路径
+
+output:
+  type: audio_file
+  description: 均衡处理后的音频文件
+
+execution_constraints:
+  should_run_before: [deesser, acompressor, loudnorm]
+  should_run_after: [pitch_shift_rubberband, afftdn_denoise]
+  mutually_exclusive_with: []
+  can_repeat: true
+
+examples:
+  - scenario: "增加男声胸腔共鸣感"
+    parameters:
+      frequency: 250
+      gain_db: 3.5
+      q: 1.2
+    expected_outcome: "200-350Hz 范围提升，声音更浑厚饱满"
+  - scenario: "削减女声过亮感"
+    parameters:
+      frequency: 5000
+      gain_db: -3.0
+      q: 2.0
+    expected_outcome: "5kHz 附近衰减，减少刺耳/明亮感"
+
+instruction_mapping:
+  "timbre_qualities.added contains 'warm'": "提升 200-400Hz"
+  "timbre_qualities.added contains 'full'": "提升 100-300Hz"
+  "timbre_qualities.removed contains 'bright'": "削减 3000-8000Hz"
+  "timbre_qualities.removed contains 'thin'": "提升 150-400Hz"
+  "timbre_qualities.removed contains 'nasal'": "削减 800-1200Hz"

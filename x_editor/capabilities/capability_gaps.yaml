@@ -1,0 +1,173 @@
+schema_version: x-editor.capability-gap-inventory/v1
+entries:
+  - capability_key: relative_waveform_gain
+    gap_class: hidden_but_ready
+    disposition: admitted_in_v2
+    runtime_operations: [artifact_ops.apply_gain]
+    has_runtime_handler: true
+    has_typed_card: true
+    has_runtime_verifier: true
+    blockers: []
+    evidence_paths:
+      - x_editor/runtime/relative_gain.py
+      - x_editor/runtime/relative_gain_verification.py
+      - tests/test_relative_gain.py
+    next_action: Validate grounded local and whole-input requests in the development gate; preserve explicit headroom failures.
+  - capability_key: speech_enhancement
+    gap_class: hidden_but_ready
+    disposition: admitted_in_v2
+    runtime_operations: [speech_enhancement]
+    has_runtime_handler: true
+    has_typed_card: true
+    has_runtime_verifier: true
+    blockers: []
+    evidence_paths:
+      - x_editor/runtime/audio_plan_executor.py
+      - x_editor/runtime/artifact_verification.py
+      - x_editor/tools/catalog/speech_enhancement/mcp_server.py
+    next_action: Run the versioned operation canary before each execute deployment.
+  - capability_key: generic_speech_separation
+    gap_class: hidden_but_ready
+    disposition: admitted_in_v2
+    runtime_operations: [speech_separation]
+    has_runtime_handler: true
+    has_typed_card: true
+    has_runtime_verifier: true
+    blockers: []
+    evidence_paths:
+      - x_editor/runtime/audio_plan_executor.py
+      - x_editor/runtime/artifact_verification.py
+      - x_editor/tools/catalog/speech_separation/mcp_server.py
+    next_action: Validate labeled vocal/accompaniment selection; keep overlapping-speaker isolation outside this model contract.
+  - capability_key: foreground_background_safe_remix
+    gap_class: hidden_but_ready
+    disposition: admitted_in_v2
+    runtime_operations: [foreground_background_remix]
+    has_runtime_handler: true
+    has_typed_card: true
+    has_runtime_verifier: true
+    blockers: []
+    evidence_paths:
+      - x_editor/runtime/foreground_background_remix.py
+      - x_editor/workflow_control/artifact_acceptance.py
+      - x_editor/capabilities/cards/scope_acoustic_timeline/foreground_background_remix.yaml
+    next_action: Admit only deterministic foreground removal or extraction modes in v2.
+  - capability_key: foreground_background_nested_edit
+    gap_class: contract_only_gap
+    disposition: contract_work
+    runtime_operations: []
+    has_runtime_handler: true
+    has_typed_card: false
+    has_runtime_verifier: true
+    blockers:
+      - Nested edit_params and separation objects do not have recursively typed parameter contracts.
+      - Nested operations need independent admission and verifier composition.
+    evidence_paths:
+      - x_editor/runtime/foreground_background_remix.py
+    next_action: Define a typed nested-operation union before exposing Planner-authored nested edits.
+  - capability_key: target_speaker_extraction
+    gap_class: contract_only_gap
+    disposition: contract_work
+    runtime_operations: [tse]
+    has_runtime_handler: true
+    has_typed_card: false
+    has_runtime_verifier: true
+    blockers:
+      - Reference-audio role and speaker-grounding evidence are not yet bound per audio_ref.
+      - The current verifier proves delivery but not target-speaker selection.
+    evidence_paths:
+      - x_editor/runtime/audio_plan_executor.py
+      - x_editor/tools/catalog/tse/mcp_server.py
+    next_action: Finish the multi-audio evidence contract, then add an exact typed card and canary.
+  - capability_key: expressive_speech_translation
+    gap_class: genuinely_missing_or_listening_required
+    disposition: listening_required
+    runtime_operations: [seamless_expressive_s2st]
+    has_runtime_handler: true
+    has_typed_card: false
+    has_runtime_verifier: true
+    blockers:
+      - Expressive preservation and fallback behavior need service-specific listening review.
+      - The operation cannot promise exact duration or original-voice identity.
+    evidence_paths:
+      - x_editor/runtime/audio_plan_executor.py
+      - x_editor/tools/catalog/seamless_expressive_s2st/manual.yaml
+    next_action: Freeze supported languages and fallback policy after real service canaries and listening review.
+  - capability_key: accent_conversion
+    gap_class: genuinely_missing_or_listening_required
+    disposition: listening_required
+    runtime_operations: [accent_conversion]
+    has_runtime_handler: true
+    has_typed_card: false
+    has_runtime_verifier: true
+    blockers:
+      - Accent reference selection and quality are composite and listening-sensitive.
+    evidence_paths:
+      - x_editor/runtime/audio_plan_executor.py
+      - x_editor/runtime/accent_conversion.py
+    next_action: Validate accent coverage and preservation by diverse listening cases before admission.
+  - capability_key: paralinguistic_event_edit
+    gap_class: genuinely_missing_or_listening_required
+    disposition: listening_required
+    runtime_operations: [paralinguistic_event_add, paralinguistic_event_remove]
+    has_runtime_handler: true
+    has_typed_card: false
+    has_runtime_verifier: true
+    blockers:
+      - Event asset naturalness, placement, and removal artifacts require listening review.
+      - Exact event-grounding and insertion parameter domains are not frozen.
+    evidence_paths:
+      - x_editor/runtime/audio_plan_executor.py
+      - x_editor/tools/catalog/paralinguistic_event_bank/manual.yaml
+    next_action: Run diverse event-placement listening cases, then freeze separate add and remove cards.
+  - capability_key: singing_and_rap_timeline_edit
+    gap_class: genuinely_missing_or_listening_required
+    disposition: listening_required
+    runtime_operations: [ace_step_music.timeline_edit]
+    has_runtime_handler: true
+    has_typed_card: false
+    has_runtime_verifier: true
+    blockers:
+      - Lyrics, identity, timing, and source influence are explicitly best-effort.
+    evidence_paths:
+      - x_editor/runtime/audio_plan_executor.py
+      - x_editor/tools/catalog/ace_step_music/manual.yaml
+    next_action: Establish listening priors and legal parameter subsets before Planner exposure.
+  - capability_key: exact_duration_original_voice_translation
+    gap_class: genuinely_missing_or_listening_required
+    disposition: genuinely_missing
+    runtime_operations: []
+    has_runtime_handler: false
+    has_typed_card: false
+    has_runtime_verifier: false
+    blockers:
+      - No operation proves translation, original-speaker preservation, and exact duration together.
+    evidence_paths:
+      - x_editor/tools/catalog/seamless_expressive_s2st/manual.yaml
+    next_action: Develop and listen-test a composite contract without claiming Seamless alone provides it.
+  - capability_key: whisper_to_normal_speech
+    gap_class: genuinely_missing_or_listening_required
+    disposition: genuinely_missing
+    runtime_operations: []
+    has_runtime_handler: false
+    has_typed_card: false
+    has_runtime_verifier: false
+    blockers:
+      - No dedicated operation has a validated whisper-to-modal-voice quality contract.
+    evidence_paths:
+      - docs/TOOL_CAPABILITIES.md
+    next_action: Compare candidate restoration paths by listening before selecting a tool contract.
+  - capability_key: multi_audio_bidirectional_voice_swap
+    gap_class: genuinely_missing_or_listening_required
+    disposition: genuinely_missing
+    runtime_operations: []
+    has_runtime_handler: false
+    has_typed_card: false
+    has_runtime_verifier: false
+    blockers:
+      - Existing single-reference conversion does not provide a complete two-base swap transaction.
+      - Per-audio evidence and dependency-aware output binding are not yet complete.
+    evidence_paths:
+      - x_editor/runtime/audio_plan_executor.py
+      - x_editor/capabilities/cards/content_voice/intra_audio_voice_transfer.yaml
+    next_action: Complete multi-audio role/evidence contracts before designing the swap transaction.

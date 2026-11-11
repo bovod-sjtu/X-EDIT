@@ -1,0 +1,59 @@
+{
+  "name": "edit_data_pipeline",
+  "status": "pinned_git_submodule",
+  "env": "EDIT_DATA_PIPELINE_ROOT",
+  "path": "third_party/dots_tts_edit",
+  "url": "git@code.devops.xiaohongshu.com:wanghankun/edit-data-pipeline.git",
+  "commit": "c36f753a91896e901ba9cf621ac02d6ef507a21d",
+  "submodules": [
+    {
+      "path": "tools/f5-tts/upstream",
+      "commit": "27e20fcf39fbce3f187a61d4a3e92065d2d9b947",
+      "url": "https://github.com/SWivid/F5-TTS.git"
+    },
+    {
+      "path": "tools/index-tts/upstream",
+      "commit": "1eafa935e8887f9ba877f82cf7319fceddfc86cb",
+      "url": "https://github.com/index-tts/index-tts.git"
+    },
+    {
+      "path": "tools/qwen3-asr/upstream",
+      "commit": "c17a131fe028b2e428b6e80a33d30bb4fa57b8df",
+      "url": "https://github.com/QwenLM/Qwen3-ASR.git"
+    },
+    {
+      "path": "tools/qwen3-tts/upstream",
+      "commit": "1ab0dd75353392f28a0d05d9ca960c9954b13c83",
+      "url": "https://github.com/QwenLM/Qwen3-TTS.git"
+    },
+    {
+      "path": "tools/seed-vc/upstream",
+      "commit": "51383efd921027683c89e5348211d93ff12ac2a8",
+      "url": "https://github.com/Plachtaa/seed-vc.git"
+    },
+    {
+      "path": "tools/ted-tts/upstream",
+      "commit": "36ffc3e2de346156baa7d60a1749ca4a9365625b",
+      "url": "https://github.com/Simon-leong/TED-TTS.git"
+    }
+  ],
+  "required_tools": [
+    "index-tts",
+    "seed-vc",
+    "qwen3-asr",
+    "qwen3-tts",
+    "ted-tts"
+  ],
+  "optional_tools": [],
+  "license_note": "The pinned outer pipeline declares Apache-2.0 in LICENSE. SDKs and weights retain their own terms. F5-TTS is operator-installed only; X·Edit does not provision it.",
+  "access": "Authenticated upstream repository; public mirror URL pending upstream publication.",
+  "external_tools": [
+    "f5-tts"
+  ],
+  "license": {
+    "spdx": "Apache-2.0",
+    "file": "LICENSE",
+    "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "revision": "c36f753a91896e901ba9cf621ac02d6ef507a21d"
+  }
+}

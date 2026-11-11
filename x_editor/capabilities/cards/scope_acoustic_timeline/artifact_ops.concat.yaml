@@ -1,0 +1,65 @@
+schema_version: x-editor.operation-capability-card/v1
+operation: artifact_ops.concat
+semantic_effects: [timeline_concatenate]
+supported_scopes: [standalone_asset, timeline]
+requirements:
+  inputs: [inputs.audio_paths]
+  evidence: []
+preservation:
+  - dimension: source_order
+    level: strong
+    evidence_kind: declared_design_fact
+    rationale: Explicit audio_paths are consumed in their declared order.
+  - dimension: source_waveform
+    level: moderate
+    evidence_kind: declared_design_fact
+    rationale: Source format is normalized and optional crossfades alter join boundaries.
+quality_characteristics:
+  - dimension: join_naturalness
+    level: unknown
+    evidence_kind: unknown
+    rationale: Crossfade and pause controls exist, but no reviewed development prior ranks their quality.
+artifact_risks:
+  - risk: hard_cut_at_join
+    level: high
+    evidence_kind: declared_design_fact
+    rationale: The default crossfade is zero milliseconds.
+composition:
+  supports_batch_targets: true
+  cumulative_degradation_risk: low
+parameter_contract:
+  additional_parameters: reject
+  planner_selectable:
+    - path: inputs.audio_paths
+      value_type: array
+      required: true
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: ordered_source_audio_list
+    - path: params.crossfade_ms
+      value_type: integer
+      required: false
+      minimum: 0
+      maximum: null
+      default: 0
+      semantic_role: join_crossfade_ms
+    - path: params.pause_duration_sec
+      value_type: number
+      required: false
+      minimum: 0
+      maximum: null
+      default: 0.0
+      semantic_role: inter_source_pause_sec
+  framework_owned: [params.output_path, params.output_dir, params._agentic_mode]
+  conditional_rules: []
+limitations:
+  - This operation joins independent artifacts; it is not a natural in-speech pause editor.
+  - A zero crossfade can create a hard boundary when adjacent recordings differ.
+provenance:
+  - source_path: x_editor/runtime/artifact_ops.py
+    source_kind: runtime_handler
+  - source_path: x_editor/runtime/audio_plan_executor.py
+    source_kind: runtime_handler
+  - source_path: tests/test_artifact_ops.py
+    source_kind: test

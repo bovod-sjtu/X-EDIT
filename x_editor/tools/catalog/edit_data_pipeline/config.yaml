@@ -1,0 +1,160 @@
+name: edit_data_pipeline
+server:
+  command: ["uv", "run", "--frozen", "--project", ".", "python", "mcp_server.py"]
+  working_dir: "."
+  env:
+    UV_PROJECT_ENVIRONMENT: ".venv"
+    UV_LINK_MODE: "copy"
+    RUST_LOG: "warn"
+    PYTHONNOUSERSITE: "1"
+    EDIT_PIPELINE_TEXT_TAGGED_URL: "http://127.0.0.1:8035"
+    EDIT_PIPELINE_PITCH_RATE_URL: "http://127.0.0.1:8036"
+    EDIT_PIPELINE_EMOTION_STYLE_URL: "http://127.0.0.1:8037"
+    EDIT_PIPELINE_PAUSE_EDIT_URL: "http://127.0.0.1:8038"
+    EDIT_PIPELINE_SPEECH_RATE_URL: "http://127.0.0.1:8004"
+    EDIT_PIPELINE_VOLUME_URL: "http://127.0.0.1:8006"
+    EDIT_PIPELINE_PITCH_URL: "http://127.0.0.1:8927"
+    EDIT_PIPELINE_BOUNDARY_SMOOTHER_URL: "http://127.0.0.1:8018"
+    EDIT_PIPELINE_AUDIO_ASSEMBLY_URL: "http://127.0.0.1:8021"
+  resources:
+    gpu: false
+    memory_gb: 4
+  lifecycle: session
+  startup_timeout_sec: 60
+managed_services:
+  - name: dots_tts_edit
+    when:
+      argument: operation
+      values: [text_edit, pitch_rate_edit, emotion_style_edit, pause_edit]
+      environment:
+        X_EDITOR_EDIT_BACKEND: {default: dots_tts_edit, values: [dots_tts_edit]}
+    url_env: DOTS_TTS_EDIT_URL
+    argument_url_key: service_url
+    default_url: "http://127.0.0.1:8049"
+    command_env: DOTS_TTS_EDIT_SERVICE_COMMAND
+    health_path: "/health"
+    smoke: [{method: "OPTIONS", path: "/execute"}]
+    startup_timeout_sec: 900
+    setup_hint: "请自行下载并安装 dots.tts.edit, then start your model service following docs/DOTS_TTS_EDIT.md; no source or weights are downloaded automatically."
+  - name: edit_text
+    external_tool: f5
+    when:
+      argument: operation
+      values: [text_edit]
+      environment:
+        X_EDITOR_EDIT_BACKEND: {default: dots_tts_edit, values: [edit_data_pipeline]}
+    url_env: EDIT_PIPELINE_TEXT_TAGGED_URL
+    default_url: "http://127.0.0.1:8035"
+    command_env: EDIT_PIPELINE_TEXT_TAGGED_SERVICE_COMMAND
+    health_path: "/health"
+    smoke: [{method: "OPTIONS", path: "/execute"}]
+    startup_timeout_sec: 600
+    setup_hint: "After configuring/installing the stack, run python deployment/stack.py --data /data/xedit start edit_text; or set EDIT_PIPELINE_TEXT_TAGGED_SERVICE_COMMAND"
+  - name: edit_prosody
+    external_tool: f5
+    when:
+      argument: operation
+      values: [pitch_rate_edit]
+      environment:
+        X_EDITOR_EDIT_BACKEND: {default: dots_tts_edit, values: [edit_data_pipeline]}
+    url_env: EDIT_PIPELINE_PITCH_RATE_URL
+    default_url: "http://127.0.0.1:8036"
+    command_env: EDIT_PIPELINE_PITCH_RATE_SERVICE_COMMAND
+    health_path: "/health"
+    smoke: [{method: "OPTIONS", path: "/execute"}]
+    startup_timeout_sec: 600
+    setup_hint: "After configuring/installing the stack, run python deployment/stack.py --data /data/xedit start edit_prosody; or set EDIT_PIPELINE_PITCH_RATE_SERVICE_COMMAND"
+  - name: edit_emotion_style
+    external_tool: f5
+    when:
+      argument: operation
+      values: [emotion_style_edit]
+      environment:
+        X_EDITOR_EDIT_BACKEND: {default: dots_tts_edit, values: [edit_data_pipeline]}
+    url_env: EDIT_PIPELINE_EMOTION_STYLE_URL
+    default_url: "http://127.0.0.1:8037"
+    command_env: EDIT_PIPELINE_EMOTION_STYLE_SERVICE_COMMAND
+    health_path: "/health"
+    smoke: [{method: "OPTIONS", path: "/execute"}]
+    startup_timeout_sec: 600
+    setup_hint: "After configuring/installing the stack, run python deployment/stack.py --data /data/xedit start edit_emotion; or set EDIT_PIPELINE_EMOTION_STYLE_SERVICE_COMMAND"
+  - name: edit_pause
+    external_tool: f5
+    when:
+      argument: operation
+      values: [pause_edit]
+      environment:
+        X_EDITOR_EDIT_BACKEND: {default: dots_tts_edit, values: [edit_data_pipeline]}
+    url_env: EDIT_PIPELINE_PAUSE_EDIT_URL
+    default_url: "http://127.0.0.1:8038"
+    command_env: EDIT_PIPELINE_PAUSE_EDIT_SERVICE_COMMAND
+    health_path: "/health"
+    smoke: [{method: "OPTIONS", path: "/execute"}]
+    startup_timeout_sec: 600
+    setup_hint: "After configuring/installing the stack, run python deployment/stack.py --data /data/xedit start edit_pause; or set EDIT_PIPELINE_PAUSE_EDIT_SERVICE_COMMAND"
+  - name: edit_speech_rate
+    when: {argument: "operation", values: ["speech_rate"]}
+    url_env: EDIT_PIPELINE_SPEECH_RATE_URL
+    default_url: "http://127.0.0.1:8004"
+    command_env: EDIT_PIPELINE_SPEECH_RATE_SERVICE_COMMAND
+    command:
+      - bash
+      - -lc
+      - >-
+        cd "${EDIT_DATA_PIPELINE_ROOT:?Set EDIT_DATA_PIPELINE_ROOT to the pinned pipeline checkout}"
+        && exec "${EDIT_PIPELINE_PYTHON:?Set EDIT_PIPELINE_PYTHON to the installed pipeline environment}"
+        -m tools.speech_rate_conversion.api_service
+        --host "${EDIT_PIPELINE_SPEECH_RATE_HOST:-127.0.0.1}"
+        --port "${EDIT_PIPELINE_SPEECH_RATE_PORT:-8004}"
+        --indextts-url "${EDIT_PIPELINE_INDEXTTS_URL:-http://127.0.0.1:9002}"
+        --qwen3tts-url "${EDIT_PIPELINE_QWEN3TTS_TOKENIZER_URL:-http://127.0.0.1:8019}"
+    health_path: "/health"
+    smoke: [{method: "OPTIONS", path: "/stretch"}]
+    startup_timeout_sec: 300
+    setup_hint: "set EDIT_DATA_PIPELINE_ROOT/EDIT_PIPELINE_SPEECH_RATE_SERVICE_COMMAND, or start tools.speech_rate_conversion.api_service"
+  - name: edit_volume
+    when: {argument: "operation", values: ["volume_normalize"]}
+    url_env: EDIT_PIPELINE_VOLUME_URL
+    default_url: "http://127.0.0.1:8006"
+    command_env: EDIT_PIPELINE_VOLUME_SERVICE_COMMAND
+    health_path: "/health"
+    smoke: [{method: "OPTIONS", path: "/normalize"}]
+    startup_timeout_sec: 120
+  - name: edit_pitch_shift
+    when: {argument: "operation", values: ["pitch_shift"]}
+    url_env: EDIT_PIPELINE_PITCH_URL
+    default_url: "http://127.0.0.1:8927"
+    command_env: EDIT_PIPELINE_PITCH_SERVICE_COMMAND
+    command:
+      - bash
+      - -lc
+      - >-
+        cd "${EDIT_DATA_PIPELINE_ROOT:?Set EDIT_DATA_PIPELINE_ROOT to the pinned pipeline checkout}"
+        && exec "${EDIT_PIPELINE_PYTHON:?Set EDIT_PIPELINE_PYTHON to the installed pipeline environment}"
+        -m tools.pitch_conversion.api_service
+        --host "${EDIT_PIPELINE_PITCH_HOST:-127.0.0.1}"
+        --port "${EDIT_PIPELINE_PITCH_PORT:-8927}"
+        --qwen3tts-url "${EDIT_PIPELINE_QWEN3TTS_TOKENIZER_URL:-http://127.0.0.1:8019}"
+        --indextts-url "${EDIT_PIPELINE_INDEXTTS_URL:-http://127.0.0.1:9002}"
+    health_path: "/health"
+    smoke: [{method: "OPTIONS", path: "/shift"}]
+    startup_timeout_sec: 120
+    setup_hint: "set EDIT_DATA_PIPELINE_ROOT/EDIT_PIPELINE_PITCH_SERVICE_COMMAND, or start tools.pitch_conversion.api_service"
+  - name: edit_boundary_smooth
+    external_tool: f5
+    when: {argument: "operation", values: ["boundary_smooth"]}
+    url_env: EDIT_PIPELINE_BOUNDARY_SMOOTHER_URL
+    default_url: "http://127.0.0.1:8018"
+    command_env: EDIT_PIPELINE_BOUNDARY_SMOOTHER_SERVICE_COMMAND
+    health_path: "/health"
+    smoke: [{method: "OPTIONS", path: "/smooth"}]
+    startup_timeout_sec: 300
+  - name: edit_audio_assembly
+    external_tool: f5
+    when: {argument: "operation", values: ["audio_assembly"]}
+    url_env: EDIT_PIPELINE_AUDIO_ASSEMBLY_URL
+    default_url: "http://127.0.0.1:8021"
+    command_env: EDIT_PIPELINE_AUDIO_ASSEMBLY_SERVICE_COMMAND
+    health_path: "/health"
+    smoke: [{method: "OPTIONS", path: "/assemble"}]
+    startup_timeout_sec: 300

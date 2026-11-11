@@ -1,0 +1,12 @@
+{
+  "audio_assets": [
+    {"asset_ref": "source", "path": "/data/source.wav", "role": "source", "order": 0},
+    {"asset_ref": "voice_reference", "path": "/data/reference.wav", "role": "reference", "order": 1}
+  ],
+  "turns": [
+    {"turn_index": 0, "user_request": "Change the voice to match the reference, preserving the words and background.",
+      "source_asset_refs": ["source"], "reference_asset_refs": ["voice_reference"]},
+    {"turn_index": 1, "user_request": "Lower the edited recording by 3 dB, keeping the previous voice change.",
+      "use_previous_output": true, "source_asset_refs": [], "reference_asset_refs": []}
+  ]
+}

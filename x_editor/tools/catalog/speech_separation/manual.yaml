@@ -1,0 +1,66 @@
+tool_id: speech_separation
+mcp_tool_name: speech_separation.separate
+input_schema:
+  type: object
+  required:
+    - input_audio_path
+    - output_dir
+  properties:
+    input_audio_path:
+      type: string
+      description: Path to audio containing vocals and accompaniment.
+    output_dir:
+      type: string
+      description: Directory where all produced stems should be written.
+    output_path:
+      type: string
+      description: Optional path where the selected stem should be copied.
+    model_family:
+      type: string
+      enum: [bs_roformer, melband_roformer]
+      default: bs_roformer
+    model_filename:
+      type: string
+      description: Optional explicit audio-separator model filename.
+    output_format:
+      type: string
+      default: WAV
+    stem_policy:
+      type: string
+      default: vocals
+      description: Select vocals or instrumental by a unique provider stem label. Speech and background are semantic aliases. Explicit first/last/residual are legacy positional selectors, not speaker or sound-type guarantees; ambiguous or absent semantic labels fail.
+output_schema:
+  type: object
+  required:
+    - output_audio_path
+    - stem_paths
+  properties:
+    output_audio_path:
+      type: string
+    selected_stem_path:
+      type: string
+    stem_paths:
+      type: array
+      items:
+        type: string
+    model_family:
+      type: string
+    model_filename:
+      type: string
+defaults:
+  model_family: bs_roformer
+  output_format: WAV
+  stem_policy: vocals
+validation:
+  frontend_check:
+    - Selected output must match the requested stem policy and a unique declared stem.
+    - Vocal/accompaniment separation does not separate individual simultaneous speakers.
+    - A speaker-specific task needs separate supported capability and identity evidence.
+examples:
+  - scenario: Isolate vocals from accompaniment without claiming speaker separation.
+    arguments:
+      input_audio_path: /tmp/overlap.wav
+      output_dir: /data/xedit/runs/separated
+      output_path: /data/xedit/runs/primary_speech_stem.wav
+      model_family: bs_roformer
+      stem_policy: vocals

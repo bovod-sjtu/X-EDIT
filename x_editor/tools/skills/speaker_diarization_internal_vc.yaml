@@ -1,0 +1,95 @@
+skill_id: speaker_diarization_internal_vc
+display_name: 同音频内部说话人音色迁移
+source_mcp: runtime-composite
+tool_names:
+  - intra_audio_voice_transfer
+  - diarization
+  - seed_vc
+  - artifact_ops.reconstruct
+
+description: |
+  用于 speech editing 中“同一段音频内部 A 说话人变成 B 说话人音色 / swap voices”的复合链路。
+  先 diarization 找出各说话人片段，再从目标说话人片段构造 reference，调用 SeedVC 转换源说话人片段，
+  最后按原时间线拼回。
+
+detailed_capability: |
+  标准链路：
+  1. diarization service 分出 speaker_segments。
+  2. 根据自然语言和 Gemini perception 解析 source speaker 与 target/reference speaker。
+  3. 从 target speaker 的若干片段拼出 internal reference audio。
+  4. 对 source speaker 的每个片段调用 seed_vc。
+  5. 将 converted segments fit 到原始 span 并 reconstruct。
+
+  适用场景：
+  - Swap the vocal timbres of the two speakers.
+  - Make the first speaker sound like the second speaker in this audio.
+  - Convert the adult voice into the child voice already present in the dialogue.
+  - Transfer the woman's timbre to the man in the same audio.
+
+  边界：
+  - 只处理同一音频内部已有的目标说话人音色，不处理无参考 persona 设计。
+  - 如果外部 reference_audio_paths 非空，直接用 seed_vc，不需要 internal reference extraction。
+  - 依赖 diarization；没有 speaker_segments 时不能精确执行。
+  - 输出应保持原文本内容和整体时间线，未选中 speaker 片段不变。
+
+dimensions: [speaker, timbre, diarization, voice_conversion, timeline]
+
+parameters:
+  - name: input_audio_path
+    type: string
+    required: true
+    description: 多说话人输入音频。
+  - name: output_path
+    type: string
+    required: true
+    description: 输出 WAV。
+  - name: instruction
+    type: string
+    required: true
+    description: 自然语言内部音色迁移指令。
+  - name: speaker_segments
+    type: string
+    required: true
+    description: diarization 输出；必须能区分所有相关说话人。
+  - name: source_speaker_id
+    type: string
+    required: false
+    description: 要被转换的说话人 ID；可由 planner/perception 推断。
+  - name: target_speaker_id
+    type: string
+    required: false
+    description: 作为 reference 的说话人 ID；可由 planner/perception 推断。
+  - name: preserve_duration
+    type: boolean
+    required: false
+    default: true
+    description: 是否把转换后片段 fit 回原 span 时长。
+
+output:
+  type: audio_file
+  description: 时间线重建后的音频；metadata 应记录 source/target speaker、reference spans、converted spans。
+
+execution_constraints:
+  should_run_before: [speech_enhancement, spatial_reverb]
+  should_run_after: [diarization]
+  mutually_exclusive_with: [qwen3_tts]
+  can_repeat: false
+
+examples:
+  - scenario: "两个说话人互换音色"
+    parameters:
+      speaker_segments: required
+      preserve_duration: true
+    expected_outcome: "A 的片段听起来像 B，B 的片段听起来像 A，文本和时间线保持"
+  - scenario: "让第一说话人听起来像第二说话人"
+    parameters:
+      source_speaker_id: SPEAKER_00
+      target_speaker_id: SPEAKER_01
+    expected_outcome: "只转换第一说话人，第二说话人不变"
+
+instruction_mapping:
+  "same audio && swap voices/timbres": "使用 intra_audio_voice_transfer"
+  "first speaker sound like second speaker": "diarization -> internal reference -> seed_vc -> reconstruct"
+  "adult speaker to child speaker already present": "使用内部目标说话人片段作 reference"
+  "external reference audio exists": "不要使用 internal_vc；直接 seed_vc"
+  "no target speaker exists in audio && no external reference": "使用 qwen3_tts_voice_design 或 unsupported，不能假造内部 reference"

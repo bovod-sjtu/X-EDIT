@@ -1,0 +1,44 @@
+skill_id: voice_class_strong_prompting
+description: Expand broad natural-language voice-class requests into strong target-voice prompts for no-reference voice design tools.
+priority: 70
+selected_tools: [qwen3_tts, no_reference_voice_conversion]
+runtime_operations: [qwen3_tts, no_reference_voice_conversion]
+positive_signals:
+  - 小孩音色
+  - 儿童音色
+  - 童声
+  - 孩子声音
+  - 老人音色
+  - 老年声音
+  - 苍老声音
+  - 年轻声音
+  - 青年音色
+  - 中年声音
+  - 男声
+  - 女声
+  - child voice
+  - kid voice
+  - elderly voice
+  - old voice
+  - young voice
+  - middle-aged voice
+  - male voice
+  - female voice
+required_evidence: [user_instruction, optional_target_voice_class]
+workflow:
+  - detect_voice_class_from_instruction_or_step_params
+  - load_runtime_voice_design_memory_for_the_detected_voice_class
+  - expand_class_label_to_concrete_age_timbre_pitch_resonance_articulation_constraints
+  - preserve_source_perceived_gender_for_age_class_requests_unless_the_user_explicitly_sets_target_gender
+  - optionally_resynthesize_dsp_adjusted_reference_with_neural_speech_resynthesis_before_voice_conversion
+  - pass_strong_prompt_to_qwen3_tts
+  - for_existing_source_audio_synthesize_independent_target_reference_then_seed_vc
+rationale: Broad labels such as child, elderly, male, or female are underspecified for voice design models. The executor should translate them into concrete and audible constraints before invoking Qwen3-TTS.
+guardrails:
+  - Keep strong prompts target-side only; do not infer target voice traits from the source speaker unless the user explicitly asks for that.
+  - The exception is perceived gender preservation for age-class conversion: child/elderly/young/middle-aged requests should keep the source speaker's male/female presentation unless the instruction explicitly says boy/girl/male/female/grandpa/grandma.
+  - Child means a 5-to-8-year-old prepubescent voice, not a teenager or adult female voice.
+  - Elderly means an 80-years-or-older voice with weak breath, slight tremor, slower pacing, and softened or leaky dental consonants from missing or loose teeth while remaining intelligible.
+  - Young adult means 18-to-25 years old and must not collapse into child voice.
+  - Adult male and adult female prompts should specify adult age, pitch range, resonance, and articulation while avoiding childlike artifacts.
+  - For existing/source audio conversion, synthesize an independent target reference first and use SeedVC for the final conversion.

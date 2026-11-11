@@ -1,0 +1,61 @@
+# X-Editor Tool Skill Schema
+# 每个 YAML 文件描述一个（或一组）工具的编辑能力，供 Planner 动态读取。
+
+skill_id: string           # 唯一标识，如 "pitch_shift_rubberband"
+display_name: string       # 人类可读名，如 "Rubberband 变调"
+source_mcp: string         # 来源 MCP server，如 "ffmpeg" / "librosa"
+tool_names: [string]       # 对应的实际工具名列表（通常1个）
+
+description: string        # 一句话功能描述
+detailed_capability: string # 详细能力说明，给 Planner 看
+
+# 该工具能影响的编辑维度（多选）
+dimensions:
+  - pitch        # 音高/性别
+  - tempo        # 速度
+  - timbre       # 音色/频谱
+  - dynamics     # 动态/响度
+  - effects      # 空间/调制效果
+  - noise        # 降噪/修复
+  - format       # 格式转换
+  - analysis     # 分析验证
+
+# 输入参数定义（供 Planner 生成正确参数）
+parameters:
+  - name: string
+    type: string            # string | number | integer | boolean | enum
+    required: boolean
+    default: any            # 可选
+    description: string     # 参数说明，含取值范围/建议
+    enum_values: [string]   # 仅 type=enum 时有效
+    constraints: string     # 约束说明，如 "0.5~2.0"
+
+# 输出类型
+output:
+  type: string              # audio_file | text | data
+  description: string       # 输出说明
+
+# 执行顺序约束（重要！影响 plan 质量）
+execution_constraints:
+  should_run_before: [string]   # 该工具应该在哪些工具之前运行
+  should_run_after: [string]    # 该工具应该在哪些工具之后运行
+  mutually_exclusive_with: [string]  # 互斥工具（通常不一起用）
+  can_repeat: boolean           # 是否允许同一 workflow 中多次调用
+
+# 典型使用场景示例（给 Planner 参考）
+examples:
+  - scenario: "降低女声音高至男声范围"
+    parameters:
+      pitch_ratio: 0.75
+    expected_outcome: "基频从 220Hz 降至 ~165Hz，听感进入中低男声区"
+
+  - scenario: "微调音高，轻微降调"
+    parameters:
+      pitch_ratio: 0.95
+    expected_outcome: "几乎不可察觉的轻微降调，保持自然度"
+
+# 与结构化指令的映射关系（指导 Planner 何时选用）
+instruction_mapping:
+  gender.target: "male" -> "当 source 为 female 且 target 为 male 时首选"
+  pitch.direction: "lower" -> "pitch_ratio < 1.0"
+  pitch.direction: "raise" -> "pitch_ratio > 1.0"

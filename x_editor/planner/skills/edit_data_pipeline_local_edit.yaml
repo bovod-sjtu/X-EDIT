@@ -1,0 +1,138 @@
+skill_id: edit_data_pipeline_local_edit
+description: Prefer edit-data-pipeline for existing-audio lexical, prosody, emotion/tone/style, pause, pitch/rate, or volume edits.
+priority: 120
+selected_tools: [perception.speech_context, edit_data_pipeline]
+runtime_operations: [edit_data_pipeline.text_edit, edit_data_pipeline.pitch_rate_edit, edit_data_pipeline.emotion_style_edit, edit_data_pipeline.pause_edit, edit_data_pipeline.speech_rate, edit_data_pipeline.volume_normalize]
+negative_signals:
+  - swap pronunciations
+  - swap the Chinese pronunciations
+  - switch pronunciations
+  - switch the Chinese pronunciations
+  - sing
+  - singing
+  - song
+  - rap
+  - rapping
+  - accent
+  - dialect
+  - telephone
+  - radio
+  - underwater
+  - wind
+  - muffled
+  - 唱歌
+  - 歌唱
+  - 说唱
+  - 口音
+  - 方言
+positive_signals:
+  - replace
+  - replace all
+  - replace every
+  - replace the word
+  - replace the phrase
+  - replace the sentence
+  - change the word
+  - change words
+  - change all
+  - change every
+  - swap
+  - switch
+  - correct the pronunciation
+  - modify the pronunciation
+  - text edit
+  - spoken text
+  - same voice and tone
+  - matching the same voice and tone
+  - pitch
+  - emphasis
+  - stress
+  - intonation
+  - speed up
+  - slow down
+  - speaking rate
+  - emotion
+  - tone
+  - style
+  - mood
+  - happy
+  - happier
+  - sad
+  - sadder
+  - angry
+  - angrier
+  - calm
+  - calmer
+  - surprised
+  - melancholic
+  - fearful
+  - afraid
+  - disgusted
+  - cheerful
+  - depressed
+  - hushed
+  - reflective
+  - 开心
+  - 更开心
+  - 高兴
+  - 悲伤
+  - 更悲伤
+  - 难过
+  - 更难过
+  - 生气
+  - 愤怒
+  - 平静
+  - 更平静
+  - 惊讶
+  - 忧郁
+  - pause
+  - volume
+  - decrease the volume of a quoted phrase
+  - prosody volume
+  - tagged instruction
+  - instruction_st
+  - <sub
+  - <rate
+  - <pitch
+  - <pause
+required_evidence: [source_text]
+workflow:
+  - perception.speech_context_for_source_text_when_missing
+  - normalize_local_edit_operation
+  - edit_data_pipeline
+  - optional_segmented_execution
+  - for_multi_hop_requests_chain_text_edit_then_voice_style_or_span_wrapper_without_merging_tool_contracts
+  - route_phrase_scoped_volume_tags_to_artifact_ops_speaker_scoped_volume_normalize_when_needed
+rationale: Existing-source audio edits that preserve the timeline, speaker identity, and acoustic context should stay on edit-data-pipeline whenever its label contract can express the requested change. TTS tools are generators, not lexical replacement tools for existing audio.
+guardrails:
+  - Emotion and prosody edits require the actual input transcript just as lexical edits do; a delivery-only objective does not resolve contradictory wording or incomplete alignment.
+  - Prefer tags over the grounded local words within the complete source transcript when the selected backend supports that scope. Do not crop solely to express a local tag; crop when required by the tool contract or audio selection, then obtain crop-local evidence if safe inheritance is unavailable.
+  - Pure extraction uses artifact_ops.extract_spans directly with grounded spans. Never place extraction, concatenation or reconstruction inside speaker_scoped_edit; that wrapper edits and restores regions to their source timeline.
+  - Transcript-conditioned edits must use source_text and labels for the actual input artifact, not an earlier whole recording.
+  - A verified crop may inherit complete words from a same-version exact source mapping. A multi-span crossfade, cut word, overlapping alignment, or content-changing step requires fresh observation of that actual artifact before text-conditioned editing.
+  - An available crop-local observation may be reused; do not discard it merely because the parent transform has no exact mapping. Never guess text or bypass a binding failure.
+  - HARD ROUTING RULE: Existing-audio word/phrase/sentence replacement, deletion, insertion, correction, or swap must use edit_data_pipeline.text_edit. Never route this class to qwen3_tts, including after service failures; split/retry or fail with the edit-data-pipeline reason.
+  - HARD ROUTING RULE: Existing-audio emotion/tone/style/rate/pitch/pause/volume edits must use the matching edit_data_pipeline operation when representable. If the target is speaker/role/time scoped, use artifact_ops.speaker_scoped_edit only as the span-selection/stitching wrapper with nested edit_op=edit_data_pipeline.<operation>.
+  - The outer operation id must be the intended edit_data_pipeline child operation. Do not emit edit_data_pipeline.text_edit with params.operation set to pitch_rate_edit, emotion_style_edit, pause_edit, volume_normalize, pitch_shift, or speech_rate.
+  - A single step must express one executable intent: do not write operation=edit_data_pipeline.text_edit while also setting params.operation=pitch_rate_edit or another conflicting operation. Choose the correct operation family before emitting the step.
+  - Multiple lexical replacements in the same source are still one text_edit intent. Emit every replacement in one complete instruction_st, for example <sub targ="blue">red</sub> ... <sub targ="green">yellow</sub>; the untagged text must remain the full source transcript and each replacement may have a different target.
+  - When requested replacement values are expressed by an unambiguous semantic description, resolve each meaning to the concrete words that must be spoken and encode all distinct replacements in the same text_edit step. Ground the source side in reviewed transcript evidence; do not mark the edit unsupported merely because the target words were stated indirectly.
+  - Multi-hop edits must be planned as multiple steps. For example, if the user asks for a word/phrase replacement plus voice conversion, first perform edit_data_pipeline.text_edit for the lexical change, then perform the requested voice/style/timbre operation on the edited audio or confirmed spans.
+  - Field ownership is strict: edit-data-pipeline tagged labels belong in instruction_st, not arbitrary instruction; source_text must be the stripped/rendered source; target_text must be the full rendered target utterance, not only the raw targ attribute value.
+  - Use canonical audio references such as current, input_audios[0], input_audios[1], or session.round[0].audio[0]. Do not invent service-local file paths for session audio.
+  - Text-like edits need source_text.
+  - Text edits should use a small number of coarse local <ins>/<del>/<sub> tags; a replacement must be <sub targ="new phrase">old phrase</sub>, while <del> is only for pure deletion and <ins> is only for pure insertion. Avoid full-utterance <sub> unless the whole utterance truly changes, and avoid character-level fragmentation.
+  - Before choosing text_edit for a replacement, decide whether the replacement target is real spoken content words or a non-lexical sound/effect. Real words belong in text_edit target_text; non-lexical sounds such as beep/bleep/censor tones belong in artifact_ops span operations such as beep_spans, not in <sub targ="[BLEEP]">.
+  - Emphasis/stress on quoted words or phrases should prefer emphasis_stress_edit when qwen3_tts, seed_vc, and audio_assembly are available. Use pitch_rate_edit as the fallback or when the user explicitly requests a mechanical pitch/rate change.
+  - pitch_rate_edit accepts only <pitch, semitones=N>...</pitch> and <rate, factor=F>...</rate>; never emit <speed>, <prosody>, pitch-contour attributes, or arbitrary XML tags.
+  - Tone-only or style-only requests such as hushed, reflective, calm, melancholic, or internal-monologue delivery are emotion_style_edit, not text_edit, because spoken words are unchanged.
+  - Questioning-to-declarative tone requests are tone/style edits: try emotion_style_edit first and keep pitch_rate_edit only for explicit pitch/intonation control or fallback.
+  - emotion_style_edit supports only canonical <emo type="emotion" level="1|2|3">...</emo> where emotion is happy, angry, sad, afraid, disgusted, melancholic, surprised, or calm, plus <emo desc="style description">...</emo>. It is not a rap, singing, accent, or channel-effect renderer.
+  - If an emotion/tone/style request is outside emotion_style_edit's supported tag space, do not force edit_data_pipeline; route to the dedicated tool if one exists or return a clear unsupported/boundary reason.
+  - pause_edit supports only self-closing insertion labels <pause act="ins" level="1|2|3"/>; use boundary_smooth points for low-level pause adjustment.
+  - artifact_ops.silence creates a standalone all-silent artifact. Never use it as the final output for a request to insert a pause inside existing speech; use pause_edit so the surrounding source audio is preserved.
+  - audio_assembly uses edit_tagged_text with <target>...</target> spans and target_audio_path/time spans; do not send instruction_st or target_text-only edits to audio_assembly.
+  - speech_rate, volume_normalize, pitch_shift, and boundary_smooth are parameter-only operations and must not receive instruction_st/XML labels.
+  - volume_normalize only accepts method=rms or method=peak. WSOLA/IndexTTS2 methods are speech-rate methods and must be represented as edit_data_pipeline.speech_rate or pitch_rate_edit, never as volume_normalize.method.
+  - Long text edits or edits whose target timeline may exceed the F5 limit need trustworthy word timestamps and, when speaker-scoped, speaker segments for safe segmentation. Alignment from the original source audio may be inherited; simple whole-audio duration changes may scale timestamps; complex timeline changes must trigger aligner refresh. If trustworthy alignment is unavailable, return a segmentation/alignment boundary error instead of switching to TTS.
+  - Do not encode volume-only changes as text_edit with unsupported prosody volume tags; use volume_normalize directly or speaker_scoped_edit with nested volume_normalize for quoted phrase/span-level gain changes.

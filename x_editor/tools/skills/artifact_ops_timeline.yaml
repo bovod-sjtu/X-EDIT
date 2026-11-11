@@ -1,0 +1,121 @@
+skill_id: artifact_ops_timeline
+display_name: 时间线片段抽取/删除/静音/拼接/重建
+source_mcp: runtime-artifact-ops
+tool_names:
+  - artifact_ops
+  - artifact_ops.extract_spans
+  - artifact_ops.remove_spans
+  - artifact_ops.mute_spans
+  - artifact_ops.concat
+  - artifact_ops.reconstruct
+  - artifact_ops.speaker_scoped_edit
+
+description: |
+  面向 speech editing 中 timeline-level 指令的运行时 skill，包括按词/句/说话人片段抽取、
+  删除、静音、拼接、多音频顺序重排、局部 speaker-scoped edit 和重建。
+
+detailed_capability: |
+  适用场景：
+  - Extract all speech from the first speaker.
+  - Remove the sentence/word/phrase containing "...".
+  - Delete all speech after/before a phrase.
+  - Mute the second speaker / remove all child speech.
+  - Append/prepend/concatenate the first audio with the second.
+  - Replace only selected spans and reconstruct the original timeline.
+
+  执行依赖：
+  - 文本/词边界定位依赖 source_text + word_timestamps。
+  - speaker 级别选择依赖 speaker_segments / diarization。
+  - gender/age/role 选择可用 Gemini 2.5 Pro perception enrichment 辅助映射到 speaker_id。
+  - 如果缺少 speaker/role/phrase grounding 证据，GeminiPlanner 可以先规划
+    perception.audio_fallback，让感知层先尝试专用 ASR/alignment/diarization，
+    再在专用感知不足时调用 Gemini 2.5 Pro 音频感知补充 source_text、
+    speaker profiles、segment descriptions 和近似时间片，再执行本 skill。
+  - 改字/情感/音高/语速等 speaker-scoped edit 应先选择目标 speaker spans，再对每段调用 edit_data_pipeline，最后 reconstruct。
+
+  操作边界：
+  - extract_spans: 输出选中片段拼接结果，适合“只保留/提取...”。
+  - remove_spans: 删除选中片段并拼接剩余音频，适合“删除/移除...”。
+  - mute_spans: 静音选中片段但保持总时长。
+  - concat: 多音频按自然语言顺序拼接。
+  - reconstruct: 将 edited spans 放回原时间线。
+  - speaker_scoped_edit: diarize/select speaker -> edit selected segments -> stitch back。
+
+  不能做：
+  - 没有 word_timestamps 时，不应声称可以精确删除某个词。
+  - 没有 speaker_segments/perception 时，不应声称可以精确选择 first/second/female/male/child speaker。
+  - 不负责 speaker timbre conversion；内部音色迁移使用 speaker_diarization_internal_vc。
+
+dimensions: [timeline, extraction, removal, speaker, text, assembly, analysis]
+
+parameters:
+  - name: operation
+    type: enum
+    required: true
+    enum_values: [extract_spans, remove_spans, mute_spans, concat, reconstruct, speaker_scoped_edit]
+    description: 时间线操作类型。
+  - name: input_audio_path
+    type: string
+    required: true
+    description: 主音频路径。
+  - name: output_path
+    type: string
+    required: true
+    description: 输出 WAV 路径。
+  - name: instruction
+    type: string
+    required: true
+    description: 原始自然语言指令，用于 span selection。
+  - name: source_text
+    type: string
+    required: false
+    description: 主音频转写。
+  - name: word_timestamps
+    type: string
+    required: false
+    description: 词级时间戳；按词/短语/句子定位时必需。
+  - name: speaker_segments
+    type: string
+    required: false
+    description: diarization 结果；speaker-scoped 操作时必需。
+  - name: reference_audio_paths
+    type: string
+    required: false
+    description: concat 或 reference-guided selection 的额外音频。
+
+output:
+  type: audio_file
+  description: timeline 操作后的 WAV；应产出 manifest，记录 spans、source/destination、speaker_id 和边界。
+
+execution_constraints:
+  should_run_before: [speech_enhancement, spatial_reverb]
+  should_run_after: [ctc_forced_aligner]
+  mutually_exclusive_with: []
+  can_repeat: true
+
+examples:
+  - scenario: "提取第一说话人的所有语音"
+    parameters:
+      operation: extract_spans
+      speaker_segments: required
+      word_timestamps: recommended
+    expected_outcome: "只输出第一说话人片段，片段边界落在词边界附近"
+  - scenario: "删除所有 Jack 这个词"
+    parameters:
+      operation: remove_spans
+      word_timestamps: required
+      source_text: required
+    expected_outcome: "Jack 对应音频被删除，剩余音频拼接"
+  - scenario: "把第一个音频接到第二个音频前面"
+    parameters:
+      operation: concat
+      reference_audio_paths: required
+    expected_outcome: "按指令顺序拼接多音频"
+
+instruction_mapping:
+  "extract/keep only/isolate + first speaker/second speaker/female/male/child/role/person": "必要时先 perception.audio_fallback；再使用 extract_spans，依赖 speaker_segments 或 Gemini perception 映射"
+  "extract/find + word/phrase/entity/semantic speech segment": "必要时先 perception.audio_fallback；再使用 extract_spans，依赖 source_text/word_timestamps/segments"
+  "remove/delete/cut out + word/phrase/sentence": "使用 remove_spans；必须有 word_timestamps"
+  "mute/silence + speaker/span": "使用 mute_spans；保持总时长"
+  "append/prepend/concatenate/merge first audio second audio": "使用 concat；不要误用 edit_data_pipeline"
+  "speaker-scoped text/emotion/pitch/rate/volume edit": "使用 speaker_scoped_edit，内部再调用 edit_data_pipeline 并 reconstruct"

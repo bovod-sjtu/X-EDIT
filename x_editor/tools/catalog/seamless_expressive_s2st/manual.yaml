@@ -1,0 +1,104 @@
+tool_id: seamless_expressive_s2st
+mcp_tool_name: seamless_expressive_s2st.translate
+input_schema:
+  type: object
+  required:
+    - input_audio_path
+    - target_language
+    - output_path
+  properties:
+    input_audio_path:
+      type: string
+      description: Source speech audio file path.
+    target_language:
+      type: string
+      description: Target speech language. Prefer Seamless ISO-639-3 codes such as fra, deu, spa, eng, cmn.
+    output_path:
+      type: string
+      description: Output WAV path.
+    source_language:
+      type: string
+      description: Optional source language code or name for traceability.
+    mode:
+      type: string
+      enum: [auto, expressive, m4t_v2]
+      default: auto
+    preserve_vocal_style:
+      type: boolean
+      default: true
+      description: Request cross-language vocal-style preservation through SeamlessExpressive.
+    preserve_speech_rate:
+      type: boolean
+      default: true
+      description: Request speech-rate preservation through SeamlessExpressive.
+    preserve_pauses:
+      type: boolean
+      default: true
+      description: Request pause/rhythm preservation through SeamlessExpressive.
+    allow_fallback_to_m4t:
+      type: boolean
+      default: false
+      description: If true, allow non-expressive SeamlessM4T v2 fallback when Expressive is unavailable or target language is unsupported.
+    duration_factor:
+      type: number
+      default: 1.0
+      description: SeamlessExpressive duration factor; larger values slow predicted duration.
+    timeout_seconds:
+      type: number
+      default: 1800.0
+    extra_args:
+      type: array
+      items:
+        type: string
+output_schema:
+  type: object
+  required:
+    - output_audio_path
+  properties:
+    output_audio_path:
+      type: string
+    backend_used:
+      type: string
+      enum: [expressive, m4t_v2]
+    target_language:
+      type: string
+    sample_rate:
+      type: integer
+    duration_seconds:
+      type: number
+    expressivity_preserved:
+      type: object
+    warning:
+      type: string
+defaults:
+  mode: auto
+  preserve_vocal_style: true
+  preserve_speech_rate: true
+  preserve_pauses: true
+  allow_fallback_to_m4t: false
+  duration_factor: 1.0
+  timeout_seconds: 1800.0
+validation:
+  frontend_check:
+    - Output speech should be in the requested target language.
+    - Spoken meaning should match the source speech.
+    - If expressive mode was used, vocal style, speech rate, and pauses should be compared perceptually or with external metrics.
+    - If fallback to SeamlessM4T v2 was used, report that expressivity preservation was not provided.
+examples:
+  - scenario: Translate English speech to French while preserving vocal style and pauses.
+    arguments:
+      input_audio_path: /tmp/input.wav
+      target_language: fra
+      output_path: /tmp/output_fra.wav
+      mode: expressive
+      preserve_vocal_style: true
+      preserve_speech_rate: true
+      preserve_pauses: true
+      allow_fallback_to_m4t: false
+  - scenario: Translate speech to Spanish with non-expressive fallback allowed.
+    arguments:
+      input_audio_path: /tmp/input.wav
+      target_language: spa
+      output_path: /tmp/output_spa.wav
+      mode: auto
+      allow_fallback_to_m4t: true

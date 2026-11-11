@@ -1,0 +1,114 @@
+tool_id: foreground_background_remix
+mcp_tool_name: foreground_background_remix.execute
+input_schema:
+  type: object
+  required:
+    - input_audio_path
+    - output_path
+    - instruction
+  properties:
+    input_audio_path:
+      type: string
+      description: Mixed foreground/background input audio path.
+    output_path:
+      type: string
+      description: Destination WAV path for the remixed result.
+    output_dir:
+      type: string
+      description: Directory for separated stems and intermediate foreground edits.
+    instruction:
+      type: string
+      description: Natural-language edit instruction.
+    source_text:
+      type: string
+      description: Transcript of the foreground speech, required for tagged foreground speech edits.
+    foreground_action:
+      type: string
+      enum:
+        - edit_foreground
+        - remove_foreground
+        - remove_voice
+        - keep_background
+        - background_only
+        - isolate_foreground
+        - foreground_only
+        - extract_foreground
+      default: edit_foreground
+    edit_operation:
+      type: string
+      description: Required when foreground_action is edit_foreground; the explicit nested operation such as text_edit, emotion_style_edit, audio_effects, qwen3_tts, gain, or copy. Instruction wording never replaces this choice. Removal and isolation do not require a nested operation.
+    foreground_stem_policy:
+      type: string
+      default: speech
+      description: Select the unique labeled vocal stem. Speech/voice/vocal/vocals/foreground are aliases, not speaker identities.
+    background_stem_policy:
+      type: string
+      default: background
+      description: Select the unique labeled accompaniment stem. Background/music/instrumental/accompaniment are aliases; missing or ambiguous labels fail.
+    separation:
+      type: object
+      description: Optional speech_separation overrides.
+    edit_params:
+      type: object
+      description: Parameters satisfying the explicitly chosen operation contract. audio_effects uses an explicit preset and strength; tagged speech edits require source_text and valid instruction_st; voice conversion requires a bound reference_audio_path. The active runtime capability profile may expose only removal/extraction rather than nested editing.
+    gain_db:
+      type: number
+      description: Legacy explicit foreground-gain shorthand. When no nested operation is declared, this field selects the existing gain operation with exactly this relative dB value, independently of instruction wording. It is not exposed by speech_edit_core_v2.
+    foreground_gain_db:
+      type: number
+      description: Optional gain applied to the edited foreground stem.
+    background_gain_db:
+      type: number
+      description: Optional gain applied to the background stem.
+    preserve_duration:
+      type: boolean
+      default: true
+output_schema:
+  type: object
+  required:
+    - output_audio_path
+  properties:
+    output_audio_path:
+      type: string
+    operation:
+      type: string
+    tool_chain:
+      type: array
+      items:
+        type: string
+    stem_paths:
+      type: array
+      items:
+        type: string
+    foreground_stem_path:
+      type: string
+    background_stem_path:
+      type: string
+    foreground_action:
+      type: string
+    edit_operation:
+      type: string
+defaults:
+  foreground_action: edit_foreground
+  foreground_stem_policy: speech
+  background_stem_policy: background
+  preserve_duration: true
+validation:
+  frontend_check:
+    - The background timing should match the original mixed audio.
+    - The selected foreground stem should contain the speech or vocal content requested by the instruction.
+    - Vocal/accompaniment separation does not isolate individual overlapping speakers; do not treat a vocal stem as a confirmed speaker identity.
+examples:
+  - scenario: Remove speech while keeping background music.
+    arguments:
+      input_audio_path: /tmp/mixed.wav
+      output_path: /tmp/background_only.wav
+      instruction: Remove the foreground speech while keeping the background music unchanged.
+      foreground_action: remove_voice
+  - scenario: Slow the foreground speech while preserving background ambience.
+    arguments:
+      input_audio_path: /tmp/mixed.wav
+      output_path: /tmp/remixed.wav
+      instruction: Slow the foreground speaker down but keep the background unchanged.
+      source_text: The transcript of the foreground speech.
+      edit_operation: pitch_rate_edit

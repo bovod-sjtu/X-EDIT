@@ -1,0 +1,72 @@
+skill_id: tse_quarkaudio_unise
+display_name: QuarkAudio-UniSE 参考说话人抽取
+source_mcp: quarkaudio_unise
+tool_names:
+  - tse
+  - tse.extract_target_speaker
+
+description: |
+  使用 QuarkAudio-UniSE 做 audio-only target speaker extraction。必须有 reference/enrollment audio。
+  适合从混合音频中提取与参考音频匹配的目标说话人。
+
+detailed_capability: |
+  适用场景：
+  - Extract the speaker matching this reference audio.
+  - Isolate the reference speaker from overlapping speech.
+  - Keep only the voice of the person in audio2 from audio1.
+
+  输入：
+  - mixture_audio_path: 混合/待抽取音频。
+  - reference_audio_path: 目标说话人 enrollment/reference 音频，必须存在。
+  - output_path: 目标说话人音频输出。
+
+  边界：
+  - 没有 reference_audio_path 时不能使用 TSE。
+  - 不处理自然语言 only 的 “first speaker / female speaker / child speaker”；这类要先 diarization/perception。
+  - 不做改字、情感、音高、语速编辑；抽取后如需编辑，再接 edit_data_pipeline 或 artifact_ops。
+  - 不用于单人降噪/清晰化；那是 speech_enhancement。
+
+dimensions: [speaker, extraction, source_separation]
+
+parameters:
+  - name: mixture_audio_path
+    type: string
+    required: true
+    description: 混合音频路径。
+  - name: reference_audio_path
+    type: string
+    required: true
+    description: 目标说话人 reference/enrollment 音频。
+  - name: output_path
+    type: string
+    required: true
+    description: 抽取结果 WAV。
+  - name: enroll_duration
+    type: number
+    required: false
+    default: 5.0
+    description: 使用 reference 的秒数。
+
+output:
+  type: audio_file
+  description: 目标说话人抽取音频；metadata 应记录 reference_audio_path 和 backend。
+
+execution_constraints:
+  should_run_before: [edit_data_pipeline, seed_vc, speech_enhancement]
+  should_run_after: []
+  mutually_exclusive_with: [speech_separation]
+  can_repeat: true
+
+examples:
+  - scenario: "从混合说话中提取参考音频对应的人"
+    parameters:
+      mixture_audio_path: /path/to/mix.wav
+      reference_audio_path: /path/to/ref.wav
+      enroll_duration: 5.0
+    expected_outcome: "输出以参考说话人为主的音频"
+
+instruction_mapping:
+  "reference_audio_paths non-empty && extract/isolate target speaker": "使用 tse"
+  "voice in second audio from first audio": "first audio 是 mixture，second audio 是 reference"
+  "no reference audio && target speaker described by gender/age/order": "不要用 tse；使用 artifact_ops_timeline + diarization/perception 或 speech_separation"
+  "single-speaker denoise/enhance": "不要用 tse；使用 speech_enhancement"

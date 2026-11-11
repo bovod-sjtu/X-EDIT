@@ -1,0 +1,92 @@
+skill_id: gemini_second_pass_replanning
+display_name: Gemini 2.5 Pro 失败任务二次规划
+source_mcp: planner-runtime
+tool_names:
+  - GeminiPlanner
+  - AudioEditExecutor
+  - GeminiExecutorToolCallPlanner
+
+description: |
+  speech editing 评测中，当 deterministic graph 首轮失败或没有产出音频时，
+  使用 Gemini 2.5 Pro 作为结构化 Planner 做二次规划，并由 AudioEditExecutor
+  严格映射到现有工具能力。
+
+detailed_capability: |
+  触发条件：
+  - graph status != completed。
+  - output_audio_path 缺失或文件不存在。
+  - deterministic guard 返回 unsupported，但用户请求可能可由新 runtime operation 覆盖。
+  - ASR/perception 不完整导致首轮失败，但 Gemini audio perception 可能补充 transcript/speaker profile。
+
+  执行模型：
+  user request + context + available_operations
+    -> GeminiPlanner(gemini-2.5-pro)
+    -> AudioEditPlan
+    -> optional GeminiExecutorToolCallPlanner
+    -> deterministic validator
+    -> AudioEditExecutor
+    -> existing X-Editor tools
+    -> StubEvaluator
+
+  硬边界：
+  - 二次规划不替代首轮 deterministic guard，只在失败后触发。
+  - Gemini 只能选择 operation registry 中存在的 operation。
+  - Gemini executor 的 tool call 必须通过 deterministic validation。
+  - 不允许直接发明模型、工具、字段或本地绝对密钥。
+  - 如果缺少 source_text / reference_audio / word timestamps / speaker segments，应在 missing_inputs 或 blocked_reason 中记录。
+
+dimensions: [planning, evaluation, fallback, analysis]
+
+parameters:
+  - name: user_request
+    type: string
+    required: true
+    description: 原始用户指令。
+  - name: input_audio
+    type: string
+    required: true
+    description: 主输入音频。
+  - name: output_audio
+    type: string
+    required: false
+    description: 二次规划目标输出路径。
+  - name: available_operations
+    type: string
+    required: true
+    description: AudioEditExecutor registry 暴露的 operation 列表。
+  - name: previous_failure
+    type: string
+    required: false
+    description: 首轮失败原因，传给 Gemini 用于避开原失败路径。
+  - name: use_gemini_executor
+    type: boolean
+    required: false
+    default: true
+    description: 是否启用 executor-side Gemini 工具调用规范化。
+
+output:
+  type: data
+  description: second_pass 记录，包含 status、plan、execution_summary、evaluation、final_output_path 或 error。
+
+execution_constraints:
+  should_run_before: []
+  should_run_after: [tool_aware_planner]
+  mutually_exclusive_with: []
+  can_repeat: true
+
+examples:
+  - scenario: "deterministic graph 对 foreground/background 编辑失败"
+    parameters:
+      previous_failure: "scene-level foreground/background edit unsupported"
+      available_operations: "contains foreground_background_remix"
+    expected_outcome: "GeminiPlanner 生成 foreground_background_remix 结构化计划，executor 严格校验并执行"
+  - scenario: "Gemini plan 选了 unsupported operation"
+    parameters:
+      available_operations: "does not contain requested operation"
+    expected_outcome: "Executor 标记 failed，trace 记录 unsupported/validation error，不静默 fallback"
+
+instruction_mapping:
+  "graph failed && output missing": "触发 Gemini second pass"
+  "deterministic unsupported but operation registry has matching composite operation": "允许二次规划尝试"
+  "Gemini returns non-json/schema-invalid": "记录 second_pass.status=failed，不覆盖原失败"
+  "Gemini executor blocked step": "记录 executor_tool_call_errors 和 blocked_reason"

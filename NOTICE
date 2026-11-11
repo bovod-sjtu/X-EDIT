@@ -1,0 +1,29 @@
+X·Edit
+Copyright 2026 X-Edit contributors
+
+Original X-Edit controller and deployment code that its contributors are entitled
+to license is licensed under Apache-2.0. Third-party material is excluded from
+that grant; original wrappers do not acquire a model's license merely by calling it.
+The edit-data-pipeline is an independently maintained Git submodule. Its SDKs,
+service adaptations and patches retain their applicable upstream terms.
+No external SDK, model weight or pipeline patch is relicensed by this NOTICE.
+See third_party/NOTICE.md, third_party/external_pipeline.json and docs/LICENSES.md.
+
+This is a source-only framework release, not a grant covering external models.
+F5-TTS is operator-installed, disabled by default, and never downloaded,
+installed or started by X-Edit's provisioning helpers. Its selected weights'
+noncommercial conditions are not waived by the framework's Apache-2.0 license.
+
+SAM-Audio and VoiceSculptor-VD are documentation-only extension candidates.
+Their clients, adapters, tool registrations, implementations, weights and
+generated audio are not included in the current release. Upstream references
+and historical license evidence do not make them installed dependencies.
+
+Users independently developing extensions must review their complete selected
+components and obtain any required permissions. External process boundaries,
+HTTP calls and installation do not grant additional rights or legal approval.
+The project team remains responsible for model services it operates; a notice
+addressed to users does not transfer that responsibility. Self-hosting users
+must also establish permission for their own use. Excluding weights or outputs
+from a release does not establish permission for commercial model operation.
+See docs/OPEN_SOURCE_STATEMENT.zh-CN.md and docs/EXTENSION_GUIDE.md.

@@ -1,0 +1,85 @@
+schema_version: x-editor.operation-capability-card/v1
+operation: artifact_ops.apply_gain
+semantic_effects: [relative_level_change]
+supported_scopes: [global, segment, timeline]
+requirements:
+  inputs: [inputs.input_audio]
+  evidence: []
+preservation:
+  - dimension: timeline_duration
+    level: strong
+    evidence_kind: declared_design_fact
+    rationale: Gain changes samples without changing frame count, sample rate or channels.
+  - dimension: non_target_waveform
+    level: strong
+    evidence_kind: declared_design_fact
+    rationale: Float64 WAV retains every decoded sample outside explicit selected spans exactly.
+quality_characteristics:
+  - dimension: relative_gain_accuracy
+    level: high
+    evidence_kind: declared_design_fact
+    rationale: Selected samples are multiplied by 10 raised to gain_db divided by 20, with no normalization or limiter.
+artifact_risks:
+  - risk: abrupt_span_boundary
+    level: high
+    evidence_kind: declared_design_fact
+    rationale: No fade is added because it would weaken the exact requested gain at boundaries.
+  - risk: over_amplified_background
+    level: unknown
+    evidence_kind: unknown
+    rationale: Gain affects all channels and sounds within the selected interval; it does not separate overlapping speakers or stems.
+composition:
+  supports_batch_targets: true
+  cumulative_degradation_risk: low
+parameter_contract:
+  additional_parameters: reject
+  planner_selectable:
+    - path: inputs.input_audio
+      value_type: string
+      required: true
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: source_audio_ref
+    - path: params.gain_db
+      value_type: number
+      required: true
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: relative_amplitude_change_db
+    - path: params.selected_spans
+      value_type: array
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: explicit_input_timeline_intervals_start_sec_end_sec
+    - path: params.headroom_db
+      value_type: number
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: 0.0
+      default: 0.0
+      semantic_role: selected_output_peak_ceiling_dbfs
+  framework_owned: [params.output_path, params.output_dir, params._agentic_mode]
+  conditional_rules: []
+limitations:
+  - gain_db is a relative amplitude change, never an absolute target_db, RMS or LUFS target.
+  - Omit selected_spans for the whole input. An explicit list must be nonempty with finite start_sec/end_sec within the bound input timeline.
+  - Resolve semantic or speaker selectors into grounded explicit spans before calling. No selector inference or span expansion occurs here.
+  - Boundaries round to nearest frames with ties to even; overlapping spans form a union and receive the gain once.
+  - Insufficient selected-region headroom fails explicitly. There is no clipping, automatic attenuation, limiting, normalization or weaker fallback.
+  - Output is Float64 WAV; sample rate, channel count and timeline are preserved, while the container subtype can differ from the source.
+  - Source/background sounds overlapping a selected speaker remain affected unless separated upstream.
+provenance:
+  - source_path: x_editor/runtime/relative_gain.py
+    source_kind: runtime_handler
+  - source_path: x_editor/runtime/relative_gain_verification.py
+    source_kind: runtime_handler
+  - source_path: tests/test_relative_gain.py
+    source_kind: test

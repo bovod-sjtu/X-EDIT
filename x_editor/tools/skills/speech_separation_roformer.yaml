@@ -1,0 +1,88 @@
+skill_id: speech_separation_roformer
+display_name: BS-RoFormer / MelBand-RoFormer 人声与伴奏分离
+source_mcp: audio_separator_roformer
+tool_names:
+  - speech_separation
+  - speech_separation.separate
+
+description: |
+  用 audio-separator + BS-RoFormer / MelBand-RoFormer 将人声与伴奏分离成 stems。
+  当前模型不提供重叠说话人分离，也不提供说话人身份标签。
+
+detailed_capability: |
+  适用场景：
+  - separate vocals/speech from music/background。
+  - 作为 foreground_background_remix 的第一步。
+  - 无 reference 音频时先产出 candidate stems，供后续人工/感知检查。
+
+  输入输出：
+  - input_audio_path: 混合音频。
+  - output_dir: 所有 stems 保存目录。
+  - output_path: selected stem 复制路径。
+  - stem_paths: 所有 produced stems。
+  - selected_stem_path: 根据 stem_policy 选中的 stem。
+
+  硬边界：
+  - 不保证 first speaker / second speaker / female speaker / child speaker 标签。
+  - 不等价于 TSE；目标说话人抽取需要另外启用且验收过的工具。
+  - 人声轨可能保留多个重叠说话人，不能声明已分离其身份。
+  - health 必须检查 audio_separator 与 onnxruntime；只有服务在线不代表真实推理可用。
+
+dimensions: [source_separation, background, analysis]
+
+parameters:
+  - name: input_audio_path
+    type: string
+    required: true
+    description: 待分离混合音频。
+  - name: output_dir
+    type: string
+    required: true
+    description: stems 输出目录。
+  - name: output_path
+    type: string
+    required: false
+    description: selected stem 复制路径。
+  - name: model_family
+    type: enum
+    required: false
+    default: bs_roformer
+    enum_values: [bs_roformer, melband_roformer]
+    description: 分离模型族。
+  - name: stem_policy
+    type: string
+    required: false
+    default: vocals
+    description: vocals 或 instrumental 按唯一声部标签选择；顺序不表示声部或身份。
+  - name: output_format
+    type: string
+    required: false
+    default: WAV
+    description: 输出格式。
+
+output:
+  type: audio_file
+  description: selected stem + all stem_paths；metadata 应记录 model_family/model_filename。
+
+execution_constraints:
+  should_run_before: [foreground_background_remix, speech_enhancement, edit_data_pipeline]
+  should_run_after: []
+  mutually_exclusive_with: [tse]
+  can_repeat: true
+
+examples:
+  - scenario: "保留伴奏"
+    parameters:
+      model_family: bs_roformer
+      stem_policy: instrumental
+    expected_outcome: "选择声明为伴奏的轨；音质需要另行检查"
+  - scenario: "从背景音乐中分离人声"
+    parameters:
+      stem_policy: speech
+    expected_outcome: "选择唯一人声轨，标签缺失或歧义则明确失败；伴奏可用于 remix"
+
+instruction_mapping:
+  "overlapping speech/separate speakers": "当前声部分离不支持；需要另行启用支持该能力的工具"
+  "foreground speech/vocals + background music/sound": "作为 foreground_background_remix 的第一步"
+  "target speaker with reference/enrollment audio": "不要用 speech_separation；需要另行启用目标说话人抽取工具"
+  "first/second/female/male speaker exact selection without diarization": "不要声称可精确完成；需要 diarization/perception"

@@ -1,0 +1,23 @@
+name: auk
+server:
+  command:
+  - .venv/bin/python
+  - mcp_server.py
+  working_dir: .
+  env:
+    PYTHONNOUSERSITE: '1'
+    AUK_SERVICE_URL: http://127.0.0.1:8065
+  resources:
+    gpu: false
+    memory_gb: 1
+  lifecycle: session
+  startup_timeout_sec: 120
+managed_services:
+- name: auk
+  command_env: AUK_SERVICE_COMMAND
+  url_env: AUK_SERVICE_URL
+  default_url: http://127.0.0.1:8065
+  health_path: /health
+  startup_timeout_sec: 600
+  setup_hint: Start the run-owned AuK service with its frozen model assets and isolated
+    environment; or supply AUK_SERVICE_COMMAND.

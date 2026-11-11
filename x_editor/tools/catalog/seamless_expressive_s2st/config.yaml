@@ -1,0 +1,27 @@
+name: seamless_expressive_s2st
+server:
+  command: [".venv/bin/python", "mcp_server.py"]
+  working_dir: "."
+  env:
+    HF_HOME: "./.cache/huggingface"
+    HF_HUB_CACHE: "./.cache/huggingface/hub"
+    SEAMLESS_S2ST_SERVICE_URL: "http://127.0.0.1:8039"
+  resources:
+    gpu: true
+    memory_gb: 24
+  lifecycle: session
+  startup_timeout_sec: 240
+managed_services:
+  - name: seamless_expressive_s2st
+    url_env: SEAMLESS_S2ST_SERVICE_URL
+    default_url: "http://127.0.0.1:8039"
+    working_dir: "."
+    command: [".venv/bin/python", "service.py", "--host", "127.0.0.1", "--port", "8039"]
+    env:
+      HF_HOME: "./.cache/huggingface"
+      HF_HUB_CACHE: "./.cache/huggingface/hub"
+    health_path: "/health"
+    smoke:
+      - {method: "OPTIONS", path: "/translate"}
+    startup_timeout_sec: 240
+    setup_hint: "cd x_editor/tools/catalog/seamless_expressive_s2st && ./setup.sh"

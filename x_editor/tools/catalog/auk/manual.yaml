@@ -1,0 +1,52 @@
+tool_id: auk
+mcp_tool_name: auk.edit
+input_schema:
+  type: object
+  additionalProperties: false
+  required:
+  - input_audio_path
+  - instruction
+  - output_path
+  properties:
+    input_audio_path:
+      type: string
+    instruction:
+      type: string
+      minLength: 1
+    output_path:
+      type: string
+    gen_seconds:
+      type: number
+      exclusiveMinimum: 0
+output_schema:
+  type: object
+  required:
+  - output_audio_path
+  - source_sha256
+  - output_sha256
+  properties:
+    output_audio_path:
+      type: string
+    source_sha256:
+      type: string
+    output_sha256:
+      type: string
+defaults: {}
+validation:
+  input_preparation:
+    source_channels: one_or_more
+    multichannel_policy: arithmetic_mean_to_mono
+    output_channels: 1
+    source_mutation: forbidden
+  prompt_enhancement:
+    mode: enabled_in_standard_deployment_disable_only_for_explicit_diagnostics
+    implementation: native_AuK_PE_with_bound_scope_and_parameter_revision
+    dependencies: configured_semantic_LLM_and_ASR
+    scope: one_bound_edit_no_history_no_VAD_trimming
+    quality_authority: unknown_until_actual_output_review
+  frontend_check:
+  - Check requested acoustic change, intelligibility, content and all unedited attributes
+    on the actual output.
+  - Evaluate spatial or independent-channel preservation when required by the instruction;
+    stereo input alone does not create an additional preservation requirement.
+examples: []

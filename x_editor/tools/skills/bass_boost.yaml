@@ -1,0 +1,57 @@
+skill_id: bass_boost
+display_name: 低频搁架均衡（Bass Boost）
+source_mcp: ffmpeg
+tool_names: [bass_boost]
+
+description: 使用低架滤波器增强或削减低频，快速改变声音的温暖度和厚重感。
+detailed_capability: |
+  低架滤波器作用于设定频率以下的所有频段。
+  性别转换中的典型用途：
+  - 女转男时，pitch_shift 降低了基频但保留了女性 formant 特征，
+    通过 bass_boost 增强 80-250Hz 可以模拟男性胸腔共鸣，弥补 formant 差异。
+
+dimensions: [timbre]
+
+parameters:
+  - name: audio_path
+    type: string
+    required: true
+    description: 输入音频文件路径
+  - name: gain_db
+    type: number
+    required: true
+    description: 增益量 (dB)
+    constraints: "-20.0 ~ +20.0"
+  - name: frequency
+    type: integer
+    required: false
+    default: 100
+    description: 搁架转折频率 (Hz)
+    constraints: "20 ~ 1000"
+  - name: output_path
+    type: string
+    required: false
+    default: auto
+    description: 输出文件路径
+
+output:
+  type: audio_file
+  description: 低频处理后的音频文件
+
+execution_constraints:
+  should_run_before: [loudnorm, acompressor]
+  should_run_after: [pitch_shift_rubberband]
+  mutually_exclusive_with: []
+  can_repeat: false
+
+examples:
+  - scenario: "女转男后增强胸腔感"
+    parameters:
+      gain_db: 4.0
+      frequency: 150
+    expected_outcome: "150Hz 以下提升，声音更有男性胸腔共鸣"
+
+instruction_mapping:
+  "gender.source:female && gender.target:male": "pitch_shift 后推荐配合使用，gain_db=+3~+6, frequency=100~200"
+  "timbre_qualities.added contains 'warm'": "gain_db=+2~+4, frequency=100~200"
+  "timbre_qualities.added contains 'full'": "gain_db=+3~+5, frequency=80~150"

@@ -1,0 +1,165 @@
+{
+  "schema_version": "x-edit.pipeline-validation/v1",
+  "date": "2026-10-11",
+  "pipeline_commit": "2111b99c72258cfefb1920fc1195e6141379236d",
+  "scope": "Migration verification using reused model assets and compatible locked environments; not a fresh complete installation or benchmark",
+  "source_check": {
+    "commit": "2111b99c72258cfefb1920fc1195e6141379236d",
+    "checked_tools": [
+      "f5-tts",
+      "index-tts",
+      "qwen3-asr",
+      "qwen3-tts",
+      "seed-vc",
+      "ted-tts"
+    ],
+    "official_sources_clean": true,
+    "inference_verified": false
+  },
+  "contracts": {
+    "passed": true,
+    "checks": [
+      "text_edit: exact declared fields",
+      "pitch_rate_edit: exact declared fields",
+      "emotion_style_edit: exact declared fields",
+      "emotion type/level preserved",
+      "pause_edit: exact declared fields",
+      "pause strategy alias preserved",
+      "continuous alpha not quantized",
+      "SeedVC deterministic default passed explicitly",
+      "artifact root accepted",
+      "artifact escape rejected: output.wav",
+      "artifact escape rejected: escape.wav"
+    ],
+    "inference_verified": false
+  },
+  "dsp": {
+    "passed": true,
+    "mode": "dsp",
+    "checks": [
+      {
+        "request": "rate",
+        "service": "rate",
+        "seconds": 0.07931495644152164,
+        "response_sha256": "e912ad380fe964a47bfeb7cbff619b1584d38e8f2362f19a8c77361fa81e9f24"
+      },
+      {
+        "request": "volume",
+        "service": "volume",
+        "seconds": 0.06795211974531412,
+        "response_sha256": "d774c58d6e503fa51766b9d5c0e14b9386b60441f622b73236065d2a6f580f72"
+      },
+      {
+        "duration_ratio": 0.8,
+        "peak_dbfs": -11.999946665424783
+      }
+    ],
+    "human_quality_verified": false,
+    "all_capabilities_verified": false
+  },
+  "backends": {
+    "rows": [
+      {
+        "backend": "indextts",
+        "passed": true,
+        "frames": 52224,
+        "sample_rate": 22050,
+        "sha256": "c859978fb276db959b972a95b4d0a6d68616e1ac8427fdb17ddca1ae0820360e",
+        "seconds": 7.903598517179489
+      },
+      {
+        "backend": "seed_vc",
+        "passed": true,
+        "frames": 54016,
+        "sample_rate": 22050,
+        "sha256": "db4a9208c7b55c116ab7bfe6bfe38a56162c9fb0ff80336ff563a5b807cea8fd",
+        "seconds": 36.38394556380808
+      }
+    ],
+    "scope": "New upstream entrypoints, existing locked envs and model snapshots, new GPU processes",
+    "human_quality_verified": false
+  },
+  "pipeline_operations": [
+    {
+      "operation": "text_edit",
+      "passed": true,
+      "frames": 58566,
+      "sample_rate": 24000,
+      "seconds": 6.8806170001626015
+    },
+    {
+      "operation": "pitch_rate_edit",
+      "passed": true,
+      "frames": 53973,
+      "sample_rate": 24000,
+      "seconds": 4.997974721714854
+    },
+    {
+      "operation": "emotion_style_edit",
+      "passed": true,
+      "frames": 78165,
+      "sample_rate": 24000,
+      "seconds": 21.69816206768155
+    },
+    {
+      "operation": "pause_edit",
+      "passed": true,
+      "frames": 70965,
+      "sample_rate": 24000,
+      "seconds": 0.29983630031347275
+    }
+  ],
+  "agent_forward": [
+    {
+      "case": "text",
+      "delivered": true,
+      "duration_seconds": 2.44025,
+      "sample_rate": 24000,
+      "frames": 58566,
+      "finite": true,
+      "sha256": "2d8c02909c7b7de6c8f85a8472db22c1cd66973e0c8839dd97658c0d100ed685",
+      "wall_seconds": 83.76139714941382
+    },
+    {
+      "case": "gain_rate",
+      "delivered": true,
+      "duration_seconds": 1.9655,
+      "sample_rate": 24000,
+      "frames": 47172,
+      "finite": true,
+      "sha256": "f3d2236d05986616171628ff5dff37eb40e8aaaafc2c6cffb6ec3a915d49f9d6",
+      "wall_seconds": 137.95140659809113
+    },
+    {
+      "case": "reference_voice",
+      "delivered": true,
+      "duration_seconds": 2.449705215419501,
+      "sample_rate": 22050,
+      "frames": 54016,
+      "finite": true,
+      "sha256": "db4a9208c7b55c116ab7bfe6bfe38a56162c9fb0ff80336ff563a5b807cea8fd",
+      "wall_seconds": 71.54745155479759
+    }
+  ],
+  "objective_checks": {
+    "text_output_asr": "The next bus will leave at six fifteen.",
+    "pause_added_seconds": 0.5
+  },
+  "limits": {
+    "human_quality_verified": false,
+    "fresh_complete_install_verified": false,
+    "benchmark_equivalence_verified": false,
+    "revision_revalidated": false,
+    "unverified_new_inference_entrypoints": [
+      "ted_tts",
+      "tts",
+      "tts_clone",
+      "asr"
+    ],
+    "existing_services_reused": [
+      "decision LLM",
+      "perception Omni",
+      "ASR"
+    ]
+  }
+}

@@ -1,0 +1,41 @@
+skill_id: acoustic_effects
+description: Apply deterministic acoustic/channel effects while preserving speech content.
+priority: 88
+selected_tools: [audio_effects]
+runtime_operations: [audio_effects, artifact_ops.speaker_scoped_edit]
+positive_signals:
+  - telephone
+  - phone call
+  - over the phone
+  - old-fashioned radio
+  - radio
+  - underwater
+  - strong wind
+  - muffled
+  - heavy wall
+  - whisper style
+  - whispering voice
+  - shouting style
+  - yelling style
+  - acoustic channel condition
+  - same channel condition
+required_evidence: [input_audio, reference_audio_path_for_channel_match_when_requested]
+workflow:
+  - audio_effects.apply_preset_or_reference_match
+  - for_reference_channel_match_use_audio_effects_dsp_estimation_not_prompt_only_memory
+  - use_whisper_style_or_shouting_style_presets_for_vocal_effort_when_no_dedicated_generative_tool_is_available
+  - for_speaker_scoped_effects_select_target_spans_then_apply_audio_effects_per_span_and_stitch_back
+rationale: >
+  Use deterministic DSP effects for channel/environment rendering and current
+  best-effort whisper/shouting vocal-effort approximation. These requests are
+  not speech enhancement, room-only reverb, or speaker timbre conversion. When
+  the request scopes the effect to a speaker, role, gender, or segment, use
+  artifact_ops.speaker_scoped_edit with audio_effects as the nested edit
+  operation instead of applying the effect globally.
+guardrails:
+  - Use speech_enhancement for cleanup/removal of noise/reverb instead of adding acoustic effects.
+  - Use spatial_reverb only for room/hall/cathedral/bathroom reverberation requests.
+  - Use seed_vc only for speaker timbre transfer; it cannot match acoustic channel conditions.
+  - Whisper/shouting presets are deterministic approximations; use a dedicated generative vocal-effort model if one becomes available.
+  - match_channel_reference requires a concrete reference_audio_path such as audio2 and estimates spectral balance, rolloff, distortion/compression, noise bed, and short reflection proxies from that reference.
+  - Do not route "same acoustic channel condition as audio2" to emotion_style_edit; focus on audio2 recording/channel environment and use audio_effects with preset match_channel_reference.

@@ -1,0 +1,1193 @@
+{
+  "schema_version": "x-edit.deployment/v1",
+  "environments": {
+    "edit_cpu": {
+      "python": "3.10.12",
+      "lock": "deployment/requirements/edit_cpu.lock"
+    },
+    "edit_gpu": {
+      "python": "3.10.12",
+      "lock": "deployment/requirements/edit_gpu.lock"
+    },
+    "indextts": {
+      "python": "3.10.12",
+      "lock": "deployment/requirements/indextts.lock"
+    },
+    "model_server": {
+      "python": "3.10.12",
+      "lock": "deployment/requirements/model_server.lock",
+      "metadata_exceptions": [
+        {
+          "pattern": "The package `compressed-tensors` requires `transformers<5\\.0\\.0`, but `5\\.5\\.0` is installed",
+          "reason": "Verified original BF16 serving snapshot; no package/code substitution. Quantized compressed models remain unqualified."
+        },
+        {
+          "pattern": "The package `vllm` requires `transformers>=4\\.56\\.0,<5`, but `5\\.5\\.0` is installed",
+          "reason": "Verified original Qwen serving environment uses Transformers 5.5.0; retain exact versions and record this metadata incompatibility. New GPU host serving still requires actual inference qualification."
+        }
+      ]
+    },
+    "flexsed": {
+      "python": "3.11.15",
+      "lock": "deployment/requirements/flexsed.lock",
+      "editable_sources": []
+    },
+    "sedicow_asr": {
+      "python": "3.11.15",
+      "lock": "deployment/requirements/sedicow_asr.lock",
+      "editable_sources": [
+        "third_party/src/DiariZen/pyannote-audio",
+        "third_party/src/DiariZen"
+      ]
+    },
+    "moss_transcribe_diarize": {
+      "python": "3.11.15",
+      "lock": "deployment/requirements/moss_transcribe_diarize.lock",
+      "editable_sources": [
+        "third_party/src/MOSS-Transcribe-Diarize"
+      ]
+    },
+    "auk": {
+      "python": "3.10.12",
+      "lock": "deployment/requirements/auk.lock",
+      "editable_sources": [
+        "third_party/src/AuK"
+      ]
+    },
+    "asr": {
+      "python": "3.10.12",
+      "lock": "deployment/requirements/asr.lock"
+    },
+    "clearer_voice_studio": {
+      "python": "3.11.15",
+      "lock": "deployment/requirements/clearer_voice_studio.lock"
+    },
+    "audio_separator_roformer": {
+      "python": "3.11.15",
+      "lock": "deployment/requirements/audio_separator_roformer.lock"
+    }
+  },
+  "services": {
+    "asr": {
+      "port": 8010,
+      "environment": "asr",
+      "entry": [
+        "{root}/deployment/asr_service.py"
+      ],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "{port:asr}",
+        "--model",
+        "{model:Qwen/Qwen3-ASR-1.7B}",
+        "--device",
+        "cuda:0",
+        "--dtype",
+        "bfloat16",
+        "--max-new-tokens",
+        "512"
+      ],
+      "depends_on": [],
+      "models": [
+        "Qwen/Qwen3-ASR-1.7B"
+      ],
+      "gpu": "4",
+      "group": "speech",
+      "health_path": "/health",
+      "timeout_seconds": 900,
+      "env": {
+        "ARTIFACT_DIR": "{data}/artifacts/pipeline"
+      },
+      "pythonpath": [
+        "{root}/third_party/dots_tts_edit/tools/qwen3-asr/upstream"
+      ],
+      "repositories": [],
+      "pipeline_tools": [
+        "qwen3-asr"
+      ],
+      "pipeline_required": true
+    },
+    "aligner_backend": {
+      "port": 8028,
+      "environment": "edit_gpu",
+      "entry": [
+        "{root}/third_party/dots_tts_edit/tools/qwen3-asr/forced_alignment_service.py"
+      ],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "{port:aligner_backend}",
+        "--model",
+        "{model:Qwen/Qwen3-ForcedAligner-0.6B}",
+        "--device-map",
+        "cuda:0"
+      ],
+      "depends_on": [],
+      "models": [
+        "Qwen/Qwen3-ForcedAligner-0.6B"
+      ],
+      "gpu": "4",
+      "group": "speech",
+      "health_path": "/health",
+      "timeout_seconds": 900,
+      "env": {
+        "ARTIFACT_DIR": "{data}/artifacts/pipeline"
+      },
+      "pythonpath": [
+        "{root}/third_party/dots_tts_edit/tools/qwen3-asr",
+        "{root}/third_party/dots_tts_edit"
+      ],
+      "repositories": [],
+      "pipeline_tools": [
+        "qwen3-asr"
+      ],
+      "pipeline_required": true
+    },
+    "aligner": {
+      "port": 8029,
+      "environment": "edit_cpu",
+      "entry": [
+        "{root}/third_party/dots_tts_edit/tools/aligner-service/api_service.py"
+      ],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "{port:aligner}",
+        "--ctc-url",
+        "",
+        "--qwen3-url",
+        "{url:aligner_backend}"
+      ],
+      "depends_on": [
+        "aligner_backend"
+      ],
+      "models": [],
+      "gpu": null,
+      "group": "speech",
+      "health_path": "/health",
+      "timeout_seconds": 900,
+      "env": {
+        "ARTIFACT_DIR": "{data}/artifacts/pipeline"
+      },
+      "pythonpath": [
+        "{root}/third_party/dots_tts_edit"
+      ],
+      "repositories": [],
+      "pipeline_tools": [],
+      "pipeline_required": true
+    },
+    "f5": {
+      "port": 8001,
+      "environment": null,
+      "entry": [],
+      "args": [],
+      "depends_on": [],
+      "models": [
+        "SWivid/F5-TTS",
+        "charactr/vocos-mel-24khz"
+      ],
+      "gpu": null,
+      "group": "speech",
+      "health_path": "/health",
+      "timeout_seconds": 900,
+      "env": {},
+      "pythonpath": [],
+      "repositories": [],
+      "pipeline_tools": [],
+      "pipeline_required": false,
+      "external_only": true,
+      "external_pipeline_tools": [
+        "f5-tts"
+      ]
+    },
+    "indextts": {
+      "port": 9002,
+      "environment": "indextts",
+      "entry": [
+        "{root}/third_party/dots_tts_edit/tools/index-tts/api_service.py"
+      ],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "{port:indextts}",
+        "--model-dir",
+        "{model:IndexTeam/IndexTTS-2}",
+        "--cfg-path",
+        "{model:IndexTeam/IndexTTS-2}/config.yaml",
+        "--device",
+        "cuda"
+      ],
+      "depends_on": [],
+      "models": [
+        "IndexTeam/IndexTTS-2",
+        "facebook/w2v-bert-2.0",
+        "amphion/MaskGCT",
+        "funasr/campplus",
+        "nvidia/bigvgan_v2_22khz_80band_256x"
+      ],
+      "gpu": "6",
+      "group": "speech",
+      "health_path": "/health",
+      "timeout_seconds": 900,
+      "env": {
+        "ARTIFACT_DIR": "{data}/artifacts/pipeline",
+        "INDEXTTS_RUNTIME_ROOT": "{data}/cache/indextts/worktrees"
+      },
+      "pythonpath": [
+        "{root}/third_party/dots_tts_edit"
+      ],
+      "repositories": [],
+      "cwd": "{data}",
+      "pipeline_tools": [
+        "index-tts"
+      ],
+      "pipeline_required": true
+    },
+    "tts": {
+      "port": 8017,
+      "environment": "edit_gpu",
+      "entry": [
+        "-m",
+        "qwen3_tts_service.api_service"
+      ],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "{port:tts}",
+        "--no-base",
+        "--no-tokenizer",
+        "--custom-voice-path",
+        "{model:Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice}"
+      ],
+      "depends_on": [],
+      "models": [
+        "Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice"
+      ],
+      "gpu": "5",
+      "group": "speech",
+      "health_path": "/health",
+      "timeout_seconds": 900,
+      "env": {
+        "ARTIFACT_DIR": "{data}/artifacts/pipeline"
+      },
+      "pythonpath": [
+        "{root}/third_party/dots_tts_edit/tools/qwen3-tts",
+        "{root}/third_party/dots_tts_edit"
+      ],
+      "repositories": [],
+      "pipeline_tools": [
+        "qwen3-tts"
+      ],
+      "pipeline_required": true
+    },
+    "tts_clone": {
+      "port": 8019,
+      "environment": "edit_gpu",
+      "entry": [
+        "-m",
+        "qwen3_tts_service.api_service"
+      ],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "{port:tts_clone}",
+        "--no-custom-voice",
+        "--base-path",
+        "{model:Qwen/Qwen3-TTS-12Hz-1.7B-Base}",
+        "--tokenizer-path",
+        "{model:Qwen/Qwen3-TTS-Tokenizer-12Hz}"
+      ],
+      "depends_on": [],
+      "models": [
+        "Qwen/Qwen3-TTS-12Hz-1.7B-Base",
+        "Qwen/Qwen3-TTS-Tokenizer-12Hz"
+      ],
+      "gpu": "5",
+      "group": "speech",
+      "health_path": "/health",
+      "timeout_seconds": 900,
+      "env": {
+        "ARTIFACT_DIR": "{data}/artifacts/pipeline"
+      },
+      "pythonpath": [
+        "{root}/third_party/dots_tts_edit/tools/qwen3-tts",
+        "{root}/third_party/dots_tts_edit"
+      ],
+      "repositories": [],
+      "pipeline_tools": [
+        "qwen3-tts"
+      ],
+      "pipeline_required": true
+    },
+    "seed_vc": {
+      "port": 8003,
+      "environment": "edit_gpu",
+      "entry": [
+        "{root}/third_party/dots_tts_edit/tools/seed-vc/seed_vc_service.py"
+      ],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "{port:seed_vc}",
+        "--device",
+        "cuda"
+      ],
+      "depends_on": [],
+      "models": [
+        "Plachta/Seed-VC",
+        "funasr/campplus",
+        "nvidia/bigvgan_v2_22khz_80band_256x",
+        "openai/whisper-small"
+      ],
+      "gpu": "6",
+      "group": "speech",
+      "health_path": "/health",
+      "timeout_seconds": 900,
+      "env": {
+        "ARTIFACT_DIR": "{data}/artifacts/pipeline"
+      },
+      "pythonpath": [
+        "{root}/third_party/dots_tts_edit"
+      ],
+      "cwd": "{data}/working/seed_vc",
+      "repositories": [],
+      "pipeline_tools": [
+        "seed-vc"
+      ],
+      "pipeline_required": true,
+      "asset_links": {
+        "working/seed_vc/checkpoints": "{data}/cache/huggingface/hub"
+      }
+    },
+    "vad": {
+      "port": 8005,
+      "environment": "edit_cpu",
+      "entry": [
+        "{root}/third_party/dots_tts_edit/tools/vad-service/api_service.py"
+      ],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "{port:vad}"
+      ],
+      "depends_on": [],
+      "models": [],
+      "gpu": null,
+      "group": "cpu",
+      "health_path": "/health",
+      "timeout_seconds": 900,
+      "env": {
+        "ARTIFACT_DIR": "{data}/artifacts/pipeline"
+      },
+      "pythonpath": [
+        "{root}/third_party/dots_tts_edit"
+      ],
+      "repositories": [],
+      "pipeline_tools": [],
+      "pipeline_required": true
+    },
+    "volume": {
+      "port": 8006,
+      "environment": "edit_cpu",
+      "entry": [
+        "-m",
+        "tools.volume_normalizer.api_service"
+      ],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "{port:volume}"
+      ],
+      "depends_on": [],
+      "models": [],
+      "gpu": null,
+      "group": "cpu",
+      "health_path": "/health",
+      "timeout_seconds": 900,
+      "env": {
+        "ARTIFACT_DIR": "{data}/artifacts/pipeline"
+      },
+      "pythonpath": [
+        "{root}/third_party/dots_tts_edit"
+      ],
+      "repositories": [],
+      "pipeline_tools": [],
+      "pipeline_required": true
+    },
+    "rate": {
+      "port": 8004,
+      "environment": "edit_cpu",
+      "entry": [
+        "-m",
+        "tools.speech_rate_conversion.api_service"
+      ],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "{port:rate}",
+        "--qwen3tts-url",
+        "{url:tts_clone}",
+        "--indextts-url",
+        "{url:indextts}"
+      ],
+      "depends_on": [],
+      "models": [],
+      "gpu": null,
+      "group": "cpu",
+      "health_path": "/health",
+      "timeout_seconds": 900,
+      "env": {
+        "ARTIFACT_DIR": "{data}/artifacts/pipeline"
+      },
+      "pythonpath": [
+        "{root}/third_party/dots_tts_edit"
+      ],
+      "repositories": [],
+      "pipeline_tools": [],
+      "pipeline_required": true
+    },
+    "pitch": {
+      "port": 8927,
+      "environment": "edit_cpu",
+      "entry": [
+        "-m",
+        "tools.pitch_conversion.api_service"
+      ],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "{port:pitch}",
+        "--qwen3tts-url",
+        "{url:tts_clone}",
+        "--indextts-url",
+        "{url:indextts}"
+      ],
+      "depends_on": [],
+      "models": [],
+      "gpu": null,
+      "group": "cpu",
+      "health_path": "/health",
+      "timeout_seconds": 900,
+      "env": {
+        "ARTIFACT_DIR": "{data}/artifacts/pipeline"
+      },
+      "pythonpath": [
+        "{root}/third_party/dots_tts_edit"
+      ],
+      "repositories": [],
+      "pipeline_tools": [],
+      "pipeline_required": true
+    },
+    "smoother": {
+      "port": 8018,
+      "environment": "edit_cpu",
+      "entry": [
+        "{root}/third_party/dots_tts_edit/tools/boundary-pause-smoother/api_service.py"
+      ],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "{port:smoother}",
+        "--aligner-url",
+        "{url:aligner}",
+        "--f5tts-url",
+        "{url:f5}",
+        "--vad-url",
+        "{url:vad}"
+      ],
+      "depends_on": [
+        "aligner",
+        "f5",
+        "vad"
+      ],
+      "models": [],
+      "gpu": null,
+      "group": "speech",
+      "health_path": "/health",
+      "timeout_seconds": 900,
+      "env": {
+        "ARTIFACT_DIR": "{data}/artifacts/pipeline"
+      },
+      "pythonpath": [
+        "{root}/third_party/dots_tts_edit"
+      ],
+      "repositories": [],
+      "pipeline_tools": [],
+      "pipeline_required": true
+    },
+    "assembly": {
+      "port": 8021,
+      "environment": "edit_cpu",
+      "entry": [
+        "{root}/third_party/dots_tts_edit/tools/audio-assembly/api_service.py"
+      ],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "{port:assembly}",
+        "--aligner-url",
+        "{url:aligner}",
+        "--smoother-url",
+        "{url:smoother}"
+      ],
+      "depends_on": [
+        "aligner",
+        "smoother"
+      ],
+      "models": [],
+      "gpu": null,
+      "group": "speech",
+      "health_path": "/health",
+      "timeout_seconds": 900,
+      "env": {
+        "ARTIFACT_DIR": "{data}/artifacts/pipeline"
+      },
+      "pythonpath": [
+        "{root}/third_party/dots_tts_edit"
+      ],
+      "repositories": [],
+      "pipeline_tools": [],
+      "pipeline_required": true
+    },
+    "edit_text": {
+      "port": 8035,
+      "environment": "edit_cpu",
+      "entry": [
+        "{root}/deployment/pipeline_service.py",
+        "text"
+      ],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "{port:edit_text}",
+        "--output-dir",
+        "services/text",
+        "--aligner-url",
+        "{url:aligner}",
+        "--f5-url",
+        "{url:f5}",
+        "--asr-url",
+        "{url:asr}",
+        "--aligner-backend",
+        "qwen3"
+      ],
+      "depends_on": [
+        "aligner",
+        "f5"
+      ],
+      "models": [],
+      "gpu": null,
+      "group": "speech",
+      "health_path": "/health",
+      "timeout_seconds": 900,
+      "env": {
+        "ARTIFACT_DIR": "{data}/artifacts/pipeline"
+      },
+      "pythonpath": [
+        "{root}/third_party/dots_tts_edit"
+      ],
+      "repositories": [],
+      "pipeline_tools": [],
+      "pipeline_required": true
+    },
+    "edit_prosody": {
+      "port": 8036,
+      "environment": "edit_cpu",
+      "entry": [
+        "{root}/deployment/pipeline_service.py",
+        "prosody"
+      ],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "{port:edit_prosody}",
+        "--output-dir",
+        "services/prosody",
+        "--aligner-url",
+        "{url:aligner}",
+        "--pitch-url",
+        "{url:pitch}",
+        "--rate-url",
+        "{url:rate}",
+        "--f5-url",
+        "{url:f5}",
+        "--asr-url",
+        "{url:asr}"
+      ],
+      "depends_on": [
+        "aligner",
+        "f5",
+        "pitch",
+        "rate"
+      ],
+      "models": [],
+      "gpu": null,
+      "group": "speech",
+      "health_path": "/health",
+      "timeout_seconds": 900,
+      "env": {
+        "ARTIFACT_DIR": "{data}/artifacts/pipeline"
+      },
+      "pythonpath": [
+        "{root}/third_party/dots_tts_edit"
+      ],
+      "repositories": [],
+      "pipeline_tools": [],
+      "pipeline_required": true
+    },
+    "edit_emotion": {
+      "port": 8037,
+      "environment": "edit_cpu",
+      "entry": [
+        "{root}/deployment/pipeline_service.py",
+        "emotion"
+      ],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "{port:edit_emotion}",
+        "--output-dir",
+        "services/emotion",
+        "--indextts-url",
+        "{url:indextts}",
+        "--f5-url",
+        "{url:f5}",
+        "--vad-url",
+        "{url:vad}",
+        "--aligner-url",
+        "{url:aligner}",
+        "--smoother-url",
+        "{url:smoother}",
+        "--assembly-url",
+        "{url:assembly}",
+        "--asr-url",
+        "{url:asr}",
+        "--aligner-backend",
+        "qwen3",
+        "--ted-tts-url",
+        "{url:ted_tts}"
+      ],
+      "depends_on": [
+        "indextts",
+        "aligner",
+        "f5",
+        "assembly",
+        "vad",
+        "smoother"
+      ],
+      "models": [],
+      "gpu": null,
+      "group": "speech",
+      "health_path": "/health",
+      "timeout_seconds": 900,
+      "env": {
+        "ARTIFACT_DIR": "{data}/artifacts/pipeline"
+      },
+      "pythonpath": [
+        "{root}/third_party/dots_tts_edit"
+      ],
+      "repositories": [],
+      "pipeline_tools": [],
+      "pipeline_required": true
+    },
+    "edit_pause": {
+      "port": 8038,
+      "environment": "edit_cpu",
+      "entry": [
+        "{root}/deployment/pipeline_service.py",
+        "pause"
+      ],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "{port:edit_pause}",
+        "--output-dir",
+        "services/pause",
+        "--aligner-url",
+        "{url:aligner}",
+        "--smoother-url",
+        "{url:smoother}",
+        "--asr-url",
+        "{url:asr}"
+      ],
+      "depends_on": [
+        "aligner",
+        "smoother"
+      ],
+      "models": [],
+      "gpu": null,
+      "group": "speech",
+      "health_path": "/health",
+      "timeout_seconds": 900,
+      "env": {
+        "ARTIFACT_DIR": "{data}/artifacts/pipeline"
+      },
+      "pythonpath": [
+        "{root}/third_party/dots_tts_edit"
+      ],
+      "repositories": [],
+      "pipeline_tools": [],
+      "pipeline_required": true
+    },
+    "planner": {
+      "port": 8040,
+      "environment": "model_server",
+      "entry": [
+        "-m",
+        "vllm.entrypoints.cli.main",
+        "serve",
+        "{model:Qwen/Qwen3.8-27B}"
+      ],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "{port:planner}",
+        "--served-model-name",
+        "Qwen/Qwen3.8-27B",
+        "--tensor-parallel-size",
+        "4",
+        "--max-model-len",
+        "262144",
+        "--max-num-seqs",
+        "8",
+        "--gpu-memory-utilization",
+        "0.58",
+        "--enable-prefix-caching",
+        "--trust-remote-code",
+        "--reasoning-parser",
+        "qwen3",
+        "--enable-auto-tool-choice",
+        "--tool-call-parser",
+        "qwen3_coder",
+        "--enforce-eager",
+        "--disable-custom-all-reduce",
+        "--gdn-prefill-backend",
+        "triton"
+      ],
+      "depends_on": [],
+      "models": [
+        "Qwen/Qwen3.8-27B"
+      ],
+      "gpu": "0,1,2,3",
+      "group": "models",
+      "health_path": "/health",
+      "timeout_seconds": 900,
+      "env": {
+        "ARTIFACT_DIR": "{data}/artifacts/pipeline"
+      },
+      "pythonpath": [
+        "{root}/third_party/dots_tts_edit"
+      ],
+      "repositories": [],
+      "pipeline_tools": [],
+      "pipeline_required": true
+    },
+    "omni": {
+      "port": 8011,
+      "environment": "model_server",
+      "entry": [
+        "-m",
+        "vllm.entrypoints.cli.main",
+        "serve",
+        "{model:Qwen/Qwen3-Omni-30B-A3B-Instruct}"
+      ],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "{port:omni}",
+        "--served-model-name",
+        "Qwen3Omni-Instruct",
+        "--trust-remote-code",
+        "--max-model-len",
+        "32768",
+        "--max-num-seqs",
+        "2",
+        "--gpu-memory-utilization",
+        "0.90"
+      ],
+      "depends_on": [],
+      "models": [
+        "Qwen/Qwen3-Omni-30B-A3B-Instruct"
+      ],
+      "gpu": "7",
+      "group": "models",
+      "health_path": "/health",
+      "timeout_seconds": 900,
+      "env": {
+        "ARTIFACT_DIR": "{data}/artifacts/pipeline"
+      },
+      "pythonpath": [
+        "{root}/third_party/dots_tts_edit"
+      ],
+      "repositories": [],
+      "pipeline_tools": [],
+      "pipeline_required": true
+    },
+    "flexsed": {
+      "port": 8057,
+      "environment": "flexsed",
+      "entry": [
+        "{root}/x_editor/tools/catalog/flexsed/service.py"
+      ],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "{port:flexsed}"
+      ],
+      "depends_on": [],
+      "models": [
+        "Higobeatz/FlexSED",
+        "laion/clap-htsat-unfused"
+      ],
+      "gpu": "4",
+      "group": "experts",
+      "health_path": "/health",
+      "timeout_seconds": 1200,
+      "env": {
+        "FLEXSED_REPO_DIR": "{root}/third_party/src/FlexSED",
+        "FLEXSED_CKPT_PATH": "{model:Higobeatz/FlexSED}/ckpts/flexsed_as.pt",
+        "FLEXSED_DEVICE": "cuda:0"
+      },
+      "pythonpath": [
+        "{root}",
+        "{root}/third_party/src/FlexSED"
+      ],
+      "cwd": "{root}/x_editor/tools/catalog/flexsed",
+      "repositories": [
+        "FlexSED"
+      ]
+    },
+    "diarization": {
+      "port": 8041,
+      "environment": "sedicow_asr",
+      "entry": ["{root}/x_editor/tools/catalog/diarization/service.py"],
+      "args": ["--host", "127.0.0.1", "--port", "{port:diarization}"],
+      "depends_on": [],
+      "models": ["BUT-FIT/diarizen-wavlm-large-s80-md-v2", "pyannote/wespeaker-voxceleb-resnet34-LM"],
+      "gpu": "4",
+      "group": "experts",
+      "health_path": "/health",
+      "timeout_seconds": 1200,
+      "env": {"TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD": "1"},
+      "pythonpath": ["{root}/third_party/src/DiariZen"],
+      "repositories": ["DiariZen"]
+    },
+    "sedicow": {
+      "port": 8046,
+      "environment": "sedicow_asr",
+      "entry": [
+        "{root}/x_editor/tools/catalog/sedicow_asr/service.py"
+      ],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "{port:sedicow}"
+      ],
+      "depends_on": [],
+      "models": [
+        "BUT-FIT/SE-DiCoW",
+        "BUT-FIT/diarizen-wavlm-large-s80-md-v2",
+        "pyannote/wespeaker-voxceleb-resnet34-LM"
+      ],
+      "gpu": "4",
+      "group": "experts",
+      "health_path": "/health",
+      "timeout_seconds": 1200,
+      "env": {
+        "SEDICOW_REPO": "{root}/third_party/src/DiCoW",
+        "SEDICOW_DICOW_MODEL": "{model:BUT-FIT/SE-DiCoW}",
+        "SEDICOW_DIARIZATION_MODEL": "BUT-FIT/diarizen-wavlm-large-s80-md-v2",
+        "SEDICOW_DIARIZATION_CACHE_DIR": "{data}/cache/huggingface/hub",
+        "TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD": "1",
+        "SEDICOW_DIARIZEN_REPO": "{root}/third_party/src/DiariZen",
+        "SEDICOW_INFERENCE_PYTHON": "{python:sedicow}",
+        "SEDICOW_HF_MODULES_CACHE": "{data}/cache/huggingface/modules"
+      },
+      "pythonpath": [
+        "{root}",
+        "{root}/third_party/src/DiCoW",
+        "{root}/third_party/src/DiariZen"
+      ],
+      "cwd": "{root}/x_editor/tools/catalog/sedicow_asr",
+      "repositories": [
+        "DiariZen",
+        "DiCoW"
+      ]
+    },
+    "moss": {
+      "port": 8048,
+      "environment": "moss_transcribe_diarize",
+      "entry": [
+        "{root}/x_editor/tools/catalog/moss_transcribe_diarize/service.py"
+      ],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "{port:moss}"
+      ],
+      "depends_on": [],
+      "models": [
+        "OpenMOSS-Team/MOSS-Transcribe-Diarize"
+      ],
+      "gpu": "4",
+      "group": "experts",
+      "health_path": "/health",
+      "timeout_seconds": 1200,
+      "env": {
+        "MOSS_REPO": "{root}/third_party/src/MOSS-Transcribe-Diarize",
+        "MOSS_MODEL_ID": "{model:OpenMOSS-Team/MOSS-Transcribe-Diarize}"
+      },
+      "pythonpath": [
+        "{root}",
+        "{root}/third_party/src/MOSS-Transcribe-Diarize"
+      ],
+      "cwd": "{root}/x_editor/tools/catalog/moss_transcribe_diarize",
+      "repositories": [
+        "MOSS-Transcribe-Diarize"
+      ]
+    },
+    "auk": {
+      "port": 8065,
+      "environment": "auk",
+      "entry": [
+        "{root}/x_editor/tools/catalog/auk/service.py"
+      ],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "{port:auk}",
+        "--config",
+        "{model:tencent/AuK}/config.yaml",
+        "--checkpoint",
+        "{model:tencent/AuK}/auk_base.safetensors",
+        "--qwen-path",
+        "{model:Qwen/Qwen2.5-Omni-3B}",
+        "--upstream-revision",
+        "d9f30ffe4231dbc90b48cc83a35d310fece0b060",
+        "--device",
+        "cuda:0",
+        "--encoder-device",
+        "cuda:1"
+      ],
+      "depends_on": [],
+      "models": [
+        "tencent/AuK",
+        "Qwen/Qwen2.5-Omni-3B"
+      ],
+      "gpu": "5,6",
+      "group": "editing",
+      "health_path": "/health",
+      "timeout_seconds": 1200,
+      "env": {},
+      "pythonpath": [
+        "{root}",
+        "{root}/third_party/src/AuK"
+      ],
+      "cwd": "{root}/x_editor/tools/catalog/auk",
+      "repositories": [
+        "AuK"
+      ]
+    },
+    "enhancement": {
+      "port": 8027,
+      "environment": "clearer_voice_studio",
+      "entry": [
+        "-m",
+        "x_editor.tools.catalog.clearer_voice_studio.service"
+      ],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "{port:enhancement}"
+      ],
+      "depends_on": [],
+      "models": [
+        "alibabasglab/MossFormer2_SE_48K"
+      ],
+      "gpu": "1",
+      "group": "optional",
+      "health_path": "/health",
+      "timeout_seconds": 1200,
+      "env": {
+        "X_EDITOR_CLEARVOICE_ALLOW_COPY_FALLBACK": "0"
+      },
+      "pythonpath": [
+        "{root}"
+      ],
+      "cwd": "{data}",
+      "asset_links": {
+        "checkpoints/MossFormer2_SE_48K": "{model:alibabasglab/MossFormer2_SE_48K}"
+      },
+      "repositories": []
+    },
+    "separation": {
+      "port": 8042,
+      "environment": "audio_separator_roformer",
+      "entry": [
+        "-m",
+        "x_editor.tools.catalog.audio_separator_roformer.service"
+      ],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "{port:separation}"
+      ],
+      "depends_on": [],
+      "models": [
+        "Politrees/UVR_resources"
+      ],
+      "gpu": "1",
+      "group": "optional",
+      "health_path": "/health",
+      "timeout_seconds": 1200,
+      "env": {
+        "X_EDITOR_AUDIO_SEPARATOR_MODEL_DIR": "{data}/models/roformer"
+      },
+      "pythonpath": [
+        "{root}"
+      ],
+      "cwd": "{data}",
+      "asset_links": {
+        "models/roformer/model_bs_roformer_ep_317_sdr_12.9755.ckpt": "{model:Politrees/UVR_resources}/models/Roformer/BandSplit/model_bs_roformer_ep_317_sdr_12.9755.ckpt",
+        "models/roformer/vocals_mel_band_roformer.ckpt": "{model:Politrees/UVR_resources}/models/Roformer/MelBand/vocals_mel_band_roformer.ckpt",
+        "models/roformer/mdx_model_data.json": "{root}/third_party/service_assets/roformer/mdx_model_data.json",
+        "models/roformer/vocals_mel_band_roformer.yaml": "{root}/third_party/service_assets/roformer/vocals_mel_band_roformer.yaml",
+        "models/roformer/download_checks.json": "{root}/third_party/service_assets/roformer/download_checks.json",
+        "models/roformer/vr_model_data.json": "{root}/third_party/service_assets/roformer/vr_model_data.json",
+        "models/roformer/model_bs_roformer_ep_317_sdr_12.9755.yaml": "{root}/third_party/service_assets/roformer/model_bs_roformer_ep_317_sdr_12.9755.yaml"
+      },
+      "repositories": [],
+      "service_assets": [
+        "roformer"
+      ]
+    },
+    "ted_tts": {
+      "port": 9003,
+      "environment": "indextts",
+      "entry": [
+        "{root}/third_party/dots_tts_edit/tools/ted-tts/api_service.py"
+      ],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "{port:ted_tts}",
+        "--model-dir",
+        "{model:IndexTeam/IndexTTS-2}",
+        "--cfg-path",
+        "{model:IndexTeam/IndexTTS-2}/config.yaml",
+        "--device",
+        "cuda"
+      ],
+      "depends_on": [],
+      "models": [
+        "IndexTeam/IndexTTS-2",
+        "facebook/w2v-bert-2.0",
+        "amphion/MaskGCT",
+        "funasr/campplus",
+        "nvidia/bigvgan_v2_22khz_80band_256x"
+      ],
+      "gpu": "5",
+      "group": "optional",
+      "health_path": "/health",
+      "timeout_seconds": 900,
+      "env": {
+        "ARTIFACT_DIR": "{data}/artifacts/pipeline",
+        "TED_ARTIFACT_ROOT": "{data}/cache/ted"
+      },
+      "pythonpath": [
+        "{root}/third_party/dots_tts_edit"
+      ],
+      "repositories": [],
+      "cwd": "{data}",
+      "pipeline_tools": [
+        "ted-tts"
+      ],
+      "pipeline_required": true
+    },
+    "dots_tts_edit": {
+      "port": 8049,
+      "environment": null,
+      "entry": [],
+      "args": [],
+      "depends_on": [],
+      "models": [
+        "dots-studio/dots.tts.edit"
+      ],
+      "repositories": [
+        "dots.tts"
+      ],
+      "gpu": null,
+      "group": "optional",
+      "health_path": "/health",
+      "timeout_seconds": 900,
+      "env": {},
+      "external_only": true
+    }
+  },
+  "client_bindings": {
+    "EDIT_PIPELINE_ASR_URL": "asr",
+    "EDIT_PIPELINE_ALIGNER_URL": "aligner",
+    "EDIT_PIPELINE_ALIGNER_GATEWAY_URL": "aligner",
+    "EDIT_PIPELINE_F5_TTS_URL": "f5",
+    "EDIT_PIPELINE_INDEXTTS_URL": "indextts",
+    "EDIT_PIPELINE_QWEN3TTS_URL": "tts",
+    "QWEN3_TTS_SERVICE_URL": "tts",
+    "QWEN3_TTS_CLONE_SERVICE_URL": "tts_clone",
+    "EDIT_PIPELINE_QWEN3TTS_TOKENIZER_URL": "tts_clone",
+    "SEED_VC_SERVICE_URL": "seed_vc",
+    "EDIT_PIPELINE_SPEECH_RATE_URL": "rate",
+    "EDIT_PIPELINE_PITCH_URL": "pitch",
+    "EDIT_PIPELINE_VOLUME_URL": "volume",
+    "EDIT_PIPELINE_BOUNDARY_SMOOTHER_URL": "smoother",
+    "EDIT_PIPELINE_AUDIO_ASSEMBLY_URL": "assembly",
+    "EDIT_PIPELINE_TEXT_TAGGED_URL": "edit_text",
+    "EDIT_PIPELINE_PITCH_RATE_URL": "edit_prosody",
+    "EDIT_PIPELINE_EMOTION_STYLE_URL": "edit_emotion",
+    "EDIT_PIPELINE_PAUSE_EDIT_URL": "edit_pause",
+    "XEDIT_PLANNER_URL": "planner",
+    "XEDIT_REASONER_URL": "planner",
+    "XEDIT_SEMANTIC_JUDGE_URL": "planner",
+    "XEDIT_PERCEPTION_URL": "omni",
+    "XEDIT_AUDIO_JUDGE_URL": "omni",
+    "FLEXSED_SERVICE_URL": "flexsed",
+    "X_EDITOR_SEDICOW_URL": "sedicow",
+    "X_EDITOR_DIARIZATION_URL": "diarization",
+    "AUK_SERVICE_URL": "auk",
+    "CLEARERVOICE_SERVICE_URL": "enhancement",
+    "AUDIO_SEPARATOR_ROFORMER_SERVICE_URL": "separation",
+    "X_EDITOR_MOSS_TRANSCRIBE_URL": "moss",
+    "F5_SERVICE_URL": "f5",
+    "DOTS_TTS_EDIT_URL": "dots_tts_edit"
+  },
+  "notes": [
+    "GPU placement is an 8x80GB starting configuration, not a capacity guarantee.",
+    "CPU group supports numerical DSP; it is not a reduced agent capability profile.",
+    "Services use isolated environments and explicit model maps; no old project or env discovery."
+  ]
+}

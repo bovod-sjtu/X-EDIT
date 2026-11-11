@@ -1,0 +1,180 @@
+schema_version: x-editor.operation-capability-card/v1
+operation: no_reference_voice_conversion
+semantic_effects:
+  - convert_to_described_voice
+supported_scopes:
+  - global
+  - segment
+requirements:
+  inputs:
+    - inputs.input_audio
+  evidence: []
+preservation:
+  - dimension: spoken_content
+    level: strong
+    evidence_kind: declared_design_fact
+    rationale: The composite route uses a synthetic target reference and SeedVC to preserve source spoken content.
+  - dimension: source_timeline
+    level: moderate
+    evidence_kind: declared_design_fact
+    rationale: Conversion retains source speech as the content carrier, but exact timing quality is not measured.
+quality_characteristics:
+  - dimension: described_voice_adherence
+    level: unknown
+    evidence_kind: unknown
+    rationale: Backend-specific target-voice adherence requires comparison listening review.
+  - dimension: source_content_fidelity
+    level: unknown
+    evidence_kind: unknown
+    rationale: Content preservation is a design goal but has no approved measured prior.
+artifact_risks:
+  - risk: synthetic_reference_mismatch
+    level: unknown
+    evidence_kind: unknown
+    rationale: The target reference is synthesized and may not realize the requested voice as intended.
+  - risk: chained_generation_conversion_artifact
+    level: unknown
+    evidence_kind: unknown
+    rationale: The composite generation and conversion route needs listening review.
+composition:
+  supports_batch_targets: false
+  cumulative_degradation_risk: unknown
+parameter_contract:
+  additional_parameters: reject
+  planner_selectable:
+    - path: inputs.input_audio
+      value_type: string
+      required: true
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: source_speech_audio
+    - path: params.instruction
+      value_type: string
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: target_voice_description
+    - path: params.voice_prompt
+      value_type: string
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: target_voice_prompt
+    - path: params.voice_design_backend
+      value_type: enum
+      required: false
+      enum_values:
+        - auto
+        - qwen3_tts
+      minimum: null
+      maximum: null
+      default: auto
+      semantic_role: target_reference_synthesis_backend
+    - path: params.age
+      value_type: string
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: perceived_age_description
+    - path: params.gender
+      value_type: string
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: perceived_gender_description
+    - path: params.pitch
+      value_type: string
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: perceived_pitch_description
+    - path: params.pitch_variation
+      value_type: string
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: pitch_variation_description
+    - path: params.volume
+      value_type: string
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: perceived_volume_description
+    - path: params.speaking_rate
+      value_type: string
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: speaking_rate_description
+    - path: params.emotion
+      value_type: string
+      required: false
+      enum_values: []
+      minimum: null
+      maximum: null
+      default: null
+      semantic_role: emotion_description
+    - path: params.diffusion_steps
+      value_type: integer
+      required: false
+      enum_values: []
+      minimum: 1
+      maximum: 100
+      default: 30
+      semantic_role: seed_vc_inference_steps
+    - path: params.length_adjust
+      value_type: number
+      required: false
+      enum_values: []
+      minimum: 0.5
+      maximum: 2.0
+      default: 1.0
+      semantic_role: seed_vc_output_length_ratio
+    - path: params.inference_cfg_rate
+      value_type: number
+      required: false
+      enum_values: []
+      minimum: 0.0
+      maximum: 1.0
+      default: 0.7
+      semantic_role: seed_vc_guidance_strength
+  framework_owned:
+    - params.output_path
+    - params.reference_output_path
+    - params.reference_text
+    - params.target_voice_reference_text
+    - params.service_url
+  at_least_one_of: []
+  conditional_rules: []
+limitations:
+  - This operation is a composite route that synthesizes an independent target reference before SeedVC conversion.
+  - It must not replace seed_vc when a concrete user-provided reference speaker is available.
+  - Backend quality ordering is unknown until route-comparison listening review is complete.
+  - Independence of the synthetic target reference requires semantic/runtime validation beyond the parameter condition DSL.
+provenance:
+  - source_path: x_editor/runtime/audio_plan_executor.py
+    source_kind: runtime_handler
+  - source_path: x_editor/runtime/tool_contract_verifier.py
+    source_kind: runtime_handler
+  - source_path: x_editor/planner/skills/no_reference_voice_design.yaml
+    source_kind: manual
+  - source_path: tests/test_gemini_executor_contracts.py
+    source_kind: test

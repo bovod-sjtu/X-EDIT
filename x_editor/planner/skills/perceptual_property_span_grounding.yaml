@@ -1,0 +1,49 @@
+skill_id: perceptual_property_span_grounding
+description: Robustly ground and execute edits that target speech segments by perceptual properties such as accent, language style, whisper, shout, singing, rap, laughter, channel, or semantic role.
+priority: 97
+selected_tools: [perception.semantic_span_review, perception.audio_fallback, artifact_ops]
+runtime_operations: [perception.semantic_span_review, perception.audio_fallback, artifact_ops.extract_spans, artifact_ops.remove_spans, artifact_ops.mute_spans, artifact_ops.beep_spans, artifact_ops.speaker_scoped_edit]
+positive_signals:
+  - accented speech
+  - non-native accented speech
+  - regional accented speech
+  - foreign accent
+  - dialect
+  - language style
+  - whispered voice
+  - whisper
+  - shout
+  - loud shout
+  - singing voice
+  - rap
+  - laughter
+  - crying
+  - intercom
+  - walkie-talkie
+  - phone voice
+  - internal monologue
+  - segment with
+  - speech with
+  - identify and extract
+  - locate and remove
+required_evidence: [source_text, candidate_segments, selected_spans, target_bindings, optional_perception_model_judgements]
+workflow:
+  - expose_event_cleanup_as_a_separate_high_level_objective_when_combined_with_style_or_voice_edits
+  - run_or_reuse_ts_asr_alignment_and_speaker_evidence_to_build_candidates
+  - build_candidate_segments_from_word_timestamps_speaker_segments_or_gemini_timeline_segments
+  - if_planner_supplies_explicit_time_spans_accept_both_dict_spans_and_start_end_pairs
+  - when_property_match_is_not_deterministic_call_perception_semantic_span_review_to_judge_each_candidate_segment_with_a_yes_no_rubric
+  - execute_artifact_ops_only_on_confirmed_spans_and_keep_selection_evidence
+  - bind_executor_arguments_to_selected_spans_by_stable_span_id_and_exact_start_end_leaf_paths
+rationale: Property-scoped speech edits often fail when a planner knows approximate spans but serializes them as simple [start, end] pairs, or when deterministic selectors cannot infer perceptual properties like accent or whisper from transcripts alone. The runtime should treat aligned candidate spans plus perception-model judgement as first-class grounding evidence.
+guardrails:
+  - Distinguish the candidate's location from evidence that it satisfies the requested semantic or perceptual criterion; a word occurrence alone is not a confirmed target.
+  - If multiple candidates remain plausible, request the missing distinguishing observation rather than selecting the first or repeating a timestamp inventory.
+  - Reuse existing scoped findings when they already resolve the criterion; preserve unknown status if the evidence or observation budget is insufficient.
+  - Do not fail merely because no dedicated accent/whisper/laughter detector tool is registered; use the perception fallback model over aligned candidate segments.
+  - Do not collapse "remove laughter" into a style/emotion edit description. Laughter may be embedded inside speech and needs explicit event/span cleanup coverage even when the same speaker is also re-synthesized.
+  - If the planner provides explicit time spans, execute them after clipping and merging, whether they are dictionaries or [start_sec, end_sec] pairs.
+  - Per-segment property review should be phrased as a reusable rubric such as whether this segment contains the requested event, role, style, or perceptual property; it must not mention benchmark ids, expected answers, or exact sample text.
+  - For extraction/removal/muting/censoring, artifact_ops must write selected_spans and selection_evidence so frontend/debug views can inspect the grounding.
+  - For generative follow-up edits, reuse the same selected spans and reconstruct the final audio instead of applying global edits to unrelated speech.
+  - Never invent aggregate selectors such as word_timestamps[time_sec=(first,last)]. Bind the exact selected_spans leaf paths admitted by reviewed evidence.

@@ -1,0 +1,44 @@
+tool_id: ace_step_music
+display_name: ACE-Step 1.5 Music Vocal Generator
+backend: ace_step_1_5_api
+category: music_vocal_generation
+purpose: >
+  Generate or edit musical vocal audio with ACE-Step 1.5 when the edit request
+  asks a speaker/line to sing, rap, become a song, become a cover, or be
+  repainted as music. This is a music foundation model integration, not a
+  strict speech TTS, voice conversion, or timing-preserving dialogue editor.
+when_to_use:
+  - User asks to make a spoken line or related speaker sing, rap, or become song-like musical vocals.
+  - User asks to convert only selected speech/speaker spans into singing/rap and put them back into the original audio timeline; X-Editor must do segment selection and reconstruction around this tool.
+  - User asks for a vocal/music style generation from text/lyrics, optionally guided by source or reference audio.
+  - User asks for cover generation or repainting of an existing audio segment into a singing/rap/music-vocal form.
+  - Best-effort speaker/style continuity is acceptable and the result can be a newly generated musical vocal segment.
+do_not_use_when:
+  - User only asks for ordinary spoken TTS, text rewrite, emotion edit, denoise, loudness, or same-language speech prosody editing.
+  - User requires exact preservation of the original speaker identity, word timing, lip sync, or background scene reconstruction.
+  - User needs cross-language speech-to-speech translation; use seamless_expressive_s2st instead.
+  - The ACE-Step API server is not running, the requested local audio files are inaccessible to the service, or license/commercial clearance is unresolved.
+inputs:
+  - instruction
+  - lyrics
+  - music_prompt
+  - optional_source_audio_path
+  - optional_reference_audio_path
+  - mode
+  - vocal_style
+  - vocal_language
+  - output_path
+outputs:
+  - music_vocal_audio
+cost:
+  gpu_required: true
+  expected_latency: high
+  model_size: ACE-Step docs state about 10GB disk for core models; VRAM starts below 4GB for DiT-only mode and 6GB or more for LM+DiT.
+constraints:
+  - ACE-Step 1.5 is MIT-licensed in the public repository/model card, but generated-music use still needs project, dataset, and downstream rights review.
+  - "Official runtime requires Python 3.11-3.12 and downloads model artifacts on first run; this repository stores only the X-Editor wrapper."
+  - "Official API is asynchronous: release_task, query_result, then v1/audio download."
+  - Documented generation duration is 10-600 seconds; very short speech-segment edits may need later trimming/reconstruction.
+  - For timeline edits, X-Editor extracts target spans and uses each span as source/reference audio by default, then trims or pads the generated music-vocal segment back to the original span duration.
+  - It can use source/reference audio for cover, repaint, and style guidance, but exact speaker identity, lyrics intelligibility, timing, and pauses are not guaranteed.
+  - X-Editor validates output file existence only; musical quality, speaker similarity, rap/singing style, copyright risk, and lyric accuracy require external review.

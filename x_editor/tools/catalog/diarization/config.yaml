@@ -1,0 +1,25 @@
+name: diarization
+server:
+  command: [".venv/bin/python", "service.py"]
+  working_dir: "."
+  env:
+    X_EDITOR_DIARIZATION_URL: "http://127.0.0.1:8041"
+    TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD: "1"
+  resources:
+    gpu: true
+    memory_gb: 16
+  lifecycle: session
+  startup_timeout_sec: 360
+managed_services:
+  - name: diarization
+    url_env: X_EDITOR_DIARIZATION_URL
+    default_url: "http://127.0.0.1:8041"
+    command_env: X_EDITOR_DIARIZATION_SERVICE_COMMAND
+    command: [".venv/bin/python", "service.py", "--host", "127.0.0.1", "--port", "8041"]
+    env:
+      TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD: "1"
+    health_path: "/health"
+    smoke:
+      - {method: "OPTIONS", path: "/diarize"}
+    startup_timeout_sec: 360
+    setup_hint: "cd x_editor/tools/catalog/diarization && ./setup.sh"

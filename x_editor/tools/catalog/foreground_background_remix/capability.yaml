@@ -1,0 +1,25 @@
+tool_id: foreground_background_remix
+display_name: Foreground/background remix
+backend: X-Editor runtime chain
+category: speech_edit
+purpose: Separate foreground speech or vocals from background audio, edit or remove the foreground stem, then remix while preserving background timing.
+when_to_use:
+  - The request edits, removes, isolates, denoises, or changes speech/vocals while keeping background music or ambient sound unchanged.
+  - The input is a mixed foreground/background recording and direct text, pitch, rate, emotion, or cleanup editing would damage the background.
+  - The desired result should keep the original timeline and duration after foreground processing.
+do_not_use_when:
+  - The request is ordinary single-speaker speech editing with no background preservation requirement.
+  - The task requires isolating an overlapping speaker; the configured separator cannot do this. A separate target-speaker tool must be available and qualified.
+  - The request asks to generate singing or rap content; use ace_step_music timeline editing when available.
+inputs:
+  - input_audio_path
+  - instruction
+  - source_text
+  - output_path
+outputs:
+  - foreground_background_remix_audio
+constraints:
+  - Requires speech_separation service for stem extraction.
+  - Foreground text, pitch, rate, emotion, and pause edits require source_text for the selected foreground speech stem.
+  - Foreground denotes vocals and background denotes accompaniment. These labels do not identify individual speakers.
+  - Semantic selection requires a unique provider-labeled stem, not a file-order fallback; separation quality needs independent review.

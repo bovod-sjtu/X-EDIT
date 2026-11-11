@@ -1,0 +1,28 @@
+tool_id: speech_enhancement
+display_name: Speech Enhancement
+backend: clearer_voice_studio
+category: enhancement
+purpose: >
+  Improve single-speaker speech clarity by reducing noise, reverberation, artifacts, or low intelligibility through ClearerVoice.
+when_to_use:
+  - User asks for clearer, cleaner, more intelligible single-speaker speech.
+  - Audio frontend detects noise, reverberation, clipping, or degraded speech quality.
+  - Final output contains artifacts after TSE, VC, or TTS.
+do_not_use_when:
+  - User needs overlapping speakers isolated; require a separately available target-speaker tool, not vocal/accompaniment separation.
+  - User needs target-speaker extraction with reference enrollment audio; a qualified target-speaker tool must be explicitly available.
+  - User wants voice identity conversion rather than quality improvement.
+  - User wants text content editing.
+  - Background ambience is intentional and should be preserved exactly.
+inputs:
+  - input_audio
+  - enhancement_goal
+outputs:
+  - enhanced_audio
+cost:
+  gpu_required: true
+  expected_latency: medium
+constraints:
+  - Use as the final cleanup step when previous tools may introduce artifacts.
+  - This is not the multi-speaker separation tool; it is for single-speaker quality cleanup.
+  - Do not over-enhance if the task requires preserving environmental sound.

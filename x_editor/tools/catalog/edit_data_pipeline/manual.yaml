@@ -1,0 +1,338 @@
+tool_id: edit_data_pipeline
+mcp_tool_name: edit_data_pipeline.apply
+input_schema:
+  type: object
+  required:
+    - operation
+    - output_path
+  properties:
+    operation:
+      type: string
+      enum:
+        - text_edit
+        - pitch_rate_edit
+        - emotion_style_edit
+        - pause_edit
+        - speech_rate
+        - volume_normalize
+        - pitch_shift
+        - boundary_smooth
+        - audio_assembly
+      description: Stable operation name; tagged edits use the selected dots model (default) or pipeline backend.
+    input_audio_path:
+      type: string
+      description: Main input audio path. The pipeline text_edit backend needs a segment shorter than 30 seconds; the dots model enforces its own source-plus-output context budget.
+    output_path:
+      type: string
+      description: Destination WAV path for the edited audio.
+    instruction:
+      type: string
+      description: Natural-language edit instruction, kept for traceability.
+    service_url:
+      type: string
+      description: Optional explicit service URL override for this call.
+    source_text:
+      type: string
+      description: Transcript matching input_audio_path. Required for text_edit, pitch_rate_edit, and emotion_style_edit service-layer operations.
+    instruction_st:
+      type: string
+      description: Structured tagged instruction. Only text_edit, pitch_rate_edit, emotion_style_edit, and pause_edit accept this field. text_edit supports '<sub targ="new">old</sub>', '<ins>new</ins>', and '<del>old</del>'; pitch_rate_edit supports '<pitch, semitones=N>...</pitch>' and '<rate, factor=F>...</rate>' only; emotion_style_edit supports '<emo type="happy" level="2">...</emo>' with an explicit supported category and intensity (free descriptions do not select categories); pause_edit supports self-closing insertion tags such as '<pause act="ins" level="2"/>'. Other operations must use their parameter schemas rather than instruction_st labels.
+    target_text:
+      type: string
+      description: Optional complete target transcript; must match the rendered instruction target.
+    num_steps:
+      type: integer
+      minimum: 1
+      maximum: 128
+      description: dots model sampling steps, default 10; not F5 nfe_step.
+    guidance_scale:
+      type: number
+      minimum: 0
+      maximum: 10
+      description: dots model guidance, default 1.2; not F5 cfg_strength.
+    use_xvector:
+      anyOf: [{type: boolean}, {const: auto}]
+      description: dots source-speaker guidance selection, default auto.
+    speaker_scale:
+      type: number
+      minimum: 0
+      maximum: 10
+      description: dots source-speaker guidance scale, default 1.5.
+    generation_id:
+      type: string
+      description: Optional generation id for service-layer /execute requests.
+    profile_id:
+      type: integer
+      description: Optional pause_edit profile id.
+    sample_id:
+      type: string
+      description: Optional stable sample id for service-layer /execute requests.
+    clip_id:
+      type: string
+      description: Optional clip id for service-layer /execute requests.
+    evaluate:
+      type: boolean
+      description: Whether to request service-side evaluation metrics when the service was launched with evaluation enabled.
+    persist:
+      type: boolean
+      description: Whether the service should persist intermediate/generated artifacts.
+    parquet_dataset_name:
+      type: string
+      description: Legacy text_edit dataset name field. The wrapper maps it to output_dataset_name before calling the latest service.
+    output_dataset_name:
+      type: string
+      description: Latest text_edit service dataset name field. The wrapper maps legacy parquet_dataset_name to this field for compatibility.
+    instructions_nl:
+      type: object
+      description: Optional natural-language instruction metadata for text_edit/prosody. For prosody, legacy list values are coerced to precise/vague strings.
+    reverse_instructions_nl:
+      type: object
+      description: Optional reverse natural-language instruction metadata for prosody. Legacy list values are coerced to precise/vague strings.
+    instruction_nl:
+      type: string
+      description: Optional natural-language instruction string for emotion_style_edit. Older instructions_nl metadata is adapted by the wrapper when possible.
+    rate:
+      type: number
+      default: 1.0
+      description: Legacy speech_rate factor. For service-layer pitch_rate_edit, encode the rate in instruction_st with '<rate, factor=...>'.
+    rate_method:
+      type: string
+      description: prosody/pitch_rate_edit service rate conversion method, such as wsola+indextts2, indextts2, or auto.
+    method:
+      type: string
+      description: "Operation-specific method. Speech-rate defaults to wsola+indextts2; other examples: wsola, indextts2, psola, psola+qwen3_codec, rms, peak."
+    target_db:
+      type: number
+      default: -20.0
+      description: Target loudness in dB for volume_normalize.
+    headroom_db:
+      type: number
+      default: -1.0
+      description: Headroom for volume_normalize.
+    semitones:
+      type: number
+      description: Pitch shift in semitones for pitch_shift.
+    text:
+      type: string
+      description: Full transcript or segment text. Required by speech_rate when using wsola+indextts2, indextts2, or auto.
+    speaker_audio_path:
+      type: string
+      description: Speaker reference audio for token-based speech_rate methods. Defaults to input_audio_path for speech_rate resynthesis methods.
+    allow_method_fallback:
+      type: boolean
+      default: false
+      description: Framework-owned recovery policy. When explicitly enabled, a failed token-based speech_rate method may retry as WSOLA and must report method_fallback and recovered_flow.
+    points:
+      type: array
+      description: Boundary smoothing point specs. Points may use audio_insert_path; the wrapper encodes it as audio_insert.
+      items:
+        type: object
+    source_audio_path:
+      type: string
+      description: Source audio for audio_assembly.
+    target_audio_path:
+      type: string
+      description: Target audio for audio_assembly.
+    edit_tagged_text:
+      type: string
+      description: Full transcript with <target>...</target> spans for audio_assembly. audio_assembly does not accept instruction_st labels.
+    time_spans_from_source:
+      type: array
+      items:
+        type: array
+        items:
+          type: number
+    time_spans_from_target:
+      type: array
+      items:
+        type: array
+        items:
+          type: number
+    preserve_outer_boundaries:
+      type: boolean
+      default: true
+    language:
+      type: string
+    aligner_backend:
+      type: string
+      default: auto
+      description: Aligner backend hint. editing services use qwen3; auto is normalized to qwen3.
+    synth_method:
+      type: string
+      enum: [insert_only, single_region, dual_boundary]
+      description: pause_edit synthesis strategy. Legacy stage2_method is accepted by the client only.
+    pitch_method:
+      type: string
+      description: prosody/pitch_rate_edit service pitch conversion method, such as psola+indextts2_cco or psola+qwen3_codec.
+    psola_indextts2_cco_pitch_boost:
+      type: string
+      description: prosody/pitch_rate_edit IndexTTS2 CCO pitch boost policy, e.g. mul:1.6.
+    smooth_policy:
+      type: string
+      description: pitch_rate_edit service smoothing policy, typically never, auto, or always. Use never for pitch-only edits to preserve duration.
+    crossfade_ms:
+      type: number
+      description: pitch_rate_edit splice crossfade in milliseconds.
+    smooth_margin_sec:
+      type: number
+      description: pitch_rate_edit smoother margin in seconds.
+    duration_mode:
+      type: string
+      description: text_edit service duration mode, typically estimate, synthesis, or generation.
+    synthesis_mode:
+      type: string
+      description: text_edit service synthesis mode, typically one_shot or per_op; emotion_style_edit also accepts single, multi_emo_normal, multi_emo_frequent, or infer.
+    emotion_condition_mode:
+      type: string
+      description: emotion_style_edit condition mode, such as type_level, desc, desc_dur, or infer.
+    expand_radius:
+      type: number
+      description: text_edit span expansion radius or pause_edit context expansion radius in seconds.
+    center_regen_second_pass:
+      type: boolean
+      description: pause_edit method_two second-pass center regeneration flag.
+    center_regen_margin_sec:
+      type: number
+      description: pause_edit method_two center regeneration margin.
+    merge_gap:
+      type: number
+      description: text_edit service span merge gap in seconds.
+    nfe_step:
+      type: integer
+      description: F5-TTS sampling steps for text_edit.
+    cfg_strength:
+      type: number
+      description: F5-TTS CFG strength for text_edit.
+    sway_sampling_coef:
+      type: number
+      description: F5-TTS sway sampling coefficient for text_edit.
+    seed:
+      type: integer
+      description: Random seed for the selected tagged-edit backend.
+    smoothing:
+      type: object
+      description: Audio assembly smoothing options.
+    debug:
+      type: boolean
+      default: false
+    debug_dir:
+      type: string
+    debug_output_dir:
+      type: string
+    trace_id:
+      type: string
+    return_synthetic_target_audio:
+      type: boolean
+      default: false
+      description: For emotion_style_edit, optionally include the synthetic donor target audio in the service response.
+    max_candidates:
+      type: integer
+      default: 3
+      description: For emotion_style_edit, number of synthesis candidates to try.
+    multi_frequent_smoothing_radius_sec:
+      type: number
+      default: 0.45
+      description: For emotion_style_edit, smoothing radius for multi-span emotion edits.
+output_schema:
+  type: object
+  required:
+    - output_audio_path
+  properties:
+    output_audio_path:
+      type: string
+    operation:
+      type: string
+    service_url:
+      type: string
+    sample_rate:
+      type: integer
+    duration_seconds:
+      type: number
+    response_headers:
+      type: object
+    response_fields:
+      type: array
+      items:
+        type: string
+    pipeline_type:
+      type: string
+    target_text:
+      type: string
+    metadata:
+      type: object
+defaults:
+  operation: pitch_rate_edit
+  rate: 1.0
+  method: wsola+indextts2
+  pitch_method: psola+indextts2_cco
+  rate_method: wsola+indextts2
+  psola_indextts2_cco_pitch_boost: mul:1.6
+  smooth_policy: auto
+  max_candidates: 3
+  multi_frequent_smoothing_radius_sec: 0.45
+  text_edit_max_input_sec: 30.0
+  target_db: -20.0
+  headroom_db: -1.0
+  preserve_outer_boundaries: true
+  aligner_backend: auto
+  debug: false
+validation:
+  hard_preconditions:
+    - For the pipeline backend, text_edit input_audio_path must be strictly shorter than 30 seconds; the dots model has a separate source-plus-output context budget.
+  frontend_check:
+    - Output path should exist and be a playable WAV.
+    - The requested operation should be audible without changing unrelated speech content.
+    - For text_edit, target_text should match the rendered instruction_st target.
+    - For pitch_rate_edit, service-layer speed and pitch edits should be expressed in instruction_st tags rather than legacy rate/semitones fields; this operation is backed by the latest prosody_edit_pipeline service on /execute.
+    - For speech_rate, volume_normalize, pitch_shift, and boundary_smooth, do not send instruction_st or XML-style labels; use operation-specific params.
+    - For audio_assembly, use edit_tagged_text with <target>...</target> spans, plus target_audio_path/time spans. Do not send target_text-only or instruction_st payloads.
+    - For emotion_style_edit, service-layer emotion edits should preserve the stripped text and mark only target emotion spans in instruction_st.
+    - For pause_edit, stripped instruction_st must match source_text and pause insertion points should be encoded with '<pause act="ins" level="1|2|3"/>'.
+    - For speech_rate, default quality path is WSOLA stretch plus IndexTTS2 re-synthesis. A fallback to pure WSOLA is disabled unless the framework explicitly opts in, and such recovery must be reported.
+    - For volume_normalize, output should avoid clipping.
+    - For pitch_shift, speech content and timing should remain recognizable.
+  failure_classification:
+    alignment_backend_failure:
+      description: The selected tagged edit was legal, but the external aligner failed before synthesis.
+      policy: Report the service failure explicitly. Do not copy the input, switch tools, or claim successful delivery.
+    request_contract_rejected:
+      description: The external service rejected the request schema or tagged-value contract.
+      policy: Return the rejection for Planner-local repair; do not weaken the edit objective.
+    service_internal_failure:
+      description: The external service returned an unclassified server-side failure.
+      policy: Preserve the failed operation and trace; only an explicit retry policy may retry it.
+examples:
+  - scenario: Replace a source phrase through the tagged text-edit pipeline service.
+    arguments:
+      operation: text_edit
+      input_audio_path: /path/to/input.wav
+      output_path: /data/xedit/runs/text_edit.wav
+      source_text: 开发边界将作为城市发展的刚性约定
+      instruction_st: '<sub targ="城市边界">开发边界</sub>将作为城市发展的刚性约定'
+      language: zh
+      evaluate: false
+  - scenario: Make a phrase 20 percent faster through the pitch/rate pipeline service.
+    arguments:
+      operation: pitch_rate_edit
+      input_audio_path: /path/to/input.wav
+      output_path: /data/xedit/runs/rate_pipeline.wav
+      source_text: 开发边界将作为城市发展的刚性约定
+      instruction_st: '<rate, factor=1.2>开发边界</rate>将作为城市发展的刚性约定'
+      language: zh
+      evaluate: false
+  - scenario: Make speech 20 percent faster using WSOLA plus IndexTTS2 re-synthesis.
+    arguments:
+      operation: speech_rate
+      rate: 1.2
+      method: wsola+indextts2
+      text: "<full transcript from perception>"
+  - scenario: Normalize loudness to -18 dB RMS.
+    arguments:
+      operation: volume_normalize
+      target_db: -18.0
+      method: rms
+  - scenario: Lower pitch by 3 semitones with pure PSOLA.
+    arguments:
+      operation: pitch_shift
+      semitones: -3.0
+      method: psola
