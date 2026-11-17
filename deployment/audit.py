@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import argparse
 import ast
-import hashlib
 import json
 import os
 from pathlib import Path
@@ -89,11 +88,6 @@ def audit():
         check('pinned clean pipeline', True, result)
     except (RuntimeError, OSError, ValueError) as error:
         check('pinned clean pipeline', False, str(error))
-    export = read('SOURCE_EXPORT.json')
-    for row in export['shared_files'] + export['new_files']:
-        path = ROOT / row['file']
-        check('export hash: ' + row['file'], path.is_file()
-              and hashlib.sha256(path.read_bytes()).hexdigest() == row['release_sha256'])
     parse_errors = []
     core_backend_imports = []
     nonportable_resources = []

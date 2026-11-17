@@ -1,6 +1,6 @@
 # Service deployment inventory
 
-Controller/tool separation is through HTTP. Each inference environment is isolated. See [pipeline migration](PIPELINE_MIGRATION.md) for current validation and public-access boundaries.
+Controller/tool separation is through HTTP. Each inference environment is isolated. See [pipeline deployment](PIPELINE.md) for current validation and public-access boundaries.
 
 The Environment column names dependency lock families, not shared virtualenvs.
 New deployments use `<env-root>/services/<service>` for every managed service;

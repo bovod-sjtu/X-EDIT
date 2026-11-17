@@ -116,6 +116,12 @@ def context(data):
     if any(p<1024 or p>65535 for p in ports.values()) or len(set(ports.values())) != len(ports):
         raise ValueError('Invalid or colliding service ports')
     def expand(value, allow_missing=False):
+        try:
+            literal = json.loads(value)
+        except (ValueError, TypeError):
+            literal = None
+        if isinstance(literal, (dict, list)):
+            return value
         def replacement(match):
             key=match.group(1)
             simple={'root':str(ROOT),'data':str(data),'envs':cfg['environments']}

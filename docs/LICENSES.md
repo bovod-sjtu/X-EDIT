@@ -4,7 +4,7 @@ The [source release boundary](RELEASE_SCOPE.md) covers original framework code,
 configuration and documentation. External SDKs, models, datasets and generated
 audio are obtained or produced separately. This inventory records declarations
 for those runtime dependencies; it does not grant additional rights to them.
-The [dependency review](DEPENDENCY_REMEDIATION.md) distinguishes source licenses,
+The [external tool guide](EXTERNAL_TOOLS.md) distinguishes source licenses,
 weight licenses, auxiliary dependencies and FFmpeg distribution requirements.
 
 X-Edit's original controller, HTTP clients and deployment code is Apache-2.0.
@@ -49,16 +49,11 @@ terms remain applicable even when only an HTTP interface is distributed.
 
 ## Pipeline source access
 
-The active pipeline pin is `c36f753a91896e901ba9cf621ac02d6ef507a21d`. Its
-root `LICENSE` declares Apache-2.0; the exact file hash is recorded in
-`third_party/external_pipeline.json`. The provider-neutral source was inspected
-through authorized Git access on 2026-10-26. No credentials are distributed.
-
-The previous runtime pin was `2111b99c72258cfefb1920fc1195e6141379236d`;
-historical GPU validation at that revision does not certify this new pin. The
-active authenticated source URL remains in the pipeline manifest. Publish a
-publicly accessible source location only after separately verifying access and
-the exact commit. Third-party SDK modifications retain their original terms.
+The public pipeline is [studio-dots-ai/dots.tts.edit-data-pipeline](https://github.com/studio-dots-ai/dots.tts.edit-data-pipeline),
+pinned at `ba270475fdb3c721db381463d73d3fc43727c554`. Anonymous HTTPS access and
+the root Apache-2.0 license were checked on 2026-11-17. The license evidence
+is recorded in `third_party/external_pipeline.json`. Its separately obtained SDKs,
+patches, and model weights retain their original terms. See [pipeline setup](PIPELINE.md).
 
 F5 is not fetched by X·Edit. Its SDK pin below is retained for provenance; users
 obtain it independently. SAM and VoiceSculptor are not included tools or code

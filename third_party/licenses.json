@@ -1072,17 +1072,17 @@
     {
       "kind": "source",
       "name": "dots.tts",
-      "revision": "8e1f5881b86a679ecdebfcd9d206e502d1b4008e",
+      "revision": "4cf7d6b13f42066f97784e7d7cf2a9ed5f956997",
       "url": "https://github.com/studio-dots-ai/dots.tts",
       "distributed": false,
       "declared_license": "Apache-2.0",
       "license_summary": "Apache-2.0",
       "status": "declared_upstream",
-      "checked_date": "2026-10-28",
+      "checked_date": "2026-11-17",
       "documents": [
         {
           "file": "LICENSE",
-          "url": "https://github.com/studio-dots-ai/dots.tts/blob/8e1f5881b86a679ecdebfcd9d206e502d1b4008e/LICENSE",
+          "url": "https://github.com/studio-dots-ai/dots.tts/blob/4cf7d6b13f42066f97784e7d7cf2a9ed5f956997/LICENSE",
           "sha256": "d4f4eb4ef1480fed48420b88bcbd887c90f0fee416ad7f2f5e5b165857a7b410"
         }
       ]
@@ -1090,28 +1090,28 @@
     {
       "kind": "model",
       "name": "dots-studio/dots.tts.edit",
-      "revision": "e2aea9cab95a802a63f1a491702a1cc8bf796b30",
+      "revision": "bef1e97b4d942c62843b92c30a68961d1902b6ec",
       "url": "https://huggingface.co/dots-studio/dots.tts.edit",
       "distributed": false,
       "declared_license": "other",
       "license_summary": "Apache-2.0 (project README declaration); model card metadata: other",
       "status": "upstream_declarations_require_scope_confirmation",
-      "checked_date": "2026-10-28",
+      "checked_date": "2026-11-17",
       "scope": "Model card refers to dots.tts project; pinned project README declares code and released checkpoints Apache-2.0. No separate model LICENSE file. Preserve this metadata discrepancy for review, not an unrestricted stack certification.",
       "documents": [
         {
           "file": "README.md",
-          "url": "https://huggingface.co/dots-studio/dots.tts.edit/blob/e2aea9cab95a802a63f1a491702a1cc8bf796b30/README.md",
-          "sha256": "d40b3812bff51e9ef110c973c5c939c591b94980391c248d879bbaacbb8bd79f"
+          "url": "https://huggingface.co/dots-studio/dots.tts.edit/blob/bef1e97b4d942c62843b92c30a68961d1902b6ec/README.md",
+          "sha256": "0fd1dfae505ce3d69ee2a05976c9649238ae965d88c9a8212d1de5296f84910b"
         },
         {
           "file": "project README.md",
-          "url": "https://github.com/studio-dots-ai/dots.tts/blob/8e1f5881b86a679ecdebfcd9d206e502d1b4008e/README.md#-license",
-          "sha256": "827992bdb66ffe68229bf086e995c237cb13017f106fa52b30e9bef54ec3d74e"
+          "url": "https://github.com/studio-dots-ai/dots.tts/blob/4cf7d6b13f42066f97784e7d7cf2a9ed5f956997/README.md#-license",
+          "sha256": "6a556d0a452927a1c9cc4835c62eb04edbd79ec735874531d9c510de652b16b1"
         }
       ]
     }
   ],
   "pipeline_manifest": "external_pipeline.json",
-  "pipeline_status": "External historical pin predates root license; upstream reference now declares Apache-2.0 at a different revision. See docs/LICENSES.md."
+  "pipeline_status": "Pinned public pipeline with Apache-2.0 root license. SDKs and models retain their own terms; see docs/LICENSES.md."
 }

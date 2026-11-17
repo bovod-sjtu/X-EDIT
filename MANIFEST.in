@@ -1,11 +1,11 @@
-include .gitmodules README.md LICENSE NOTICE SOURCE_EXPORT.json uv.lock .python-version .env.example .dockerignore .gitignore
+include .gitmodules README.md LICENSE NOTICE uv.lock .python-version .env.example .dockerignore .gitignore
 recursive-include configs *.json *.yaml
 recursive-include deployment *.py *.sh *.json *.lock Dockerfile
 include deployment/Dockerfile.gpu
 include third_party/manifest.json third_party/external_pipeline.json third_party/licenses.json third_party/NOTICE.md
 include third_party/release_review.json
 prune third_party/dots_tts_edit
-recursive-include docs *.md *.json
+recursive-include docs *.md *.json *.png
 prune tests
 prune runs
 prune models

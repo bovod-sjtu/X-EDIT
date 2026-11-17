@@ -58,9 +58,11 @@ responsibility. Neither omission of weights nor omission of generated audio
 establishes commercial-use permission. Hosted services and any later containers,
 preloaded environments or binary packages need their own reviews.
 
-The active pipeline pin is `c36f753a91896e901ba9cf621ac02d6ef507a21d`, which
-contains an Apache-2.0 root license. Historical GPU reports apply only to their
-recorded older revisions. See [source access](LICENSES.md#pipeline-source-access).
+The active pipeline is the public
+[studio-dots-ai/dots.tts.edit-data-pipeline](https://github.com/studio-dots-ai/dots.tts.edit-data-pipeline)
+revision `ba270475fdb3c721db381463d73d3fc43727c554`. Its root license is Apache-2.0.
+The upstream checkout is excluded from source archives and wheels. SDKs, model
+weights, and operation permissions remain subject to their own terms.
 
 ## FFmpeg
 

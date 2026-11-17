@@ -8,6 +8,7 @@ import os
 from pathlib import Path, PurePosixPath
 import re
 import stat
+import struct
 import subprocess
 import tarfile
 import zipfile
@@ -51,6 +52,23 @@ PATTERNS = {
 }
 
 
+def reviewed_diagram(name, payload):
+    if name != "docs/assets/framework.png" or not payload.startswith(b"\x89PNG\r\n\x1a\n"):
+        return False
+    offset = 8
+    chunks = []
+    while offset + 12 <= len(payload):
+        length = struct.unpack(">I", payload[offset:offset + 4])[0]
+        kind = payload[offset + 4:offset + 8]
+        if kind not in {b"IHDR", b"IDAT", b"IEND", b"pHYs"}:
+            return False
+        offset += length + 12
+        chunks.append(kind)
+        if kind == b"IEND":
+            return length == 0 and offset == len(payload) and chunks[0] == b"IHDR" and b"IDAT" in chunks
+    return False
+
+
 def inspect_file(name, payload):
     path = PurePosixPath(name)
     reasons = []
@@ -72,6 +90,8 @@ def inspect_file(name, payload):
         reasons.append("binary_or_environment_file")
     if payload.startswith((b"\x7fELF", b"MZ", b"\xcf\xfa\xed\xfe", b"\xfe\xed\xfa\xcf")):
         reasons.append("native_executable")
+    if reviewed_diagram(name, payload):
+        return [{"file": name, "reason": reason} for reason in reasons]
     try:
         contents = payload.decode("utf-8")
     except UnicodeDecodeError:

@@ -1,73 +1,72 @@
 # X·Edit
+### Natural-language speech editing with specialist tools
 
-X·Edit edits speech from natural-language instructions. It combines audio
-perception, reasoning, planning, and specialist tools.
+[Quick start](#quick-start) · [Framework](#framework) · [Deployment](docs/MODULE_DEPLOYMENT.md) · [Tools](docs/TOOL_SELECTION.md) · [License](#license)
 
-For example: “Replace ‘tomorrow’ with ‘Friday’” or “Make this sentence sound
-happier without changing the words.” Available edits depend on the tools you
-deploy and enable.
+X·Edit turns a speech-editing request into an executable sequence of tool calls.
+It combines audio perception, reasoning, planning, execution, and optional
+evaluation-driven revision.
 
-This repository contains framework code, original service adapters,
-configurations, and documentation. It does not include third-party model code,
-weights, datasets, reference recordings, or generated audio.
+> “Replace ‘tomorrow’ with ‘Friday’, make the last sentence happier, and keep the speaker.”
 
-## How it works
+The framework decides which operations to run and tracks their inputs and outputs.
+Available edits depend on the tools you deploy and enable.
 
-```text
-Audio + instruction
-  → Perception: transcribe and inspect the audio
-  → Reasoner: interpret the request and available evidence
-  → Planner: select tools and order the steps
-  → Executor: validate inputs, call tools, and save results
-  → Edited audio + execution record
-```
+## Framework
 
-- **Forward:** one planning and execution attempt, with Reasoner enabled by default.
-- **Revision:** adds evaluation and revision, with up to three attempts by default.
-- **Tool selection:** only enabled capabilities are shown to the planner and accepted by the executor.
-- **Failures:** errors remain visible; the framework does not silently switch editing backends.
+![X·Edit framework: perception, reasoning and planning, tool execution, and evaluation-driven revision](docs/assets/framework.png)
 
-## Deployment
+*Framework figure from the accompanying manuscript. [Figure provenance](docs/assets/README.md).*
 
-The controller, tool clients, and model services use separate Python environments.
+- **Perceive:** transcribe the audio and collect evidence about speakers and sounds.
+- **Plan:** interpret the request, choose enabled tools, and order the edits.
+- **Execute:** validate each operation, call its service, and save the audio and trace.
+- **Revise:** optionally evaluate the result and use feedback to revise the plan.
 
-| Component | Role | Deployment |
+**Forward mode** makes one planning/execution attempt, with the Reasoner enabled
+by default. **Revision mode** adds evaluation and revision, with up to three
+attempts by default. Errors remain visible; a failed backend is not silently
+replaced by another one.
+
+## Choose an editing backend
+
+| Backend | How it edits speech | Setup |
 | --- | --- | --- |
-| Controller | Perception scheduling, reasoning, planning, execution, and records | One Python 3.11 uv environment |
-| MCP clients | HTTP tool calls and local audio processing | One uv environment per client, on the controller host |
-| Model and tool services | Model inference and specialist processing | One uv environment per managed service, on the same or separate hosts |
+| **dots.tts.edit V1.1** — default | One independently deployed model handles tagged text, emotion, pitch, rate, and pause edits. | [Model setup](docs/DOTS_TTS_EDIT.md) |
+| **dots.tts.edit Data Pipeline** | Separate services perform alignment, synthesis, local editing, and assembly. | [Pipeline setup](docs/PIPELINE.md) |
 
-Planner, Reasoner, perception, and evaluation can use separate model endpoints
-or share compatible services. The controller still runs the workflow; each
-logical module does not need its own HTTP server.
+Both use the same tool inputs. Switch `edit_backend` in `configs/tools.yaml`;
+the compatible tool name remains `edit_data_pipeline`. The two backends do not
+promise identical audio, timing, or quality.
 
-See the [module deployment guide](docs/MODULE_DEPLOYMENT.md) for endpoint
-configuration, environment layout, shared files, and network access.
+The pipeline links to the public
+[studio-dots-ai/dots.tts.edit-data-pipeline](https://github.com/studio-dots-ai/dots.tts.edit-data-pipeline)
+repository. Code and model revisions are pinned; installation does not follow a
+moving branch.
 
 ## Quick start
 
-Run these commands from the repository root. Required: Linux, Git, Python
-3.11.15, uv 0.11.28, FFmpeg/ffprobe, and libsndfile. Model services also need
-compatible hardware, drivers, and separately obtained model files.
-
-See [deployment requirements](docs/DEPLOYMENT.md) for system setup and the
-non-GPL FFmpeg build. The complete tool stack is not a single-GPU deployment.
+Required: Linux, Git, Python 3.11.15, uv 0.11.28, FFmpeg/ffprobe, and libsndfile.
+Model services need compatible hardware and separately obtained weights.
+The full tool stack is not a single-GPU deployment.
 
 ### 1. Install the controller
 
 ```bash
+git clone https://github.com/bovod-sjtu/X-EDIT.git
+cd X-EDIT
 python3 -m pip install uv==0.11.28
 uv python install 3.11.15
 UV_PROJECT_ENVIRONMENT="$PWD/.venv" uv sync --locked --no-dev
 cp .env.example .env
 ```
 
-This installs the controller, not the model services.
+This installs the controller, not model services. Do not use a recursive clone:
+external tools have separate installation and license requirements.
 
-### 2. Select tools
+### 2. Select the tools you have deployed
 
-Edit `configs/tools.yaml`. The default configuration enables local audio
-operations, tagged speech editing, ASR, alignment, and Omni perception:
+The starting configuration in `configs/tools.yaml` is:
 
 ```yaml
 schema_version: x-edit.tools/v1
@@ -80,25 +79,13 @@ enabled_tools:
   - omni
 ```
 
-The `edit_data_pipeline` tool name is retained for compatibility. Choose its
-backend with `edit_backend`:
+Deploy the selected services and set their URLs and model names in `.env`.
+Start with the [model guide](docs/DOTS_TTS_EDIT.md) or
+[pipeline guide](docs/PIPELINE.md). Remove unavailable tools; add optional tools
+from `configs/tools.full.yaml` only after deploying them. The Reasoner and Planner
+see only the enabled capabilities, and the executor enforces the same selection.
 
-- `dots_tts_edit` — the independently deployed dots.tts.edit model; default.
-- `edit_data_pipeline` — the independently deployed editing pipeline.
-
-Both accept the same editing inputs. There is no automatic fallback between them.
-
-Add other tools from `configs/tools.full.yaml` only after deploying their
-services. See [tool selection](docs/TOOL_SELECTION.md) and
-[service requirements](docs/SERVICE_CAPABILITIES.md).
-
-### 3. Connect services and install clients
-
-Set the model names and service URLs in `.env`. To deploy services yourself,
-follow the [dots.tts.edit setup](docs/DOTS_TTS_EDIT.md) and
-[module deployment guide](docs/MODULE_DEPLOYMENT.md).
-
-Install the selected local clients:
+Install the selected MCP clients:
 
 ```bash
 .venv/bin/python deployment/client_envs.py \
@@ -106,13 +93,10 @@ Install the selected local clients:
 ```
 
 Set `X_EDITOR_MCP_ENV_ROOT=/data/xedit/envs/clients` in `.env`.
-Each client uses its own environment; preinstalled client environments are not
-automatically synchronized during execution.
+Each client and each managed service has its own uv environment.
+Preinstalled clients are not automatically synchronized during execution.
 
-Keep models and run outputs outside the source tree. Across hosts, path-based
-services must read and write audio at the **same absolute paths**.
-
-### 4. Check and run
+### 3. Check the deployment and edit audio
 
 ```bash
 .venv/bin/x-edit --env-file .env doctor --config configs/runtime.yaml
@@ -124,61 +108,76 @@ services must read and write audio at the **same absolute paths**.
   --mode forward --output /data/xedit/runs/first-edit
 ```
 
-`doctor` checks configuration and local dependencies. `--live` also checks
-service connections and interfaces. Neither verifies model inference or editing
-quality; run a real edit with audio you are authorized to use.
-
 Use a new output directory for each run. `result.json` identifies the selected
-audio and execution records. A failed delivery returns a nonzero exit status.
+audio and execution records; a failed delivery returns a nonzero exit status.
+`doctor --live` checks connections and interfaces, not editing quality.
 
-Use `--mode revision` to enable evaluation and revision, and configure the
-evaluation endpoints. See the [runtime API](docs/RUNTIME.md) for Python,
-multi-audio, and multi-turn usage.
+Use `--mode revision` after configuring evaluation endpoints. See the
+[runtime API](docs/RUNTIME.md) for Python, multi-audio, and multi-turn usage.
 
-The package is `x-edit-audio`, the CLI is `x-edit`, and the Python namespace
-is `x_editor`. Wheel installations can export configuration with
-`x-edit init ./configs`; deployment scripts are provided in the source repository.
+## Deployment and repository layout
 
-## License and external components
+The controller, MCP clients, and model services are separate environments.
+Reasoner, Planner, perception, and evaluation can use separate inference
+endpoints or share compatible ones. The workflow itself runs in the controller.
+
+Keep model files, reference recordings, logs, and generated audio **outside this
+repository**. Across hosts, path-based services need the same absolute audio
+paths on shared storage. Put remote endpoints behind access control; the example
+services are not public multi-tenant servers.
+
+```text
+x_editor/       Framework, prompts, capability cards, and original adapters
+configs/        Runtime and tool selections
+deployment/     Environment setup, service orchestration, and checks
+third_party/    Upstream links, revision pins, and license records
+docs/           Setup guides, interfaces, and the framework figure
+```
+
+The package is `x-edit-audio`, the CLI is `x-edit`, and the Python namespace is
+`x_editor`. A wheel installs the controller; use the source checkout for service
+deployment. Run `x-edit init ./configs` to export packaged configurations.
+
+## Documentation and validation
+
+| Guide | Contents |
+| --- | --- |
+| [Module deployment](docs/MODULE_DEPLOYMENT.md) | Separate uv environments, remote services, and role endpoints |
+| [Deployment reference](docs/DEPLOYMENT.md) | System dependencies, service startup, and operation checks |
+| [Tool selection](docs/TOOL_SELECTION.md) | Enable capabilities and switch editing backends |
+| [Service capabilities](docs/SERVICE_CAPABILITIES.md) | Prerequisites for each tool |
+| [Tool contracts](docs/TOOL_CONTRACTS.md) | Parameters, audio assets, and errors |
+| [Validation](docs/VALIDATION.md) | What this release was actually tested on |
+| [Reproducibility](docs/REPRODUCIBILITY.md) | Version records and evaluation boundaries |
+
+Deployment checks, valid waveforms, and benchmark scores are different evidence.
+Historical scores apply to their recorded code, models, and settings—not
+automatically to the current release.
+
+## License
 
 Original code, configuration, and documentation that X·Edit is entitled to
-license use [Apache License 2.0](LICENSE). Third-party components, models, data,
-and outputs retain their own terms. Independent installation or HTTP access does
-not remove those terms or grant commercial model-use rights. Service operators
-remain responsible for their own deployments.
+license use [Apache-2.0](LICENSE). Third-party code, weights, data, and outputs
+retain their own terms. This repository does not bundle third-party model
+implementations, weights, datasets, reference recordings, or generated audio.
 
-- **F5-TTS:** disabled by default, with no automatic installation or download.
-  Operations that require it prompt the user to install it separately before
-  enabling access. The recorded SDK is MIT-licensed; the recorded official
-  `F5TTS_v1_Base` weights are CC-BY-NC-4.0. Other checkpoints require their own
-  license review. See [external tool setup](docs/EXTERNAL_TOOLS.md).
-- **SAM-Audio and VoiceSculptor-VD:** not included in the built-in toolset or
-  deployment code. Only [extension guidance](docs/EXTENSION_GUIDE.md) is provided.
-- **edit-data-pipeline:** a pinned external dependency, not bundled source.
-  Access to the currently pinned repository requires upstream authorization.
-  See [source access](docs/LICENSES.md#pipeline-source-access).
-- **FFmpeg:** invoked as an external process; no binary is bundled. The supplied
-  build disables GPL and nonfree features. Review any container or binary package
-  separately before distribution.
+- **F5-TTS:** operator-installed and disabled by default. No automatic download or
+  installation. Its recorded SDK is MIT; the recorded official
+  `F5TTS_v1_Base` weights are CC-BY-NC-4.0. See [external tools](docs/EXTERNAL_TOOLS.md).
+- **SAM-Audio and VoiceSculptor-VD:** not in the built-in toolset or deployment
+  code. Only [extension guidance](docs/EXTENSION_GUIDE.md) is provided.
+- **FFmpeg:** used as an external program; no binary is bundled. The supplied
+  build disables GPL and nonfree features.
 
-Retain applicable notices when copying or modifying third-party code.
-Commercial use of noncommercial models requires separate authorization or a
-suitable replacement; excluding weights from a release does not grant that
-permission. Exact sources, versions, and terms are listed in the
-[third-party notices](third_party/NOTICE.md) and [license inventory](docs/LICENSES.md).
+Independent installation, a submodule, or HTTP access does not remove model-use
+restrictions or grant commercial rights. Service operators remain responsible
+for their deployments. Review containers and binary packages separately.
+See [third-party notices](third_party/NOTICE.md), the
+[license inventory](docs/LICENSES.md), and the [release boundary](docs/RELEASE_SCOPE.md).
 
-## Documentation
+## Acknowledgments
 
-- [Module deployment](docs/MODULE_DEPLOYMENT.md): isolated environments and remote services.
-- [Deployment reference](docs/DEPLOYMENT.md): dependencies, startup, and operation checks.
-- [Service capabilities](docs/SERVICE_CAPABILITIES.md): tool profiles and prerequisites.
-- [Tool contracts](docs/TOOL_CONTRACTS.md): parameters, audio assets, and errors.
-- [Release notes](docs/RELEASE_NOTES.md) and [reproducibility](docs/REPRODUCIBILITY.md): changes and validation scope.
-- [Release boundary](docs/RELEASE_SCOPE.md): source, models, data, and distribution rules.
-
-Some detailed guides are currently in Chinese. Historical benchmark results
-apply to their recorded versions, not automatically to later deployment changes.
-
-Run records contain instructions, audio paths, and model responses. Keep them
-private and review them before sharing. This project builds on and extends
-dots.tts.edit models and pipeline services; upstream licenses remain unchanged.
+X·Edit builds on [dots.tts](https://github.com/studio-dots-ai/dots.tts),
+[dots.tts.edit Data Pipeline](https://github.com/studio-dots-ai/dots.tts.edit-data-pipeline),
+and the specialist tools listed in the third-party inventory. Upstream
+implementations and contributor work retain their attribution and licenses.

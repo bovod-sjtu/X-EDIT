@@ -9,6 +9,7 @@ import importlib
 import json
 import os
 from pathlib import Path
+import re
 import sys
 import tempfile
 from unittest.mock import patch
@@ -25,10 +26,8 @@ def main():
     import soundfile as sf
     from x_editor.tools.catalog.edit_data_pipeline import client
     from x_editor.tools.catalog.seed_vc.client import SeedVCClient
-    from pipeline_service import activate_paths_compat
     from speech_edit.runtime.paths import get_artifact_paths
 
-    activate_paths_compat()
     checks = []
     def check(label, condition):
         if not condition:
@@ -44,6 +43,20 @@ def main():
         raise Captured()
 
     with tempfile.TemporaryDirectory(prefix='xedit-contract-') as directory:
+        services = json.loads((ROOT / 'deployment/stack.json').read_text())['services']
+        for task in ['text', 'prosody', 'emotion', 'pause']:
+            service = services['edit_' + task]
+            arguments = [re.sub(r'\{(?:url|port):([^{}]+)\}',
+                                lambda match: ('http://127.0.0.1:' if match[0].startswith('{url:') else '')
+                                + str(services[match[1]]['port']), value)
+                         for value in service['args']]
+            module = importlib.import_module(f'speech_edit.pipelines.{task}.service.api_service')
+            with patch.dict(os.environ, {'ARTIFACT_DIR': directory}), \
+                    patch.object(sys, 'argv', [task, *arguments]), \
+                    patch.object(module.uvicorn, 'run') as server:
+                module.main()
+                check(task + ': startup arguments accepted', server.call_count == 1)
+                check(task + ': upstream configuration loaded', bool(module.RUNTIME_CONFIG.pipeline_parameters))
         audio = Path(directory) / 'input.wav'
         sf.write(audio, np.ones(24000, dtype=np.float32) * .01, 24000)
         for operation, task, instruction, extra in [

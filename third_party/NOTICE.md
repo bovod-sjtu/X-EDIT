@@ -9,7 +9,7 @@ installed and deployed independently; its runtime interface is disabled by defau
 
 These are provenance records, not bundled files, automatic download instructions
 or proof of the weights behind an operator's HTTP endpoint. X·Edit pins the outer
-pipeline at `c36f753a91896e901ba9cf621ac02d6ef507a21d`; that upstream tree records
+pipeline at `ba270475fdb3c721db381463d73d3fc43727c554`; that upstream tree records
 F5 in its nested `tools/f5-tts/upstream` gitlink. X·Edit's helpers do not initialize
 that F5 checkout. A manually recursive clone is a separate acquisition action.
 

@@ -3,8 +3,8 @@
   "status": "pinned_git_submodule",
   "env": "EDIT_DATA_PIPELINE_ROOT",
   "path": "third_party/dots_tts_edit",
-  "url": "git@code.devops.xiaohongshu.com:wanghankun/edit-data-pipeline.git",
-  "commit": "c36f753a91896e901ba9cf621ac02d6ef507a21d",
+  "url": "https://github.com/studio-dots-ai/dots.tts.edit-data-pipeline.git",
+  "commit": "ba270475fdb3c721db381463d73d3fc43727c554",
   "submodules": [
     {
       "path": "tools/f5-tts/upstream",
@@ -46,7 +46,7 @@
   ],
   "optional_tools": [],
   "license_note": "The pinned outer pipeline declares Apache-2.0 in LICENSE. SDKs and weights retain their own terms. F5-TTS is operator-installed only; X·Edit does not provision it.",
-  "access": "Authenticated upstream repository; public mirror URL pending upstream publication.",
+  "access": "Public HTTPS repository; fetch the pinned outer source without recursive SDK downloads.",
   "external_tools": [
     "f5-tts"
   ],
@@ -54,6 +54,6 @@
     "spdx": "Apache-2.0",
     "file": "LICENSE",
     "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
-    "revision": "c36f753a91896e901ba9cf621ac02d6ef507a21d"
+    "revision": "ba270475fdb3c721db381463d73d3fc43727c554"
   }
 }

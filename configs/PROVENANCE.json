@@ -2,7 +2,7 @@
   "source_run": "validated explicit-Reasoner / Graph / R2 preset",
   "source_config_sha256": "1881d4cf42d9f5ac54a62380888cda762c6448111afc9d878bbe9d7db34851a8",
   "profile_changes": [],
-  "code_source": "current working tree; SOURCE_EXPORT.json",
+  "code_source": "Git release revision; record local changes separately when reproducing a run",
   "notes": "Forward preset preserves the corrected explicit Reasoner + Graph R2 configuration. Historical benchmark metadata omitted. This is not a claim of reproducing benchmark scores.",
   "pipeline_migration": {
     "date": "2026-10-11",

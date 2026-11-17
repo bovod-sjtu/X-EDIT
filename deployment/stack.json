@@ -156,8 +156,6 @@
         "127.0.0.1",
         "--port",
         "{port:aligner}",
-        "--ctc-url",
-        "",
         "--qwen3-url",
         "{url:aligner_backend}"
       ],
@@ -582,8 +580,10 @@
         "{url:f5}",
         "--asr-url",
         "{url:asr}",
-        "--aligner-backend",
-        "qwen3"
+        "--pipeline-defaults",
+        "pipeline/text_edit/defaults",
+        "--pipeline-parameters",
+        "{\"num_generations\":1}"
       ],
       "depends_on": [
         "aligner",
@@ -627,7 +627,11 @@
         "--f5-url",
         "{url:f5}",
         "--asr-url",
-        "{url:asr}"
+        "{url:asr}",
+        "--pipeline-defaults",
+        "pipeline/prosody_edit/defaults",
+        "--pipeline-parameters",
+        "{}"
       ],
       "depends_on": [
         "aligner",
@@ -666,10 +670,6 @@
         "services/emotion",
         "--indextts-url",
         "{url:indextts}",
-        "--f5-url",
-        "{url:f5}",
-        "--vad-url",
-        "{url:vad}",
         "--aligner-url",
         "{url:aligner}",
         "--smoother-url",
@@ -678,17 +678,17 @@
         "{url:assembly}",
         "--asr-url",
         "{url:asr}",
-        "--aligner-backend",
-        "qwen3",
         "--ted-tts-url",
-        "{url:ted_tts}"
+        "{url:ted_tts}",
+        "--pipeline-defaults",
+        "pipeline/emotion_style_edit/defaults",
+        "--pipeline-parameters",
+        "{\"max_candidates\":3}"
       ],
       "depends_on": [
         "indextts",
         "aligner",
-        "f5",
         "assembly",
-        "vad",
         "smoother"
       ],
       "models": [],
@@ -725,7 +725,11 @@
         "--smoother-url",
         "{url:smoother}",
         "--asr-url",
-        "{url:asr}"
+        "{url:asr}",
+        "--pipeline-defaults",
+        "pipeline/pause_edit/defaults",
+        "--pipeline-parameters",
+        "{\"center_regen_second_pass\":false}"
       ],
       "depends_on": [
         "aligner",
@@ -880,17 +884,33 @@
     "diarization": {
       "port": 8041,
       "environment": "sedicow_asr",
-      "entry": ["{root}/x_editor/tools/catalog/diarization/service.py"],
-      "args": ["--host", "127.0.0.1", "--port", "{port:diarization}"],
+      "entry": [
+        "{root}/x_editor/tools/catalog/diarization/service.py"
+      ],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "{port:diarization}"
+      ],
       "depends_on": [],
-      "models": ["BUT-FIT/diarizen-wavlm-large-s80-md-v2", "pyannote/wespeaker-voxceleb-resnet34-LM"],
+      "models": [
+        "BUT-FIT/diarizen-wavlm-large-s80-md-v2",
+        "pyannote/wespeaker-voxceleb-resnet34-LM"
+      ],
       "gpu": "4",
       "group": "experts",
       "health_path": "/health",
       "timeout_seconds": 1200,
-      "env": {"TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD": "1"},
-      "pythonpath": ["{root}/third_party/src/DiariZen"],
-      "repositories": ["DiariZen"]
+      "env": {
+        "TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD": "1"
+      },
+      "pythonpath": [
+        "{root}/third_party/src/DiariZen"
+      ],
+      "repositories": [
+        "DiariZen"
+      ]
     },
     "sedicow": {
       "port": 8046,

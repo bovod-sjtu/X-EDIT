@@ -4,7 +4,7 @@ The source distribution includes the controller, deployment helpers and exact
 dependency pins. It can fetch edit-data-pipeline and its official SDK submodules
 separately; it does not need a sibling development checkout. A **wheel contains
 the controller**; use the source archive or Git checkout for GPU service
-deployment. The pipeline currently requires authenticated repository access.
+deployment. The pipeline is fetched from its pinned public GitHub repository.
 Model weights are downloaded separately, not copied into the release.
 
 **The default tagged-edit backend is now the dots.tts.edit model, not this
@@ -73,7 +73,7 @@ The optional image recipes build a pinned LGPL FFmpeg via `deployment/build_ffmp
 the OS FFmpeg package is not installed by these Dockerfiles. Preserve the complete
 `/opt/xedit-ffmpeg` prefix, including corresponding source and license notices.
 For manual installation, put `/opt/xedit-ffmpeg/bin` first on `PATH`.
-See [dependency remediation](DEPENDENCY_REMEDIATION.md) for verification commands
+See [external tool setup](EXTERNAL_TOOLS.md) for installation boundaries
 and the separate model-license inventory. Images are not source-release deliverables.
 
 CUDA 12.8 environment installation prefers PyPI when both official indexes
@@ -273,16 +273,11 @@ speaker preservation, emotion, artifacts or all tools. Finish with representativ
 real requests for **each exposed capability**, including multi-audio, multi-turn
 and failure-driven revision, and inspect the returned audio and runtime records.
 
-The source closure is declared. The selected historical pipeline pin still
-requires authorized source access; see [the version-specific license record](LICENSES.md#pipeline-source-access). [PIPELINE_MIGRATION.md](PIPELINE_MIGRATION.md)
-records current verification; [REPRODUCIBILITY.md](REPRODUCIBILITY.md) preserves
-the historical checks and their original versions.
-
-`deployment/qualify_services.py` extends the DSP/speech check to the other
-deployed model services and creates a synthetic diagnostic recording with the
-new TTS. See [RELEASE_ACCEPTANCE.md](RELEASE_ACCEPTANCE.md) for the exact commands,
-dependency order, evidence requirements and quality/capacity boundaries.
-
+Use [PIPELINE.md](PIPELINE.md) for the current public source and startup contract,
+and [VALIDATION.md](VALIDATION.md) for version-specific verification.
+`deployment/qualify_services.py` extends the DSP/speech check to other deployed
+services. Run its `--help` for service selection; save diagnostics outside the
+source checkout. These probes do not replace listening or benchmark scoring.
 
 ## Cold-host fixes and dependency boundaries
 
@@ -315,11 +310,10 @@ failed quality checks into passes.
 
 ## Pinned pipeline and official SDKs
 
-The active provider-neutral pipeline is the Git submodule at commit
-`c36f753a91896e901ba9cf621ac02d6ef507a21d`. The current URL requires authenticated
-access; configure a public mirror only after upstream publication. No token is
-stored in this repository. `bootstrap.py --phase fetch` initializes the exact
-pipeline and only the SDKs required by the selected services.
+The active public pipeline is pinned in `third_party/external_pipeline.json`.
+`bootstrap.py --phase fetch` initializes that source and only the managed SDKs
+required by the selected services. F5 remains independently installed.
+See [PIPELINE.md](PIPELINE.md) for upgrading an existing checkout safely.
 
 ```bash
 python deployment/pipeline.py fetch all
@@ -336,9 +330,8 @@ No SDK is written to or silently replaced.
 
 Four orchestration services now use `speech_edit.pipelines`. Dependency URLs and
 output directories are passed explicitly on their command lines. `ARTIFACT_DIR`
-is outside both checkouts. `deployment/pipeline_service.py` adapts only Git's
-artifact-boundary query for Ubuntu 22.04 Git, which lacks `worktree list -z`;
-path containment checks remain active. Newer Git uses the upstream function.
+is outside both checkouts. `deployment/pipeline_service.py` verifies the pin and calls the upstream entrypoint.
+The current upstream implements artifact/Git compatibility itself.
 
 Emotion type/level profiles use IndexTTS and do not require TED. To use the
 pipeline's description-based profiles, explicitly start the optional `ted_tts`
@@ -347,7 +340,7 @@ weights but requires its own model process and GPU budget. Duration-conditioned
 TED profiles remain unsupported by the pinned pipeline.
 
 Request changes, verification coverage and known limits are recorded in
-[PIPELINE_MIGRATION.md](PIPELINE_MIGRATION.md). Configure a new deployment data
+[PIPELINE.md](PIPELINE.md). Configure a new deployment data
 directory after this upgrade: older configurations intentionally fail their
 manifest check. Existing model assets and compatible locked environments can
 be supplied explicitly; do not synchronize an environment serving another job.

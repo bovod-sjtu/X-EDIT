@@ -49,7 +49,7 @@
     {
       "name": "dots.tts",
       "url": "https://github.com/studio-dots-ai/dots.tts.git",
-      "commit": "8e1f5881b86a679ecdebfcd9d206e502d1b4008e",
+      "commit": "4cf7d6b13f42066f97784e7d7cf2a9ed5f956997",
       "license_file": "LICENSE",
       "status": "operator_installed_only_not_distributed",
       "source_changes": []
@@ -248,8 +248,8 @@
     },
     {
       "repo_id": "dots-studio/dots.tts.edit",
-      "revision": "e2aea9cab95a802a63f1a491702a1cc8bf796b30",
-      "revision_evidence": "upstream model API checked 2026-10-28; operator deployment must attest files separately",
+      "revision": "bef1e97b4d942c62843b92c30a68961d1902b6ec",
+      "revision_evidence": "Official Hub API checked 2026-11-17; V1.1 weights; operator installation remains separate.",
       "model_card": "https://huggingface.co/dots-studio/dots.tts.edit",
       "status": "operator_installed_only_not_distributed"
     }
