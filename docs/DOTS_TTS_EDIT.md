@@ -35,12 +35,9 @@ uv pip install --python /data/dots-edit-env/bin/python --no-deps -e /data/dots-t
 uv pip check --python /data/dots-edit-env/bin/python
 /data/dots-edit-env/bin/hf download dots-studio/dots.tts.edit \
   --revision bef1e97b4d942c62843b92c30a68961d1902b6ec --local-dir /data/dots-edit-model
-/data/dots-edit-env/bin/python deployment/check_dots_runtime.py
 ```
 
-The runtime check uses synthetic tensors and a stub model. It checks control flow,
-not GPU inference. The dependency lock targets this HTTP adapter; the upstream
-browser playground is not qualified by these checks.
+The dependency lock targets this HTTP adapter, not the upstream browser playground.
 
 ## Start the model service
 
@@ -72,7 +69,7 @@ edit_backend: dots_tts_edit
 enabled_tools: [artifact_ops, edit_data_pipeline, asr, aligner, omni]
 ```
 
-Install the selected MCP clients as described in [module deployment](MODULE_DEPLOYMENT.md).
+Install the selected MCP clients as described in [deployment](DEPLOYMENT.md).
 Their environment is separate from the GPU model environment. For the optional
 stack launcher, register an existing service with
 `--external dots_tts_edit=http://host:8049`; it is not installed or stopped by
@@ -102,5 +99,6 @@ retains the four operation contracts above. Other tools such as voice conversion
 separation, and enhancement remain independently configured. There is no automatic
 fallback to the pipeline or download of F5 on model failure.
 
-See [validation](VALIDATION.md) for actual operation checks. Successful transport
-and a readable waveform are not proof of perceptual quality or a new benchmark score.
+Run `x-edit doctor --config configs/runtime.yaml --live`, then a short real edit
+using the README example. Inspect both the resulting audio and execution record.
+Service health and a readable waveform do not establish perceptual quality.

@@ -26,4 +26,4 @@ The project team remains responsible for model services it operates; a notice
 addressed to users does not transfer that responsibility. Self-hosting users
 must also establish permission for their own use. Excluding weights or outputs
 from a release does not establish permission for commercial model operation.
-See docs/OPEN_SOURCE_STATEMENT.zh-CN.md and docs/EXTENSION_GUIDE.md.
+See docs/LICENSES.md and docs/EXTERNAL_TOOLS.md.

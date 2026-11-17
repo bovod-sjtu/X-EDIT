@@ -624,7 +624,7 @@ class SpeechPerceptionClient:
             except ImportError as exc:
                 raise SpeechPerceptionError(
                     "diarizen is required for BUT-FIT DiariZen diarization models. "
-                    "Install DiariZen and its bundled pyannote-audio fork; see docs/MMAE_SPEECH_BENCHMARK.md."
+                    "Install DiariZen and its bundled pyannote-audio fork; see docs/DEPLOYMENT.md."
                 ) from exc
 
             _allow_trusted_torch_checkpoints()

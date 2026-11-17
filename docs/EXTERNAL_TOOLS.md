@@ -7,7 +7,7 @@ kept for disclosure, not as automatic installer inputs.
 
 SAM-Audio and VoiceSculptor are not included integrations. They have no shipped
 clients, adapters, catalog entries, registrations, launchers or opt-in switches.
-Only [independent extension guidance](EXTENSION_GUIDE.md) remains.
+Only the independent extension guidance below is provided.
 
 ## F5-TTS
 
@@ -54,8 +54,51 @@ SAM-Audio and VoiceSculptor are absent from the built-in toolset, profiles and
 service/download manifests. Former environment variables cannot enable them.
 Qwen3-TTS accepts only its native backend or `auto`; an unavailable backend is
 rejected, not redirected. Users may independently develop extensions as described
-in [EXTENSION_GUIDE.md](EXTENSION_GUIDE.md). No ready-to-run plugin is supplied.
+below. No ready-to-run plugin is supplied.
 The existing Qwen path is not claimed equivalent to every removed capability.
+
+| Candidate | Upstream references | Review before developing an extension |
+| --- | --- | --- |
+| SAM-Audio | [Source](https://github.com/facebookresearch/sam-audio), [official model](https://huggingface.co/facebook/sam-audio-large) | Review the [SAM agreement](https://github.com/facebookresearch/sam-audio/blob/bb4c6999d2677c7402360e426afc01ddfad6dce0/LICENSE) and auxiliary components, including [ImageBind](https://github.com/facebookresearch/ImageBind/blob/53680b02d7e37b19b124fa37bae4b6c98c38f5be/LICENSE). |
+| VoiceSculptor-VD | [Source](https://github.com/ASLP-lab/VoiceSculptor), [model](https://huggingface.co/ASLP-lab/VoiceSculptor-VD) | The top-level Apache declaration does not cover every dependency. The historically used [XCodec2 weights](https://huggingface.co/HKUSTAudio/xcodec2/blob/e412427ed30f0cf9d5e3c95562113deb10a32d03/README.md) declare CC-BY-NC-4.0. |
+
+These are references, not runtime dependencies or approved extension packages.
+Historical evidence remains in [the license inventory](../third_party/licenses.json).
+The former SAM mirror is not asserted to be identical to official weights.
+
+To develop a separate extension:
+
+1. Review the intended use and all selected source, checkpoint, and auxiliary
+   licenses. Obtain additional permission where needed.
+2. Keep implementation, downloads, environments, and generated media in your own
+   repository and data directory, outside X·Edit's distribution.
+3. Define the HTTP contract, failures, timeouts, and output identity. A separator
+   must identify target and residual stems; a voice tool must distinguish
+   synthesis from editing and preserve unedited words, speakers, and timing.
+4. Maintain your own capability card, manual, and MCP wrapper. Generic loaders
+   and `ToolExecutor(catalog_dir=...)` accept a separate catalog.
+5. Wire that catalog into your application and register handlers with
+   `AudioOperationRegistry.register`. Pass the registry to
+   `AudioEditExecutor(registry=...)`. An explicit registry replaces default
+   registration: include every operation your application needs. This is not
+   an automatic plugin installer or stock CLI switch.
+6. Test setup failures, disabled tools, output paths, source preservation, and
+   real inference separately. Review the complete extension before publishing.
+
+## Additional operator-supplied integrations
+
+These optional catalog interfaces are outside the managed service stack.
+Their source and model revisions are not selected by its manifest. Obtain and
+review the actual implementations, checkpoints, and auxiliary components yourself.
+
+| Interface | External implementation | Purpose |
+| --- | --- | --- |
+| `ace_step_music` | [ACE-Step 1.5](https://github.com/ace-step/ACE-Step-1.5) | Music and vocal generation/editing |
+| `seamless_expressive_s2st` | [Seamless Communication](https://github.com/facebookresearch/seamless_communication) | Expressive speech translation |
+| `tse` / `quarkaudio_unise` | [QuarkAudio-UniSE](https://github.com/alibaba/unified-audio/tree/main/QuarkAudio-UniSE), [Spark-TTS assets](https://huggingface.co/SparkAudio/Spark-TTS-0.5B) | Reference-conditioned target-speaker extraction |
+
+No implementation, checkpoint, or generated recording is bundled for these
+interfaces. Keeping an HTTP client does not install or approve a model.
 
 ## Licensing boundary
 
@@ -72,21 +115,16 @@ appropriate authorization from their rights holders. Other disclosed model-stack
 restrictions remain; this is not a claim that the full inference stack is Apache-only.
 Service operators retain responsibility for their own deployments, including when
 the project team operates a service; asking clients to follow upstream terms does
-not transfer that responsibility. See the [source-publication and model-operation
-review](OPEN_SOURCE_STATEMENT.zh-CN.md).
+not transfer that responsibility.
 
-## Validation scope
+The source release contains original framework code, configuration, interfaces,
+and documentation. It excludes third-party implementations, model weights,
+datasets, reference recordings, and generated audio. Downloading, deploying,
+using, modifying, and redistributing those assets remain subject to their terms.
+Excluding weights or outputs does not establish commercial model-use permission.
 
-On 2026-10-26, 16 isolated checks passed for tool removal, rejected former
-backend selections, native Qwen transport and Qwen-to-SeedVC composition,
-F5 setup gates, download/start prevention, DSP availability and the stdio
-installation prompt. The surviving Qwen reference-generation branch was also
-compared structurally with the baseline and is unchanged. Eleven checks against
-the pinned pipeline's native request schemas and artifact boundaries passed.
-
-Validate current source with `python deployment/audit.py` and current source or
-packages with `python deployment/release_audit.py`. Offline transport/schema
-checks use mock transport and diagnostic fixtures, not real model inference.
-They do not establish waveform quality, benchmark parity or commercial clearance.
-Historical GPU reports retain their original revisions. This release-boundary
-change does not rerun or modify those experiments.
+Source archives, wheels, containers, preloaded caches, and hosted services need
+separate reviews. Copied or modified MIT code must retain its copyright and
+permission notice; it is not automatically relicensed as original X·Edit code.
+FFmpeg is an external program, not a bundled binary. Its supplied build disables
+GPL/nonfree features; other builds must be checked before redistribution.

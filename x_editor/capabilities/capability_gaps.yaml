@@ -155,7 +155,7 @@ entries:
     blockers:
       - No dedicated operation has a validated whisper-to-modal-voice quality contract.
     evidence_paths:
-      - docs/TOOL_CAPABILITIES.md
+      - docs/TOOL_SELECTION.md
     next_action: Compare candidate restoration paths by listening before selecting a tool contract.
   - capability_key: multi_audio_bidirectional_voice_swap
     gap_class: genuinely_missing_or_listening_required

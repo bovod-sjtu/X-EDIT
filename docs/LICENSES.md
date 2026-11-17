@@ -1,6 +1,6 @@
 # Code and model licenses
 
-The [source release boundary](RELEASE_SCOPE.md) covers original framework code,
+The [source release boundary](../README.md#license) covers original framework code,
 configuration and documentation. External SDKs, models, datasets and generated
 audio are obtained or produced separately. This inventory records declarations
 for those runtime dependencies; it does not grant additional rights to them.
@@ -20,11 +20,11 @@ model service. Operators remain responsible for their own use, not only end user
 
 ## dots.tts.edit
 
-For the default tagged-edit backend, see [dots.tts.edit license evidence](DOTS_TTS_EDIT.md#许可与版本证据).
+For the default tagged-edit backend, see [dots.tts.edit versions and terms](DOTS_TTS_EDIT.md#versions).
 Its code is Apache-2.0. The pinned project README declares released checkpoints
 Apache-2.0, while the exact edit model card says `license: other` and refers back
-to that project. Both records and their hashes are retained; the audit requests
-scope review instead of presenting the model metadata as an independently
+to that project. Both records are retained for scope review rather than
+presenting the model metadata as an independently
 verified unrestricted grant. Source and weights are operator-installed only.
 
 ## Qwen models and roles
@@ -63,7 +63,7 @@ See [runtime opt-in and installation boundary](EXTERNAL_TOOLS.md).
 ## Pipeline SDK source
 
 The additional operator-supplied ACE-Step, Seamless and QuarkAudio interfaces are
-listed in [SERVICE_MATRIX.md](SERVICE_MATRIX.md#additional-operator-supplied-integrations).
+listed in [external tools](EXTERNAL_TOOLS.md#additional-operator-supplied-integrations).
 They are outside the managed stack and have no selected model/source revision in
 its manifest. Review their exact implementation, checkpoint and auxiliary terms
 when configuring them; no license conclusion for those unselected assets is
@@ -89,7 +89,7 @@ CC-BY-NC conditions on the selected model weights.
 
 The table preserves source evidence, not a blanket installer list. SAM, T5,
 VoiceSculptor and XCodec2 records are historical/documentation-only extension
-references in [extension_references.json](extension_references.json), not active
+references in [the license inventory](../third_party/licenses.json), not active
 entries in `third_party/manifest.json`. The corresponding six source records are
 also retained solely as historical license evidence. No extension is supplied.
 
@@ -131,7 +131,7 @@ also retained solely as historical license evidence. No extension is supplied.
 
 ## Separately fetched service metadata
 
-These five files are excluded from Git and source/wheel distributions. Deploying
+These five files are not tracked and are excluded from source/wheel distributions. Deploying
 RoFormer downloads them from the URLs below and verifies each SHA256. Download
 does not change their upstream terms or establish checkpoint rights.
 

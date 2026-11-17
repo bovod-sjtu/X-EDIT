@@ -36,7 +36,7 @@ implementation, weights or generated audio and certifies no prebuilt image.
 The model's noncommercial condition is not limited to redistribution. Service
 operators, including the project team if it hosts inference, remain responsible
 for their own use; a user-facing disclaimer cannot transfer that responsibility.
-See the [release statement](../docs/OPEN_SOURCE_STATEMENT.zh-CN.md) for the
+See the [licensing boundary](../docs/EXTERNAL_TOOLS.md#licensing-boundary) for the
 separate source-publication and model-operation review boundaries.
 
 ## Documentation-only references
@@ -44,12 +44,11 @@ separate source-publication and model-operation review boundaries.
 SAM-Audio and VoiceSculptor-VD are documentation-only extension candidates, not
 active dependencies or shipped integrations. No client, adapter, capability card,
 registry entry, backend environment or automatic launcher is included. Their
-exclusive source/model records have moved out of the installer manifest into
-`../docs/extension_references.json`. Historical license evidence is retained in
-`licenses.json` for transparency and is marked accordingly.
+source/model records are not installer inputs. Historical license evidence is
+retained in `licenses.json` for transparency and is marked accordingly.
 
 `src/` and `service_assets/` are acquired separately and excluded from release
 archives. No model weights, third-party generated audio or media binaries are
 bundled. HTTP, independent installation and extension development do not waive
 upstream restrictions or establish commercial authorization. See
-`../docs/OPEN_SOURCE_STATEMENT.zh-CN.md` and `../docs/EXTENSION_GUIDE.md`.
+[licensing and extension guidance](../docs/EXTERNAL_TOOLS.md).

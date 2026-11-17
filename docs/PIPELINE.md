@@ -34,7 +34,7 @@ The helper refuses a dirty checkout or a different pin instead of resetting it.
 
 ## Deploy and select
 
-Use [module deployment](MODULE_DEPLOYMENT.md) to create separate uv environments
+Use [deployment](DEPLOYMENT.md) to create separate uv environments
 for the selected services. `deployment/stack.json` declares their dependency
 graph, ports, environment locks, and launch arguments. `bootstrap.py --tools`
 uses the same tool selection as the controller.
@@ -77,13 +77,17 @@ changing their services.
 
 ## Validate
 
-After installing the CPU orchestration environment and fetching the pipeline:
+After starting the selected services, load their exported addresses and run:
 
 ```bash
-/data/xedit/envs/services/edit_text/bin/python deployment/check_pipeline_contracts.py
+source /data/xedit/client.env
+.venv/bin/x-edit doctor --config configs/runtime.yaml --live
+.venv/bin/x-edit edit --config configs/runtime.yaml \
+  --audio /data/audio/source.wav \
+  --instruction "Make this sentence sound happier. Keep the words and speaker." \
+  --mode forward --output /data/xedit/runs/pipeline-edit
 ```
 
-This checks payload schemas, startup configuration, and artifact boundaries;
-it does not run neural inference. Then use `deployment/qualify.py` and
-`deployment/qualify_services.py` with independently deployed services and
-authorized audio. See [validation](VALIDATION.md) for this release's measured scope.
+`doctor --live` checks connections and interfaces. The edit command runs the
+selected workflow; inspect its audio and execution record for actual behavior.
+Neither a health check nor a readable waveform proves perceptual quality.

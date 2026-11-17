@@ -1,7 +1,7 @@
 # X·Edit
 ### Natural-language speech editing with specialist tools
 
-[Quick start](#quick-start) · [Framework](#framework) · [Deployment](docs/MODULE_DEPLOYMENT.md) · [Tools](docs/TOOL_SELECTION.md) · [License](#license)
+[Quick start](#quick-start) · [Framework](#framework) · [Deployment](docs/DEPLOYMENT.md) · [Tools](docs/TOOL_SELECTION.md) · [License](#license)
 
 X·Edit turns a speech-editing request into an executable sequence of tool calls.
 It combines audio perception, reasoning, planning, execution, and optional
@@ -16,7 +16,8 @@ Available edits depend on the tools you deploy and enable.
 
 ![X·Edit framework: perception, reasoning and planning, tool execution, and evaluation-driven revision](docs/assets/framework.png)
 
-*Framework figure from the accompanying manuscript. [Figure provenance](docs/assets/README.md).*
+*Framework figure from the accompanying manuscript (`figures/overview.pdf`,
+revision `8ad2529`), exported to PNG without changing the diagram.*
 
 - **Perceive:** transcribe the audio and collect evidence about speakers and sounds.
 - **Plan:** interpret the request, choose enabled tools, and order the edits.
@@ -129,7 +130,7 @@ services are not public multi-tenant servers.
 ```text
 x_editor/       Framework, prompts, capability cards, and original adapters
 configs/        Runtime and tool selections
-deployment/     Environment setup, service orchestration, and checks
+deployment/     Environment setup and service orchestration
 third_party/    Upstream links, revision pins, and license records
 docs/           Setup guides, interfaces, and the framework figure
 ```
@@ -138,17 +139,15 @@ The package is `x-edit-audio`, the CLI is `x-edit`, and the Python namespace is
 `x_editor`. A wheel installs the controller; use the source checkout for service
 deployment. Run `x-edit init ./configs` to export packaged configurations.
 
-## Documentation and validation
+## Documentation
 
 | Guide | Contents |
 | --- | --- |
-| [Module deployment](docs/MODULE_DEPLOYMENT.md) | Separate uv environments, remote services, and role endpoints |
-| [Deployment reference](docs/DEPLOYMENT.md) | System dependencies, service startup, and operation checks |
-| [Tool selection](docs/TOOL_SELECTION.md) | Enable capabilities and switch editing backends |
-| [Service capabilities](docs/SERVICE_CAPABILITIES.md) | Prerequisites for each tool |
+| [Deployment](docs/DEPLOYMENT.md) | Separate uv environments, role endpoints, and service lifecycle |
+| [Tool selection](docs/TOOL_SELECTION.md) | Enable capabilities, check prerequisites, and switch backends |
 | [Tool contracts](docs/TOOL_CONTRACTS.md) | Parameters, audio assets, and errors |
-| [Validation](docs/VALIDATION.md) | What this release was actually tested on |
-| [Reproducibility](docs/REPRODUCIBILITY.md) | Version records and evaluation boundaries |
+| [Runtime](docs/RUNTIME.md) | Configuration, execution modes, and output records |
+| [External tools](docs/EXTERNAL_TOOLS.md) | Operator-installed F5 and independent extension guidance |
 
 Deployment checks, valid waveforms, and benchmark scores are different evidence.
 Historical scores apply to their recorded code, models, and settings—not
@@ -165,7 +164,7 @@ implementations, weights, datasets, reference recordings, or generated audio.
   installation. Its recorded SDK is MIT; the recorded official
   `F5TTS_v1_Base` weights are CC-BY-NC-4.0. See [external tools](docs/EXTERNAL_TOOLS.md).
 - **SAM-Audio and VoiceSculptor-VD:** not in the built-in toolset or deployment
-  code. Only [extension guidance](docs/EXTENSION_GUIDE.md) is provided.
+  code. Only [extension guidance](docs/EXTERNAL_TOOLS.md#documentation-only-extensions) is provided.
 - **FFmpeg:** used as an external program; no binary is bundled. The supplied
   build disables GPL and nonfree features.
 
@@ -173,7 +172,7 @@ Independent installation, a submodule, or HTTP access does not remove model-use
 restrictions or grant commercial rights. Service operators remain responsible
 for their deployments. Review containers and binary packages separately.
 See [third-party notices](third_party/NOTICE.md), the
-[license inventory](docs/LICENSES.md), and the [release boundary](docs/RELEASE_SCOPE.md).
+[license inventory](docs/LICENSES.md).
 
 ## Acknowledgments
 
